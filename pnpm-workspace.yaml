@@ -1,0 +1,15 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+
+autoInstallPeers: true
+cacheDir: .runtime/pnpm-cache
+confirmModulesPurge: false
+saveExact: true
+storeDir: .runtime/pnpm-store
+strictPeerDependencies: true

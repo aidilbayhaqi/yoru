@@ -1,0 +1,1219 @@
+openapi: 3.1.0
+info:
+  title: Yoru API
+  version: 0.2.0-sprint1
+  summary: Programming contract outline for the Yoru platform
+  description: >
+    API outline with implemented Sprint 1 identity contracts and representative
+    contracts for later business modules.
+servers:
+  - url: /api/v1
+    description: Environment-relative API base path
+tags:
+  - name: Auth
+    description: Identity, session, recovery, and step-up authentication
+  - name: Catalog
+    description: Public product and service discovery
+  - name: Checkout
+    description: Quote and checkout orchestration
+  - name: Orders
+    description: Product order lifecycle
+  - name: Bookings
+    description: Home-service booking and field operations
+  - name: Payments
+    description: Payment intents, callbacks, and verified webhooks
+  - name: Partner Analytics
+    description: Deterministic partner business metrics
+  - name: AI
+    description: Customer recommendations and partner insight narratives
+security:
+  - sessionCookie: []
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a customer account
+      operationId: registerCustomer
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Create a browser session
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Session cookies set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate the current refresh token
+      operationId: refreshSession
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+      responses:
+        "200":
+          description: Rotated session cookies set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the current session
+      operationId: logout
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+      responses:
+        "200":
+          description: Session revoked
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the current authenticated user
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Current user and capabilities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /auth/logout-all:
+    post:
+      tags: [Auth]
+      summary: Revoke every session owned by the current user
+      operationId: logoutAll
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+      responses:
+        "200":
+          description: All sessions revoked
+  /auth/active-partner:
+    patch:
+      tags: [Auth]
+      summary: Select an active partner from the current user's memberships
+      operationId: selectActivePartner
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelectPartnerRequest"
+      responses:
+        "200":
+          description: Active tenant changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /auth/sessions:
+    get:
+      tags: [Auth]
+      summary: List sessions owned by the current user
+      operationId: listOwnSessions
+      responses:
+        "200":
+          description: Active user sessions
+  /auth/sessions/{session_id}:
+    delete:
+      tags: [Auth]
+      summary: Revoke a session owned by the current user
+      operationId: revokeOwnSession
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CsrfToken"
+      responses:
+        "200":
+          description: Session revoked
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /products:
+    get:
+      tags: [Catalog]
+      summary: List published products
+      operationId: listProducts
+      security: []
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+            maxLength: 120
+        - name: category_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: min_price_minor
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: max_price_minor
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Published product list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListEnvelope"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /products/{product_id}:
+    get:
+      tags: [Catalog]
+      summary: Get a published product
+      operationId: getProduct
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: Published product detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /checkout/quote:
+    post:
+      tags: [Checkout]
+      summary: Create an expiring checkout quote
+      operationId: createCheckoutQuote
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutQuoteRequest"
+      responses:
+        "201":
+          description: Expiring server-side quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteEnvelope"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /checkout/confirm:
+    post:
+      tags: [Checkout]
+      summary: Confirm checkout from a valid quote
+      operationId: confirmCheckout
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutConfirmRequest"
+      responses:
+        "201":
+          description: Order and payment intent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResultEnvelope"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /orders:
+    get:
+      tags: [Orders]
+      summary: List actor-scoped orders
+      operationId: listOrders
+      parameters:
+        - name: state
+          in: query
+          schema:
+            $ref: "#/components/schemas/OrderState"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Actor-scoped orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListEnvelope"
+  /orders/{order_id}:
+    get:
+      tags: [Orders]
+      summary: Get an authorized order
+      operationId: getOrder
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Authorized order detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /bookings:
+    post:
+      tags: [Bookings]
+      summary: Create a home-service booking
+      operationId: createBooking
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingCreateRequest"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingEnvelope"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /bookings/{booking_id}:
+    get:
+      tags: [Bookings]
+      summary: Get an authorized booking
+      operationId: getBooking
+      parameters:
+        - $ref: "#/components/parameters/BookingId"
+      responses:
+        "200":
+          description: Authorized booking detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /bookings/{booking_id}/start-trip:
+    post:
+      tags: [Bookings]
+      summary: Start travel to a booking location
+      operationId: startBookingTrip
+      parameters:
+        - $ref: "#/components/parameters/BookingId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CsrfToken"
+      responses:
+        "200":
+          description: Booking transitioned to en_route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingEnvelope"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /payments/intents:
+    post:
+      tags: [Payments]
+      summary: Create a payment intent
+      operationId: createPaymentIntent
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentIntentRequest"
+      responses:
+        "201":
+          description: Payment intent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntentEnvelope"
+  /webhooks/payments/{provider}:
+    post:
+      tags: [Payments]
+      summary: Receive a signed payment provider event
+      operationId: receivePaymentWebhook
+      security: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9_-]{1,40}$"
+        - name: X-Provider-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "202":
+          description: Verified event accepted for asynchronous processing
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /ai/customer/recommendations:
+    post:
+      tags: [AI]
+      summary: Generate grounded customer recommendations
+      operationId: createCustomerRecommendation
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerRecommendationRequest"
+      responses:
+        "200":
+          description: Grounded recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationEnvelope"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+  /partners/{partner_id}/analytics/summary:
+    get:
+      tags: [Partner Analytics]
+      summary: Get a deterministic partner metric snapshot
+      operationId: getPartnerAnalyticsSummary
+      parameters:
+        - $ref: "#/components/parameters/PartnerId"
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: "^\\d{4}-(0[1-9]|1[0-2])$"
+      responses:
+        "200":
+          description: Deterministic metric snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsSummaryEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /partners/{partner_id}/ai/insights:
+    post:
+      tags: [AI]
+      summary: Generate evidence-linked partner insights
+      operationId: createPartnerInsights
+      parameters:
+        - $ref: "#/components/parameters/PartnerId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [period]
+              properties:
+                period:
+                  type: string
+                  pattern: "^\\d{4}-(0[1-9]|1[0-2])$"
+      responses:
+        "200":
+          description: Evidence-linked business insight
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartnerInsightEnvelope"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: yoru_access
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CsrfToken:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 20
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+        maxLength: 500
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    ProductId:
+      name: product_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PartnerId:
+      name: partner_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderId:
+      name: order_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BookingId:
+      name: booking_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: Permission, tenant, state, CSRF, or MFA policy denied the request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Resource not found or hidden by access policy
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: Resource state, concurrency, or idempotency conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unavailable:
+      description: Dependency temporarily unavailable
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, full_name]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 150
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          maxLength: 128
+    User:
+      type: object
+      required: [id, email, full_name, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, blocked]
+    Membership:
+      type: object
+      required: [partner_id, partner_status, membership_status, role, permissions]
+      properties:
+        partner_id:
+          type: string
+          format: uuid
+        partner_status:
+          type: string
+        membership_status:
+          type: string
+        role:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    SessionResponse:
+      type: object
+      required: [user, active_partner_id, platform_roles, permissions, memberships]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        active_partner_id:
+          type: [string, "null"]
+          format: uuid
+        platform_roles:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        memberships:
+          type: array
+          items:
+            $ref: "#/components/schemas/Membership"
+    SelectPartnerRequest:
+      type: object
+      additionalProperties: false
+      required: [partner_id]
+      properties:
+        partner_id:
+          type: [string, "null"]
+          format: uuid
+    Product:
+      type: object
+      required: [id, partner_id, name, status, variants]
+      properties:
+        id:
+          type: string
+          format: uuid
+        partner_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [published]
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductVariant"
+    ProductVariant:
+      type: object
+      required: [id, sku, price, availability]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        price:
+          $ref: "#/components/schemas/Money"
+        availability:
+          type: string
+          enum: [in_stock, low_stock, out_of_stock]
+    Money:
+      type: object
+      additionalProperties: false
+      required: [amount_minor, currency]
+      properties:
+        amount_minor:
+          type: integer
+          minimum: 0
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+    CheckoutQuoteRequest:
+      type: object
+      additionalProperties: false
+      required: [cart_id, shipping_address_id]
+      properties:
+        cart_id:
+          type: string
+          format: uuid
+        shipping_address_id:
+          type: string
+          format: uuid
+        coupon_code:
+          type: [string, "null"]
+          maxLength: 50
+    Quote:
+      type: object
+      required: [id, expires_at, total]
+      properties:
+        id:
+          type: string
+          format: uuid
+        expires_at:
+          type: string
+          format: date-time
+        total:
+          $ref: "#/components/schemas/Money"
+        version:
+          type: integer
+          minimum: 1
+    CheckoutConfirmRequest:
+      type: object
+      additionalProperties: false
+      required: [quote_id, quote_version, payment_method]
+      properties:
+        quote_id:
+          type: string
+          format: uuid
+        quote_version:
+          type: integer
+          minimum: 1
+        payment_method:
+          type: string
+          maxLength: 40
+    CheckoutResult:
+      type: object
+      required: [orders, payment_intent]
+      properties:
+        orders:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Order"
+        payment_intent:
+          $ref: "#/components/schemas/PaymentIntent"
+    OrderState:
+      type: string
+      enum:
+        - pending_payment
+        - paid
+        - processing
+        - shipped
+        - delivered
+        - completed
+        - cancelled
+        - partially_refunded
+        - refunded
+        - expired
+    Order:
+      type: object
+      required: [id, number, partner_id, state, total, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+        partner_id:
+          type: string
+          format: uuid
+        state:
+          $ref: "#/components/schemas/OrderState"
+        total:
+          $ref: "#/components/schemas/Money"
+        created_at:
+          type: string
+          format: date-time
+    BookingCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - service_id
+        - scheduled_start
+        - service_address_id
+        - quote_id
+      properties:
+        service_id:
+          type: string
+          format: uuid
+        professional_id:
+          type: [string, "null"]
+          format: uuid
+        scheduled_start:
+          type: string
+          format: date-time
+        service_address_id:
+          type: string
+          format: uuid
+        quote_id:
+          type: string
+          format: uuid
+        notes:
+          type: [string, "null"]
+          maxLength: 500
+    BookingState:
+      type: string
+      enum:
+        - pending_payment
+        - pending_acceptance
+        - confirmed
+        - assigned
+        - en_route
+        - arrived
+        - in_service
+        - completed
+        - declined
+        - cancelled
+        - no_show
+        - expired
+    Booking:
+      type: object
+      required:
+        - id
+        - partner_id
+        - service_id
+        - state
+        - scheduled_start
+        - total
+      properties:
+        id:
+          type: string
+          format: uuid
+        partner_id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+        professional_id:
+          type: [string, "null"]
+          format: uuid
+        state:
+          $ref: "#/components/schemas/BookingState"
+        scheduled_start:
+          type: string
+          format: date-time
+        total:
+          $ref: "#/components/schemas/Money"
+        version:
+          type: integer
+          minimum: 1
+    PaymentIntentRequest:
+      type: object
+      additionalProperties: false
+      required: [reference_type, reference_id, method]
+      properties:
+        reference_type:
+          type: string
+          enum: [checkout, order, booking]
+        reference_id:
+          type: string
+          format: uuid
+        method:
+          type: string
+          maxLength: 40
+    PaymentIntent:
+      type: object
+      required: [id, status, amount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [requires_action, pending, succeeded, failed, cancelled]
+        amount:
+          $ref: "#/components/schemas/Money"
+        redirect_url:
+          type: [string, "null"]
+          format: uri
+    CustomerRecommendationRequest:
+      type: object
+      additionalProperties: false
+      required: [session_id, description, budget, consent_version]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        description:
+          type: string
+          minLength: 3
+          maxLength: 2000
+        budget:
+          $ref: "#/components/schemas/Budget"
+        photo_upload_token:
+          type: [string, "null"]
+          maxLength: 500
+        consent_version:
+          type: string
+          maxLength: 40
+    Budget:
+      type: object
+      additionalProperties: false
+      required: [max_minor, currency]
+      properties:
+        min_minor:
+          type: integer
+          minimum: 0
+          default: 0
+        max_minor:
+          type: integer
+          minimum: 0
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+    Recommendation:
+      type: object
+      required: [entity_type, entity_id, reasons, availability_checked_at]
+      properties:
+        entity_type:
+          type: string
+          enum: [product_variant, service]
+        entity_id:
+          type: string
+          format: uuid
+        reasons:
+          type: array
+          items:
+            type: string
+        caveats:
+          type: array
+          items:
+            type: string
+        availability_checked_at:
+          type: string
+          format: date-time
+    AnalyticsSummary:
+      type: object
+      required:
+        - period
+        - metric_version
+        - gross_sales
+        - net_sales
+        - generated_at
+      properties:
+        period:
+          type: string
+        metric_version:
+          type: string
+        gross_sales:
+          $ref: "#/components/schemas/Money"
+        net_sales:
+          $ref: "#/components/schemas/Money"
+        orders_paid:
+          type: integer
+          minimum: 0
+        bookings_completed:
+          type: integer
+          minimum: 0
+        refund_rate:
+          type: number
+          minimum: 0
+          maximum: 1
+        generated_at:
+          type: string
+          format: date-time
+    PartnerInsight:
+      type: object
+      required: [headline, evidence, recommendations, metric_version]
+      properties:
+        headline:
+          type: string
+        metric_version:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        recommendations:
+          type: array
+          items:
+            type: object
+            required: [action, reason, confidence]
+            properties:
+              action:
+                type: string
+              reason:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              requires_approval:
+                type: boolean
+        limitations:
+          type: array
+          items:
+            type: string
+    Problem:
+      type: object
+      required: [type, title, status, code, request_id]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        code:
+          type: string
+          pattern: "^[A-Z0-9_]+$"
+        detail:
+          type: string
+        instance:
+          type: string
+        request_id:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            required: [code, message]
+            properties:
+              field:
+                type: [string, "null"]
+              code:
+                type: string
+              message:
+                type: string
+    Page:
+      type: object
+      required: [has_more]
+      properties:
+        next_cursor:
+          type: [string, "null"]
+        has_more:
+          type: boolean
+    Meta:
+      type: object
+      required: [request_id]
+      properties:
+        request_id:
+          type: string
+    UserEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/User"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    ProductEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Product"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    ProductListEnvelope:
+      type: object
+      required: [data, page, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        page:
+          $ref: "#/components/schemas/Page"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    QuoteEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Quote"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    CheckoutResultEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/CheckoutResult"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    OrderEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Order"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    OrderListEnvelope:
+      type: object
+      required: [data, page, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        page:
+          $ref: "#/components/schemas/Page"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    BookingEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Booking"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    PaymentIntentEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/PaymentIntent"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    RecommendationEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    AnalyticsSummaryEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/AnalyticsSummary"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    PartnerInsightEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/PartnerInsight"
+        meta:
+          $ref: "#/components/schemas/Meta"

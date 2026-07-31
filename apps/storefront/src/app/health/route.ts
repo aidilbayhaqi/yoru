@@ -1,0 +1,19 @@
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+export function GET() {
+  return NextResponse.json(
+    {
+      status: "ok",
+      service: "yoru-storefront",
+      version: "0.2.1",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  );
+}

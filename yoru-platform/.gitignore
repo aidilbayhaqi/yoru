@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build and coverage
+dist/
+build/
+coverage/
+htmlcov/
+.coverage
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Runtime data
+.runtime/
+*.log

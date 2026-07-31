@@ -1,0 +1,29 @@
+{
+  "name": "@yoru/storefront",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@yoru/contracts": "workspace:*",
+    "@yoru/ui": "workspace:*",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
