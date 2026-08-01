@@ -1,0 +1,9 @@
+{
+  "product": "Yoru Platform",
+  "release": "phase-01",
+  "version": "0.2.1",
+  "includes": ["phase-0-foundation", "phase-1-identity"],
+  "alembic_head": "20260728_0002",
+  "package_mode": "full-source-baseline",
+  "released_at": "2026-07-29"
+}

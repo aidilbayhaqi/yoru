@@ -7,7 +7,6 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     String,
-    Text,
     UniqueConstraint,
     func,
     text,
@@ -20,6 +19,7 @@ from yoru_api.core.models import Base
 
 class User(Base):
     __tablename__ = "users"
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True)
     full_name: Mapped[str] = mapped_column(String(150), nullable=False)
@@ -52,27 +52,10 @@ class UserCredential(Base):
 
 class Partner(Base):
     __tablename__ = "partners"
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     display_name: Mapped[str] = mapped_column(String(150), nullable=False)
-    legal_name: Mapped[str | None] = mapped_column(String(200))
-    partner_type: Mapped[str | None] = mapped_column(String(40))
-    contact_email: Mapped[str | None] = mapped_column(String(320))
-    contact_phone: Mapped[str | None] = mapped_column(String(40))
-    address_line: Mapped[str | None] = mapped_column(String(300))
-    city: Mapped[str | None] = mapped_column(String(120))
-    province: Mapped[str | None] = mapped_column(String(120))
-    postal_code: Mapped[str | None] = mapped_column(String(20))
-    description: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="draft")
-    created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
-    )
-    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    reviewed_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
-    )
-    review_reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -95,6 +78,7 @@ class Role(Base):
 
 class Permission(Base):
     __tablename__ = "permissions"
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     code: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
 
@@ -104,6 +88,7 @@ class RolePermission(Base):
     __table_args__ = (
         UniqueConstraint("role_id", "permission_id", name="uq_role_permissions_role_permission"),
     )
+
     role_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("roles.id", ondelete="CASCADE"),
@@ -121,6 +106,7 @@ class UserPlatformRole(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "role_id", name="uq_user_platform_roles_user_role"),
     )
+
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -139,6 +125,7 @@ class PartnerMembership(Base):
         UniqueConstraint("partner_id", "user_id", name="uq_partner_memberships_partner_user"),
         Index("ix_partner_memberships_user_status", "user_id", "status"),
     )
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     partner_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("partners.id", ondelete="CASCADE"), nullable=False
@@ -167,6 +154,7 @@ class AuthSession(Base):
         Index("ix_auth_sessions_access_hash", "access_token_hash", unique=True),
         Index("ix_auth_sessions_refresh_hash", "refresh_token_hash", unique=True),
     )
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     family_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), nullable=False, default=uuid.uuid4
@@ -197,6 +185,7 @@ class AuthSession(Base):
 class RefreshTokenHistory(Base):
     __tablename__ = "refresh_token_history"
     __table_args__ = (Index("ix_refresh_token_history_hash", "token_hash", unique=True),)
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     session_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -212,6 +201,7 @@ class MfaMethod(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "method_type", name="uq_mfa_methods_user_type"),
     )
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False

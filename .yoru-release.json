@@ -1,9 +1,13 @@
-{
-  "product": "Yoru Platform",
-  "release": "phase-01",
-  "version": "0.2.1",
-  "includes": ["phase-0-foundation", "phase-1-identity"],
-  "alembic_head": "20260728_0002",
-  "package_mode": "full-source-baseline",
-  "released_at": "2026-07-29"
+﻿{
+    "product":  "Yoru Platform",
+    "release":  "phase-02",
+    "version":  "0.3.0",
+    "includes":  [
+                     "phase-0-foundation",
+                     "phase-1-identity",
+                     "phase-2-partner-onboarding"
+                 ],
+    "alembic_head":  "20260731_0003",
+    "package_mode":  "incremental-patch",
+    "released_at":  "2026-07-31"
 }

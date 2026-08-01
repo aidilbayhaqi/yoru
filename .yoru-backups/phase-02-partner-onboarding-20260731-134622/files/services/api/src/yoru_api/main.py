@@ -16,7 +16,6 @@ from yoru_api.core.problem import AppError, app_error_handler
 from yoru_api.core.settings import Settings, get_settings
 from yoru_api.modules.identity.rate_limit import LoginRateLimiter
 from yoru_api.modules.identity.router import router as identity_router
-from yoru_api.modules.partners.router import router as partners_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -48,6 +47,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.login_rate_limiter = login_rate_limiter
     app.state.health_checker = DependencyHealthChecker(app_settings, engine)
     app.state.started = False
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(app_settings.cors_allowed_origins),
@@ -77,13 +77,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {
             "name": "Yoru API",
             "version": __version__,
-            "stage": "partner-onboarding",
+            "stage": "identity-foundation",
         }
 
     app.include_router(health_router)
     app.include_router(meta_router, prefix=app_settings.api_v1_prefix)
     app.include_router(identity_router, prefix=app_settings.api_v1_prefix)
-    app.include_router(partners_router, prefix=app_settings.api_v1_prefix)
     return app
 
 
