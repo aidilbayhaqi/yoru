@@ -1,0 +1,18 @@
+﻿{
+    "product":  "Yoru Platform",
+    "release":  "phase-07",
+    "version":  "0.8.0",
+    "includes":  [
+                     "phase-0-foundation",
+                     "phase-1-identity",
+                     "phase-2-partner-onboarding",
+                     "phase-3-catalog-service-inventory",
+                     "phase-4-cart-checkout-order-payment",
+                     "phase-5-booking-home-service",
+                     "phase-6-ledger-refund-payout-dispute",
+                     "phase-7-customer-ai-advisor"
+                 ],
+    "alembic_head":  "20260801_0008",
+    "package_mode":  "incremental-patch",
+    "released_at":  "2026-08-01"
+}

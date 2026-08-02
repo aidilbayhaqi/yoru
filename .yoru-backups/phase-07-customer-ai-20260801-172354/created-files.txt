@@ -1,0 +1,10 @@
+docs/PHASE07_CUSTOMER_AI_ADVISOR.md
+services/api/alembic/versions/20260801_0008_customer_ai_advisor.py
+services/api/src/yoru_api/modules/advisor/__init__.py
+services/api/src/yoru_api/modules/advisor/domain.py
+services/api/src/yoru_api/modules/advisor/models.py
+services/api/src/yoru_api/modules/advisor/repository.py
+services/api/src/yoru_api/modules/advisor/router.py
+services/api/src/yoru_api/modules/advisor/schemas.py
+services/api/src/yoru_api/modules/advisor/service.py
+services/api/tests/test_advisor_phase07.py

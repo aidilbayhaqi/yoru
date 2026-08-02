@@ -1,0 +1,15 @@
+﻿{
+    "product":  "Yoru Platform",
+    "release":  "phase-04",
+    "version":  "0.5.0",
+    "includes":  [
+                     "phase-0-foundation",
+                     "phase-1-identity",
+                     "phase-2-partner-onboarding",
+                     "phase-3-catalog-service-inventory",
+                     "phase-4-cart-checkout-order-payment"
+                 ],
+    "alembic_head":  "20260801_0005",
+    "package_mode":  "incremental-patch",
+    "released_at":  "2026-08-01"
+}

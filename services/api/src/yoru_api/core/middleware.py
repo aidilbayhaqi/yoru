@@ -1,3 +1,4 @@
+import asyncio
 import contextvars
 import logging
 import re
@@ -6,53 +7,49 @@ import uuid
 
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import JSONResponse, Response
 from starlette.types import ASGIApp
 
+from yoru_api.core.metrics import MetricsRegistry
 
 request_id_context: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "request_id",
-    default="unknown",
+    "request_id", default="unknown"
 )
 
 _REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
-
 logger = logging.getLogger("yoru_api.request")
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self,
-        request: Request,
-        call_next: RequestResponseEndpoint,
-    ) -> Response:
-
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         supplied_request_id = request.headers.get("X-Request-ID", "")
-
         request_id = (
             supplied_request_id
             if _REQUEST_ID_PATTERN.fullmatch(supplied_request_id)
             else str(uuid.uuid4())
         )
-
         token = request_id_context.set(request_id)
-
         started = time.perf_counter()
-
         try:
             response = await call_next(request)
-
-        finally:
-            duration_ms = round(
-                (time.perf_counter() - started) * 1000,
-                2,
+        except Exception:
+            duration_ms = round((time.perf_counter() - started) * 1000, 2)
+            logger.exception(
+                "request_failed",
+                extra={
+                    "request_id": request_id,
+                    "method": request.method,
+                    "route": request.url.path,
+                    "duration_ms": duration_ms,
+                },
             )
+            raise
+        finally:
             request_id_context.reset(token)
 
+        duration_ms = round((time.perf_counter() - started) * 1000, 2)
         response.headers["X-Request-ID"] = request_id
-
         route = request.scope.get("route")
-
         logger.info(
             "request_completed",
             extra={
@@ -63,17 +60,93 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
                 "duration_ms": duration_ms,
             },
         )
-
         return response
 
 
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app: ASGIApp, *, max_bytes: int) -> None:
+        super().__init__(app)
+        self._max_bytes = max_bytes
 
-    DOCS_PATHS = {
-        "/docs",
-        "/openapi.json",
-        "/redoc",
-    }
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        content_length = request.headers.get("Content-Length")
+        if content_length is not None:
+            try:
+                if int(content_length) > self._max_bytes:
+                    return JSONResponse(
+                        status_code=413,
+                        content={
+                            "type": "about:blank",
+                            "title": "Request body too large",
+                            "status": 413,
+                            "code": "REQUEST_BODY_TOO_LARGE",
+                        },
+                    )
+            except ValueError:
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "type": "about:blank",
+                        "title": "Invalid Content-Length header",
+                        "status": 400,
+                        "code": "INVALID_CONTENT_LENGTH",
+                    },
+                )
+        return await call_next(request)
+
+
+class RequestTimeoutMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app: ASGIApp, *, timeout_seconds: float) -> None:
+        super().__init__(app)
+        self._timeout_seconds = timeout_seconds
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        try:
+            async with asyncio.timeout(self._timeout_seconds):
+                return await call_next(request)
+        except TimeoutError:
+            logger.warning(
+                "request_timeout",
+                extra={
+                    "request_id": request_id_context.get(),
+                    "method": request.method,
+                    "route": request.url.path,
+                    "timeout_seconds": self._timeout_seconds,
+                },
+            )
+            return JSONResponse(
+                status_code=504,
+                content={
+                    "type": "about:blank",
+                    "title": "Request timed out",
+                    "status": 504,
+                    "code": "REQUEST_TIMEOUT",
+                },
+            )
+
+
+class MetricsMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app: ASGIApp, *, registry: MetricsRegistry) -> None:
+        super().__init__(app)
+        self._registry = registry
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        self._registry.begin_request()
+        started = time.perf_counter()
+        status_code = 500
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+            return response
+        finally:
+            route = request.scope.get("route")
+            route_path = getattr(route, "path", request.url.path)
+            duration_ms = (time.perf_counter() - started) * 1000
+            self._registry.end_request(request.method, route_path, status_code, duration_ms)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    DOCS_PATHS = frozenset({"/docs", "/openapi.json", "/redoc"})
 
     def __init__(
         self,
@@ -82,35 +155,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         production: bool = False,
         auth_path_prefix: str = "/api/v1/auth",
     ) -> None:
-
         super().__init__(app)
-
         self._production = production
         self._auth_path_prefix = auth_path_prefix
 
-
-    async def dispatch(
-        self,
-        request: Request,
-        call_next: RequestResponseEndpoint,
-    ) -> Response:
-
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         response = await call_next(request)
 
-
-        # ================================
-        # Swagger / OpenAPI CSP
-        # ================================
-        #
-        # FastAPI Swagger UI membutuhkan:
-        # - javascript
-        # - css
-        # - inline script
-        # - CDN swagger-ui
-        #
-
         if request.url.path in self.DOCS_PATHS:
-
             response.headers.setdefault(
                 "Content-Security-Policy",
                 (
@@ -124,75 +176,29 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                     "base-uri 'self'"
                 ),
             )
-
-
-        # ================================
-        # Normal Application CSP
-        # ================================
         else:
-
             response.headers.setdefault(
                 "Content-Security-Policy",
-                (
-                    "default-src 'none'; "
-                    "frame-ancestors 'none'; "
-                    "base-uri 'none'"
-                ),
+                "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
             )
 
-
-        # ================================
-        # Security Headers
-        # ================================
-
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         response.headers.setdefault(
-            "X-Content-Type-Options",
-            "nosniff",
+            "Permissions-Policy", "camera=(), microphone=(), geolocation=(self)"
         )
-
-        response.headers.setdefault(
-            "X-Frame-Options",
-            "DENY",
-        )
-
-        response.headers.setdefault(
-            "Referrer-Policy",
-            "strict-origin-when-cross-origin",
-        )
-
-
-        response.headers.setdefault(
-            "Permissions-Policy",
-            "camera=(), microphone=(), geolocation=(self)",
-        )
-
-
-        response.headers.setdefault(
-            "Cross-Origin-Opener-Policy",
-            "same-origin",
-        )
-
-
-        # ================================
-        # Authentication Endpoint
-        # ================================
+        response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        response.headers.setdefault("Cross-Origin-Resource-Policy", "same-site")
 
         if request.url.path.startswith(self._auth_path_prefix):
-
             response.headers["Cache-Control"] = "no-store"
             response.headers["Pragma"] = "no-cache"
-
-
-        # ================================
-        # Production HTTPS
-        # ================================
-
         if self._production:
-
             response.headers.setdefault(
                 "Strict-Transport-Security",
-                "max-age=31536000; includeSubDomains",
+                "max-age=31536000; includeSubDomains; preload",
             )
-
-
+        if "server" in response.headers:
+            del response.headers["server"]
         return response

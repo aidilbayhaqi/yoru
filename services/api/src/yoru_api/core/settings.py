@@ -16,7 +16,8 @@ class Settings(BaseSettings):
 
     app_env: Literal["local", "test", "staging", "production"] = "local"
     app_name: str = "Yoru"
-    app_version: str = "0.2.1"
+    app_version: str = "1.0.0"
+    release_id: str = "local"
     log_level: str = "INFO"
     api_v1_prefix: str = "/api/v1"
 
@@ -33,15 +34,30 @@ class Settings(BaseSettings):
     )
     trusted_hosts: tuple[str, ...] = ("localhost", "127.0.0.1", "testserver", "api")
     request_timeout_seconds: float = Field(default=30, gt=0, le=120)
+    max_request_body_bytes: int = Field(default=10_485_760, ge=1024, le=52_428_800)
+
     access_token_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     refresh_token_ttl_seconds: int = Field(default=2_592_000, ge=3600, le=7_776_000)
     auth_rate_limit_attempts: int = Field(default=5, ge=1, le=100)
     auth_rate_limit_window_seconds: int = Field(default=300, ge=10, le=3600)
     cookie_secure: bool = False
     cookie_domain: str | None = None
+    session_signing_key: SecretStr = SecretStr(
+        "local-development-key-change-before-production"
+    )
+    refresh_token_pepper: SecretStr = SecretStr(
+        "local-development-pepper-change-before-production"
+    )
+    payment_webhook_secret: SecretStr = SecretStr(
+        "local-payment-webhook-secret-change-before-production"
+    )
 
-    session_signing_key: SecretStr = SecretStr("local-development-key-change-before-production")
-    refresh_token_pepper: SecretStr = SecretStr("local-development-pepper-change-before-production")
+    metrics_enabled: bool = True
+    metrics_token: SecretStr | None = None
+    tracking_retention_days: int = Field(default=30, ge=1, le=365)
+    security_event_retention_days: int = Field(default=730, ge=30, le=3650)
+    restore_drill_max_age_days: int = Field(default=30, ge=1, le=365)
+    launch_gate_max_age_days: int = Field(default=30, ge=1, le=365)
 
     feature_customer_ai: bool = False
     feature_partner_copilot: bool = False
@@ -79,7 +95,7 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def validate_production_secrets(self) -> "Settings":
+    def validate_production_configuration(self) -> "Settings":
         if self.app_env != "production":
             return self
 
@@ -87,22 +103,35 @@ class Settings(BaseSettings):
         secret_values = (
             self.session_signing_key.get_secret_value(),
             self.refresh_token_pepper.get_secret_value(),
+            self.payment_webhook_secret.get_secret_value(),
         )
-        if any(fragment in secret for secret in secret_values for fragment in forbidden_fragments):
+        if any(
+            fragment in secret
+            for secret in secret_values
+            for fragment in forbidden_fragments
+        ):
             raise ValueError("Production secrets still use local placeholder values")
         if any(len(secret) < 32 for secret in secret_values):
-            raise ValueError(
-                "Production authentication secrets must contain at least 32 characters"
-            )
-        if any("localhost" in origin for origin in self.cors_allowed_origins):
-            raise ValueError("Production CORS origins cannot use localhost")
+            raise ValueError("Production secrets must contain at least 32 characters")
         if not self.cookie_secure:
             raise ValueError("Production cookies must be secure")
+
+        if any("localhost" in origin or origin.startswith("http://") for origin in self.cors_allowed_origins):
+            raise ValueError("Production CORS origins must use HTTPS and cannot use localhost")
+        forbidden_hosts = {"localhost", "127.0.0.1", "testserver", "api", "*"}
+        if any(host in forbidden_hosts for host in self.trusted_hosts):
+            raise ValueError("Production trusted hosts must be explicit public hostnames")
+        if "yoru_local_only" in self.database_url or "yoru123" in self.database_url:
+            raise ValueError("Production database URL still uses local credentials")
+        if self.metrics_enabled:
+            token = self.metrics_token.get_secret_value() if self.metrics_token else ""
+            if len(token) < 32:
+                raise ValueError("Production metrics token must contain at least 32 characters")
         return self
 
     @property
     def docs_enabled(self) -> bool:
-        return self.app_env != "production"
+        return self.app_env in {"local", "test"}
 
 
 @lru_cache

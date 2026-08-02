@@ -1,0 +1,11 @@
+docs/PHASE03_CATALOG_SERVICE_INVENTORY.md
+services/api/alembic/versions/20260801_0004_catalog_service_inventory.py
+services/api/src/yoru_api/modules/catalog/__init__.py
+services/api/src/yoru_api/modules/catalog/domain.py
+services/api/src/yoru_api/modules/catalog/models.py
+services/api/src/yoru_api/modules/catalog/repository.py
+services/api/src/yoru_api/modules/catalog/router.py
+services/api/src/yoru_api/modules/catalog/schemas.py
+services/api/src/yoru_api/modules/catalog/service.py
+services/api/src/yoru_api/modules/catalog/state_machine.py
+services/api/tests/test_catalog_phase03.py

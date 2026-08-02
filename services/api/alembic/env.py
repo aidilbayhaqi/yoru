@@ -7,12 +7,19 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from yoru_api.core.models import Base
 from yoru_api.core.settings import get_settings
+from yoru_api.modules.advisor import models as advisor_models  # noqa: F401
+from yoru_api.modules.bookings import models as booking_models  # noqa: F401
+from yoru_api.modules.catalog import models as catalog_models  # noqa: F401
+from yoru_api.modules.commerce import models as commerce_models  # noqa: F401
+from yoru_api.modules.finance import models as finance_models  # noqa: F401
 from yoru_api.modules.identity import models as identity_models  # noqa: F401
+from yoru_api.modules.ops import models as ops_models  # noqa: F401
+from yoru_api.modules.partner_copilot import models as partner_copilot_models  # noqa: F401
+from yoru_api.modules.partners import models as partner_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
 config.set_main_option("sqlalchemy.url", get_settings().database_url)
 target_metadata = Base.metadata
 

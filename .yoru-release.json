@@ -1,13 +1,20 @@
 ﻿{
     "product":  "Yoru Platform",
-    "release":  "phase-02",
-    "version":  "0.3.0",
+    "release":  "phase-09",
+    "version":  "1.0.0",
     "includes":  [
                      "phase-0-foundation",
                      "phase-1-identity",
-                     "phase-2-partner-onboarding"
+                     "phase-2-partner-onboarding",
+                     "phase-3-catalog-service-inventory",
+                     "phase-4-cart-checkout-order-payment",
+                     "phase-5-booking-home-service",
+                     "phase-6-ledger-refund-payout-dispute",
+                     "phase-7-customer-ai-advisor",
+                     "phase-8-partner-copilot",
+                     "phase-9-hardening-production-launch"
                  ],
-    "alembic_head":  "20260731_0003",
+    "alembic_head":  "20260802_0010",
     "package_mode":  "incremental-patch",
-    "released_at":  "2026-07-31"
+    "released_at":  "2026-08-02"
 }
