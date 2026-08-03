@@ -1,0 +1,5 @@
+﻿apps\console\src\app\dashboard\page.tsx
+apps\console\src\components\operations-dashboard.module.css
+apps\console\src\components\operations-dashboard.tsx
+apps\console\src\lib\console-dashboard.ts
+apps\console\src\lib\__tests__\console-dashboard.test.ts

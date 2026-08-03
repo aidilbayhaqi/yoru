@@ -1,0 +1,3 @@
+﻿apps\console\src\proxy.ts
+apps\console\src\lib\console-auth.ts
+apps\console\src\lib\__tests__\console-auth.test.ts

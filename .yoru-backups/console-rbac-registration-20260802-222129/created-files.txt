@@ -1,0 +1,5 @@
+﻿apps\console\src\app\register\page.tsx
+apps\console\src\components\auth-shell.module.css
+apps\console\src\components\console-registration-form.tsx
+apps\console\src\lib\__tests__\console-rbac.test.ts
+scripts\bootstrap-dummy-superadmin.ps1
