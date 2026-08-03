@@ -1,3 +1,6 @@
+<!-- YORU_PHASE9_STATUS -->
+> **Current implementation status:** Phase 9 hardening, release 1.0.0. The repository now contains identity, partner/catalog, commerce, booking, finance, advisor/copilot, and operations modules. See `docs/FEATURE_STATUS.md` for the live/mock boundary and `docs/RELEASE_DISCIPLINE.md` for release gates.
+
 # Yoru Platform
 
 Sprint 1 identity foundation untuk Yoru di atas dua aplikasi Next.js, FastAPI

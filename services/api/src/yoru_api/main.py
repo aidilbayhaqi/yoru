@@ -2,6 +2,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
@@ -19,7 +20,11 @@ from yoru_api.core.middleware import (
     RequestTimeoutMiddleware,
     SecurityHeadersMiddleware,
 )
-from yoru_api.core.problem import AppError, app_error_handler
+from yoru_api.core.problem import (
+    AppError,
+    app_error_handler,
+    request_validation_error_handler,
+)
 from yoru_api.core.settings import Settings, get_settings
 from yoru_api.modules.advisor.router import router as advisor_router
 from yoru_api.modules.bookings.router import router as bookings_router
@@ -103,13 +108,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(MetricsMiddleware, registry=metrics_registry)
     app.add_middleware(RequestContextMiddleware)
     app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(
+        RequestValidationError,
+        request_validation_error_handler,  # type: ignore[arg-type]
+    )
 
     @app.get("/", include_in_schema=False)
     async def root() -> dict[str, str]:
         return {
             "name": "Yoru API",
             "version": __version__,
-            "stage": "production-ready",
+            "stage": "phase-9-pre-production",
             "release_id": app_settings.release_id,
         }
 

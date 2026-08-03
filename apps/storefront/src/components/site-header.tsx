@@ -2,8 +2,8 @@
 
 import type { AuthSession } from "@yoru/contracts";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/icons";
 import { ApiError, apiRequest } from "@/lib/api";
@@ -12,18 +12,26 @@ import { useStorefront } from "@/lib/storefront-store";
 const navigation = [
   { href: "/products", label: "Belanja" },
   { href: "/services", label: "Home service" },
-  { href: "/history", label: "Riwayat" },
-  { href: "/assistant", label: "Yoru Advisor" },
+  { href: "/collections", label: "Koleksi" },
+  { href: "/deals", label: "Deals" },
 ];
+
+function openSearch(mode: "query" | "ai" | "image" = "query") {
+  window.dispatchEvent(new CustomEvent("yoru:open-search", { detail: { mode } }));
+}
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const router = useRouter();
   const { cartCount } = useStorefront();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+    });
+
     let active = true;
     apiRequest<AuthSession>("/auth/me")
       .then((value) => {
@@ -37,24 +45,24 @@ export function SiteHeader() {
 
     return () => {
       active = false;
+      window.cancelAnimationFrame(frame);
     };
   }, []);
 
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const query = String(data.get("q") ?? "").trim();
-    if (query) {
-      router.push(`/search?q=${encodeURIComponent(query)}`);
-    }
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem("yoru-theme", next);
+    setTheme(next);
   }
 
   return (
     <>
       <div className="announcement-bar">
-        <span>Gratis ongkir produk mulai Rp500 ribu</span>
-        <span>Profesional terverifikasi untuk layanan di rumah</span>
+        <span>Gratis pengiriman untuk pilihan tertentu</span>
+        <Link href="/deals">Lihat penawaran hari ini</Link>
       </div>
+
       <header className="commerce-header">
         <div className="commerce-header__inner">
           <Link className="commerce-brand" href="/" aria-label="Yoru home">
@@ -76,17 +84,32 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <form className="header-search" onSubmit={submitSearch} role="search">
+          <button
+            className="header-search header-search--button"
+            onClick={() => openSearch("query")}
+            type="button"
+          >
             <Icon name="search" width="18" />
-            <input
-              aria-label="Cari produk atau layanan"
-              name="q"
-              placeholder="Cari serum, facial, hair spa..."
-              type="search"
-            />
-          </form>
+            <span>Cari produk, layanan, atau gambar</span>
+            <kbd>⌘ K</kbd>
+          </button>
 
           <div className="header-actions">
+            <button
+              aria-label={`Gunakan mode ${theme === "dark" ? "terang" : "gelap"}`}
+              aria-pressed={theme === "dark"}
+              className="icon-button theme-toggle"
+              onClick={toggleTheme}
+              title={`Mode ${theme === "dark" ? "terang" : "gelap"}`}
+              type="button"
+            >
+              <span aria-hidden="true">{theme === "dark" ? "☀" : "◐"}</span>
+            </button>
+
+            <Link aria-label="Wishlist" className="icon-button" href="/wishlist">
+              <Icon name="heart" width="20" />
+            </Link>
+
             <Link
               aria-label={session ? `Akun ${session.user.full_name}` : "Masuk ke akun"}
               className="icon-button"
@@ -94,10 +117,12 @@ export function SiteHeader() {
             >
               <Icon name="user" width="20" />
             </Link>
+
             <Link aria-label={`Keranjang berisi ${cartCount} item`} className="icon-button" href="/cart">
               <Icon name="bag" width="20" />
               {cartCount > 0 ? <span className="cart-count">{cartCount}</span> : null}
             </Link>
+
             <button
               aria-expanded={mobileOpen}
               aria-label="Buka navigasi"
@@ -112,16 +137,32 @@ export function SiteHeader() {
 
         {mobileOpen ? (
           <div className="mobile-menu">
-            <form className="header-search mobile-search" onSubmit={submitSearch} role="search">
+            <button
+              className="mobile-search-trigger"
+              onClick={() => {
+                setMobileOpen(false);
+                openSearch("query");
+              }}
+              type="button"
+            >
               <Icon name="search" width="18" />
-              <input name="q" placeholder="Cari di Yoru" type="search" />
-            </form>
+              Cari di Yoru
+              <Icon name="arrow" width="18" />
+            </button>
             {navigation.map((item) => (
               <Link href={item.href} key={item.href} onClick={() => setMobileOpen(false)}>
                 {item.label}
                 <Icon name="arrow" width="18" />
               </Link>
             ))}
+            <Link href="/wishlist" onClick={() => setMobileOpen(false)}>
+              Wishlist
+              <Icon name="arrow" width="18" />
+            </Link>
+            <Link href="/history" onClick={() => setMobileOpen(false)}>
+              Riwayat transaksi
+              <Icon name="arrow" width="18" />
+            </Link>
             <Link href={session ? "/account" : "/login"} onClick={() => setMobileOpen(false)}>
               {session ? "Akun saya" : "Masuk"}
               <Icon name="arrow" width="18" />

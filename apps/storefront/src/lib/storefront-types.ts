@@ -77,14 +77,40 @@ export type TimelineItem = {
   completed: boolean;
 };
 
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+export type RefundStatus = "none" | "requested" | "approved" | "rejected" | "refunded";
+export type DisputeStatus = "none" | "opened" | "under_review" | "resolved" | "rejected";
+export type OrderStatus =
+  | "awaiting_payment"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+export type FulfillmentStatus =
+  | "unfulfilled"
+  | "packing"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
 export type DemoOrder = {
   id: string;
   number: string;
   createdAt: string;
-  status: "awaiting_payment" | "processing" | "shipped" | "delivered" | "cancelled";
-  paymentStatus: "pending" | "paid" | "refunded";
+  updatedAt?: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
   paymentMethod: string;
+  paymentExpiresAt?: string | null;
+  fulfillmentStatus?: FulfillmentStatus;
   deliveryMethod: string;
+  courier?: string | null;
+  trackingNumber?: string | null;
+  estimatedDeliveryAt?: string | null;
+  refundStatus?: RefundStatus;
+  disputeStatus?: DisputeStatus;
+  cancellationReason?: string | null;
   subtotalMinor: number;
   shippingMinor: number;
   serviceFeeMinor: number;
@@ -95,21 +121,28 @@ export type DemoOrder = {
   timeline: TimelineItem[];
 };
 
+export type BookingStatus =
+  | "requested"
+  | "confirmed"
+  | "assigned"
+  | "en_route"
+  | "arrived"
+  | "in_service"
+  | "completed"
+  | "cancelled";
+
 export type DemoBooking = {
   id: string;
   number: string;
   createdAt: string;
-  status:
-    | "requested"
-    | "confirmed"
-    | "assigned"
-    | "en_route"
-    | "arrived"
-    | "in_service"
-    | "completed"
-    | "cancelled";
-  paymentStatus: "pending" | "paid" | "refunded";
+  updatedAt?: string;
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
   paymentMethod: string;
+  paymentExpiresAt?: string | null;
+  refundStatus?: RefundStatus;
+  cancellationReason?: string | null;
+  rescheduleCount?: number;
   serviceId: string;
   serviceName: string;
   scheduledAt: string;

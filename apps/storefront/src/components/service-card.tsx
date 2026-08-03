@@ -15,8 +15,8 @@ export function ServiceCard({ service }: { service: Service }) {
   return (
     <article className="catalog-card service-card">
       <div className="catalog-card__media">
-        <Link href={`/services/${service.slug}`}>
-          <Image alt={service.name} height={640} src={service.image} width={640} />
+        <Link aria-label={`Lihat ${service.name}`} href={`/services/${service.slug}`}>
+          <Image alt={service.name} height={720} src={service.image} width={640} />
         </Link>
         {service.badge ? <span className="catalog-badge service-badge">{service.badge}</span> : null}
         <button
@@ -28,29 +28,35 @@ export function ServiceCard({ service }: { service: Service }) {
           <Icon name="heart" width="18" />
         </button>
       </div>
+
       <div className="catalog-card__body">
-        <p className="catalog-card__partner">{service.partner}</p>
-        <Link href={`/services/${service.slug}`}>
-          <h3>{service.name}</h3>
-        </Link>
+        <div className="catalog-card__heading">
+          <div>
+            <p className="catalog-card__partner">{service.partner}</p>
+            <Link href={`/services/${service.slug}`}>
+              <h3>{service.name}</h3>
+            </Link>
+          </div>
+          <div className="rating-row" aria-label={`Rating ${service.rating}`}>
+            <Icon name="star" width="14" />
+            <span>{service.rating}</span>
+          </div>
+        </div>
+
         <div className="service-meta">
-          <span>
-            <Icon name="clock" width="15" />
-            {service.durationMin} menit
-          </span>
-          <span>
-            <Icon name="star" width="15" />
-            {service.rating}
-          </span>
+          <span><Icon name="clock" width="14" />{service.durationMin} menit</span>
+          <span><Icon name="pin" width="14" />{service.serviceArea}</span>
         </div>
-        <div className="service-price-row">
-          <span>Mulai</span>
-          <strong>{formatMoney(service.priceMinor)}</strong>
+
+        <div className="catalog-card__footer">
+          <div className="service-price-row">
+            <span>Mulai</span>
+            <strong>{formatMoney(service.priceMinor)}</strong>
+          </div>
+          <Link aria-label={`Pilih jadwal ${service.name}`} className="card-quick-action" href={`/services/${service.slug}/book`}>
+            <Icon name="arrow" width="17" />
+          </Link>
         </div>
-        <Link className="primary-button card-book-button" href={`/services/${service.slug}/book`}>
-          Pilih jadwal
-          <Icon name="calendar" width="17" />
-        </Link>
       </div>
     </article>
   );

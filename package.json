@@ -1,6 +1,6 @@
 {
   "name": "yoru-platform",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@11.7.0",
   "engines": {
@@ -17,7 +17,8 @@
     "test": "pnpm -r --if-present test",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "release:check": "python scripts/check-release-consistency.py"
   },
   "devDependencies": {
     "prettier": "3.6.2",

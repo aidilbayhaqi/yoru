@@ -1144,3 +1144,116 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     grid-template-columns: 1fr;
   }
 }
+
+/* YORU_PHASE9_AUTH_HARDENING */
+.auth-form input[aria-invalid="true"] {
+  border-color: #c83d4b;
+  box-shadow: 0 0 0 4px rgb(200 61 75 / 10%);
+}
+
+.field-error {
+  color: #a12d3a;
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.password-input-wrap {
+  display: grid;
+  position: relative;
+}
+
+.password-input-wrap input {
+  padding-right: 112px;
+  width: 100%;
+}
+
+.password-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--forest);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  height: 36px;
+  padding: 0 10px;
+  position: absolute;
+  right: 6px;
+  top: 6px;
+}
+
+.password-rules {
+  background: #f6f3ff;
+  border: 1px solid #ded7fa;
+  border-radius: 12px;
+  display: grid;
+  gap: 7px;
+  padding: 13px 14px;
+}
+
+.password-rules strong {
+  color: #3e3c47;
+  font-size: 12px;
+}
+
+.password-rules span {
+  color: var(--muted);
+  font-size: 12px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.password-rules span::before {
+  content: "○";
+  left: 0;
+  position: absolute;
+}
+
+.password-rules span[data-valid="true"] {
+  color: #176b4d;
+}
+
+.password-rules span[data-valid="true"]::before {
+  content: "✓";
+  font-weight: 900;
+}
+
+.terms-field {
+  align-items: flex-start;
+  display: grid !important;
+  gap: 10px !important;
+  grid-template-columns: auto 1fr;
+}
+
+.terms-field input {
+  min-height: auto;
+  margin-top: 3px;
+}
+
+.auth-error-summary {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+}
+
+.auth-error-summary > span {
+  display: grid;
+  gap: 5px;
+}
+
+.auth-error-summary strong {
+  font-size: 13px;
+}
+
+.auth-error-summary small {
+  color: #7c2730;
+  font-size: 11px;
+}
+
+.auth-error-summary code {
+  overflow-wrap: anywhere;
+}

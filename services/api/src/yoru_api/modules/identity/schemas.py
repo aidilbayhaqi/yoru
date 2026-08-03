@@ -5,13 +5,31 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class RegisterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     email: EmailStr
     full_name: str = Field(min_length=2, max_length=150)
     password: str = Field(min_length=12, max_length=128)
 
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalize_email(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip().lower()
+        return value
+
+    @field_validator("full_name", mode="before")
+    @classmethod
+    def normalize_full_name(cls, value: object) -> object:
+        if isinstance(value, str):
+            return " ".join(value.split())
+        return value
+
     @field_validator("password")
     @classmethod
     def validate_password_complexity(cls, value: str) -> str:
+        if value != value.strip():
+            raise ValueError("Password must not start or end with whitespace")
         categories = (
             any(char.islower() for char in value),
             any(char.isupper() for char in value),
@@ -24,8 +42,17 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalize_email(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip().lower()
+        return value
 
 
 class UserResponse(BaseModel):
@@ -54,6 +81,8 @@ class SessionResponse(BaseModel):
 
 
 class SelectPartnerRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     partner_id: UUID | None
 
 

@@ -2,9 +2,11 @@
 
 import type { AuthSession } from "@yoru/contracts";
 import { useRouter } from "next/navigation";
-import type { ChangeEvent, FormEvent, ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
+import { CatalogManager } from "@/components/catalog-manager";
+import { CatalogModeration } from "@/components/catalog-moderation";
 import { ApiError, apiRequest } from "@/lib/api";
 import { activePartnerMembership, eligiblePartnerMemberships } from "@/lib/console-auth";
 import {
@@ -13,7 +15,6 @@ import {
   financeBalances,
   formatCompact,
   formatCurrency,
-  initialProducts,
   navigationForRole,
   partnerDirectory,
   partnerMetrics,
@@ -32,8 +33,6 @@ import {
 } from "@/lib/console-dashboard";
 
 import styles from "./operations-dashboard.module.css";
-
-type ProductRow = (typeof initialProducts)[number];
 
 function Icon({ name, size = 18 }: { name: IconName | "search" | "bell" | "plus" | "chevron" | "menu" | "trend" | "more" | "close" | "check" | "download"; size?: number }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
@@ -139,11 +138,8 @@ export function OperationsDashboard() {
   const [role, setRole] = useState<ConsoleRole | null>(null);
   const [section, setSection] = useState<DashboardSection>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [products, setProducts] = useState<ProductRow[]>([...initialProducts]);
-  const [productModal, setProductModal] = useState(false);
   const [toast, setToast] = useState("");
   const [search, setSearch] = useState("");
-  const [productForm, setProductForm] = useState({ name: "", category: "Home service", price: "", stock: "" });
 
   useEffect(() => {
     let active = true;
@@ -204,23 +200,6 @@ export function OperationsDashboard() {
     setSidebarOpen(false);
   }
 
-  function createProduct(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const next: ProductRow = {
-      id: `PRD-${Math.floor(1100 + Math.random() * 8000)}`,
-      name: productForm.name || "Produk baru",
-      category: productForm.category,
-      price: Number(productForm.price || 0),
-      stock: Number(productForm.stock || 0),
-      status: "Draft",
-      sales: 0,
-    };
-    setProducts((current) => [next, ...current]);
-    setProductForm({ name: "", category: "Home service", price: "", stock: "" });
-    setProductModal(false);
-    setToast("Draft produk berhasil dibuat. Hubungkan tombol Publish ke endpoint katalog partner.");
-  }
-
   if (error) return <main className={styles.loadingState}><div><h1>Akses tidak tersedia</h1><p>{error}</p></div></main>;
   if (!session || !role) return <main className={styles.loadingState}><div className={styles.loader}/><p>Memuat Yoru Operations...</p></main>;
 
@@ -246,15 +225,15 @@ export function OperationsDashboard() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div className={styles.topbarLeft}><button className={styles.menuButton} onClick={() => setSidebarOpen(true)} type="button"><Icon name="menu"/></button><div className={styles.breadcrumb}><span>{role === "superadmin" ? "Platform" : "Kemitraan"}</span><Icon name="chevron" size={13}/><strong>{pageTitle}</strong></div></div>
-          <div className={styles.topbarActions}><label className={styles.searchBox}><Icon name="search" size={17}/><input placeholder="Cari order, booking, partner..." value={search} onChange={(event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)}/><kbd>⌘ K</kbd></label><span className={styles.rolePill}>{role === "superadmin" ? "Super Admin" : "Kemitraan"}</span><button className={styles.iconButton} type="button"><Icon name="bell"/><span className={styles.notificationDot}/></button><button className={styles.primaryButton} onClick={() => role === "partner" ? setProductModal(true) : setToast("Buka antrean verifikasi untuk memproses partner baru.")} type="button"><Icon name="plus" size={17}/>{role === "partner" ? "Tambah produk" : "Review partner"}</button></div>
+          <div className={styles.topbarActions}><label className={styles.searchBox}><Icon name="search" size={17}/><input placeholder="Cari order, booking, partner..." value={search} onChange={(event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)}/><kbd>⌘ K</kbd></label><span className={styles.rolePill}>{role === "superadmin" ? "Super Admin" : "Kemitraan"}</span><button className={styles.iconButton} type="button"><Icon name="bell"/><span className={styles.notificationDot}/></button><button className={styles.primaryButton} onClick={() => role === "partner" ? navigate("products") : navigate("partner-verification")} type="button"><Icon name="plus" size={17}/>{role === "partner" ? "Kelola katalog" : "Review partner"}</button></div>
         </header>
 
         <div className={styles.content}>
           <section className={styles.pageHeader}><div><span className={styles.eyebrow}>{role === "superadmin" ? "PLATFORM COMMAND CENTER" : "PARTNER OPERATING SYSTEM"}</span><h1>{pageTitle}</h1><p>{role === "superadmin" ? "Kendalikan pertumbuhan, risiko, transaksi, dan operasional seluruh ekosistem Yoru." : "Kelola commerce, home service, tim lapangan, dan arus kas dalam satu workspace."}</p>{role === "superadmin" ? <span className={styles.demoBadge}>Demo dataset · khusus development</span> : null}</div><div className={styles.headerMeta}><span>Data diperbarui</span><strong>Baru saja</strong><button type="button"><Icon name="download" size={16}/> Export</button></div></section>
 
           {section === "overview" ? <Overview role={role}/> : null}
-          {role === "partner" && section === "products" ? <Products products={products} onAdd={() => setProductModal(true)} onDelete={(id) => { setProducts((current) => current.filter((item) => item.id !== id)); setToast("Produk dihapus dari tampilan lokal."); }}/>: null}
-          {role === "partner" && section === "inventory" ? <Inventory products={products}/>: null}
+          {role === "partner" && section === "products" ? <CatalogManager view="products" onMessage={setToast}/> : null}
+          {role === "partner" && section === "inventory" ? <CatalogManager view="inventory" onMessage={setToast}/> : null}
           {role === "partner" && section === "orders" ? <Orders/> : null}
           {role === "partner" && section === "bookings" ? <Bookings/> : null}
           {role === "partner" && section === "professionals" ? <Professionals/> : null}
@@ -263,7 +242,7 @@ export function OperationsDashboard() {
           {role === "superadmin" && section === "partner-verification" ? <Verification/> : null}
           {role === "superadmin" && section === "partners" ? <Partners/> : null}
           {role === "superadmin" && section === "transactions" ? <Transactions/> : null}
-          {role === "superadmin" && section === "operations" ? <PlatformOperations/> : null}
+          {role === "superadmin" && section === "operations" ? <><PlatformOperations/><CatalogModeration onMessage={setToast}/></> : null}
           {role === "superadmin" && section === "ledger" ? <PlatformFinance/> : null}
           {role === "superadmin" && section === "risk" ? <Risk/> : null}
           {role === "superadmin" && section === "ai-governance" ? <AIGovernance/> : null}
@@ -272,7 +251,6 @@ export function OperationsDashboard() {
         </div>
       </main>
 
-      {productModal ? <div className={styles.modalBackdrop} role="presentation"><div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="product-modal-title"><div className={styles.modalHeader}><div><span className={styles.eyebrow}>CATALOG WORKFLOW</span><h2 id="product-modal-title">Tambah produk atau layanan</h2></div><button onClick={() => setProductModal(false)} type="button"><Icon name="close"/></button></div><form onSubmit={createProduct}><label>Nama produk / layanan<input required value={productForm.name} onChange={(event: ChangeEvent<HTMLInputElement>) => setProductForm({ ...productForm, name: event.target.value })} placeholder="Contoh: Deep Cleaning Premium"/></label><div className={styles.formGrid}><label>Kategori<select value={productForm.category} onChange={(event: ChangeEvent<HTMLSelectElement>) => setProductForm({ ...productForm, category: event.target.value })}><option>Home service</option><option>Maintenance</option><option>Cleaning</option><option>Healthcare</option><option>Product</option></select></label><label>Harga<input min="0" required type="number" value={productForm.price} onChange={(event: ChangeEvent<HTMLInputElement>) => setProductForm({ ...productForm, price: event.target.value })} placeholder="475000"/></label></div><div className={styles.formGrid}><label>Stok / kapasitas<input min="0" required type="number" value={productForm.stock} onChange={(event: ChangeEvent<HTMLInputElement>) => setProductForm({ ...productForm, stock: event.target.value })} placeholder="20"/></label><label>Media katalog<span className={styles.fileInput}><Icon name="plus" size={16}/> Pilih gambar<input type="file" accept="image/*"/></span></label></div><div className={styles.modalNotice}><Icon name="shield" size={18}/><span>Produk disimpan sebagai draft. Publish membutuhkan kelengkapan media, harga, stok, dan moderasi sesuai policy.</span></div><div className={styles.modalFooter}><button className={styles.secondaryButton} onClick={() => setProductModal(false)} type="button">Batal</button><button className={styles.primaryButton} type="submit">Simpan draft</button></div></form></div></div> : null}
       {toast ? <div className={styles.toast}><div><Icon name="check" size={17}/></div><span>{toast}</span></div> : null}
     </div>
   );
@@ -284,10 +262,6 @@ function Overview({ role }: { role: ConsoleRole }) {
 }
 
 function Task({ title, meta, tone }: { title: string; meta: string; tone: "warning" | "danger" | "success" | "info" }) { return <div className={styles.task}><span className={`${styles.taskDot} ${styles[`taskDot_${tone}`]}`}/><div><strong>{title}</strong><span>{meta}</span></div><Icon name="chevron" size={14}/></div>; }
-
-function Products({ products, onAdd, onDelete }: { products: ProductRow[]; onAdd: () => void; onDelete: (id: string) => void }) { return <section className={styles.panel}><div className={styles.tableToolbar}><div><span className={styles.panelEyebrow}>CATALOG MANAGEMENT</span><h2>{products.length} produk dan layanan</h2></div><div><button className={styles.secondaryButton} type="button"><Icon name="download" size={15}/> Export</button><button className={styles.primaryButton} onClick={onAdd} type="button"><Icon name="plus" size={16}/> Tambah baru</button></div></div><div className={styles.filterBar}><div className={styles.inlineSearch}><Icon name="search" size={16}/><input placeholder="Cari katalog..."/></div><select><option>Semua kategori</option><option>Home service</option><option>Product</option></select><select><option>Semua status</option><option>Published</option><option>Draft</option></select></div><div className={styles.tableWrap}><table><thead><tr><th>Produk</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Penjualan</th><th>Status</th><th/></tr></thead><tbody>{products.map((product) => <tr key={product.id}><td><div className={styles.productCell}><div className={styles.productThumb}>{product.name.slice(0, 2).toUpperCase()}</div><div><strong>{product.name}</strong><span>{product.id}</span></div></div></td><td>{product.category}</td><td>{formatCurrency(product.price)}</td><td><strong>{product.stock}</strong></td><td>{product.sales}</td><td><StatusBadge value={product.status}/></td><td><div className={styles.rowActions}><button type="button">Edit</button><button onClick={() => onDelete(product.id)} type="button">Hapus</button></div></td></tr>)}</tbody></table></div></section>; }
-
-function Inventory({ products }: { products: ProductRow[] }) { return <><section className={styles.metricGrid}><article className={styles.metricCard}><div className={styles.metricHeader}><span>Total unit tersedia</span><span>01</span></div><strong>{products.reduce((sum, product) => sum + product.stock, 0)}</strong><p>Di seluruh SKU aktif</p></article><article className={styles.metricCard}><div className={styles.metricHeader}><span>Low stock</span><span>02</span></div><strong>8</strong><p>Perlu restock minggu ini</p></article><article className={styles.metricCard}><div className={styles.metricHeader}><span>Reserved</span><span>03</span></div><strong>16</strong><p>Untuk order aktif</p></article><article className={styles.metricCard}><div className={styles.metricHeader}><span>Stock accuracy</span><span>04</span></div><strong>98.4%</strong><p>Sinkron dengan transaksi</p></article></section><section className={styles.panel}><div className={styles.panelHeader}><div><span className={styles.panelEyebrow}>INVENTORY CONTROL</span><h2>Pergerakan dan risiko stok</h2></div><button className={styles.primaryButton} type="button">Stock adjustment</button></div><div className={styles.inventoryGrid}>{products.map((product) => <article key={product.id}><div><strong>{product.name}</strong><span>{product.id} · {product.category}</span></div><div className={styles.stockBar}><span style={{ width: `${Math.min(product.stock * 4, 100)}%` }}/></div><div className={styles.stockMeta}><span>{product.stock} tersedia</span><span>{Math.max(0, 12 - product.stock)} kebutuhan minimum</span></div></article>)}</div></section></>; }
 
 function Orders() { return <section className={styles.panel}><div className={styles.panelHeader}><div><span className={styles.panelEyebrow}>ORDER MANAGEMENT</span><h2>Order fulfillment</h2></div><div className={styles.segmented}><button className={styles.segmentActive} type="button">Semua</button><button type="button">Menunggu</button><button type="button">Diproses</button><button type="button">Selesai</button></div></div><OrderTable/></section>; }
 function Bookings() { return <section className={styles.dashboardGrid}><article className={styles.panel}><div className={styles.panelHeader}><div><span className={styles.panelEyebrow}>TODAY’S OPERATIONS</span><h2>Jadwal booking hari ini</h2></div><button className={styles.primaryButton} type="button">Tambah booking</button></div><div className={styles.schedule}>{bookingSchedule.map((booking) => <div className={styles.scheduleRow} key={`${booking.time}-${booking.customer}`}><time>{booking.time}</time><div className={styles.scheduleLine}><span/></div><div><strong>{booking.customer}</strong><span>{booking.service} · {booking.professional}</span></div><StatusBadge value={booking.status}/><button type="button"><Icon name="more"/></button></div>)}</div></article><article className={`${styles.panel} ${styles.sidePanel}`}><div className={styles.panelHeader}><div><span className={styles.panelEyebrow}>FIELD TEAM</span><h2>Operasional lapangan</h2></div></div><div className={styles.radarCard}><div className={styles.radar}><span/><i/><b/></div><strong>3 profesional aktif</strong><span>2 on the way · 1 in progress</span></div><div className={styles.taskList}><Task title="OTP check-in menunggu" meta="BK-72118 · Raka" tone="warning"/><Task title="Tracking aktif" meta="BK-72112 · 18 menit" tone="success"/><Task title="Potensi keterlambatan" meta="BK-72122 · ETA +14 menit" tone="danger"/></div></article></section>; }

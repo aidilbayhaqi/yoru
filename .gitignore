@@ -36,3 +36,7 @@ Thumbs.db
 # Runtime data
 .runtime/
 *.log
+.yoru-backups/
+.yoru-hardening-backup/
+.yoru-last-*
+migrate-error.txt

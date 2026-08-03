@@ -5,6 +5,10 @@ import { getPublicApiBaseUrl } from "@/lib/config";
 export type ApiFieldErrors = Record<string, string[]>;
 
 type ValidationIssue = {
+  field?: string;
+  message?: string;
+  code?: string;
+  location?: Array<string | number>;
   loc?: Array<string | number>;
   msg?: string;
   type?: string;
@@ -30,17 +34,15 @@ export class ApiError extends Error {
   }
 }
 
-function csrfToken(): string | undefined {
-  if (typeof document === "undefined") {
-    return undefined;
-  }
+let refreshPromise: Promise<boolean> | null = null;
 
+function csrfToken(): string | undefined {
+  if (typeof document === "undefined") return undefined;
   const prefix = "yoru_csrf=";
   const cookie = document.cookie
     .split(";")
     .map((value) => value.trim())
     .find((value) => value.startsWith(prefix));
-
   return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : undefined;
 }
 
@@ -53,7 +55,8 @@ function isValidationIssue(value: unknown): value is ValidationIssue {
 }
 
 function validationField(issue: ValidationIssue): string {
-  const location = issue.loc ?? [];
+  if (typeof issue.field === "string" && issue.field) return issue.field;
+  const location = issue.location ?? issue.loc ?? [];
   const candidate = [...location]
     .reverse()
     .find(
@@ -61,61 +64,77 @@ function validationField(issue: ValidationIssue): string {
         typeof item === "string" &&
         !["body", "query", "path", "header", "cookie"].includes(item),
     );
-
   return candidate ?? "_form";
 }
 
 function validationMessage(issue: ValidationIssue): string {
-  const message = typeof issue.msg === "string" ? issue.msg : "Nilai tidak valid.";
+  const message =
+    typeof issue.message === "string"
+      ? issue.message
+      : typeof issue.msg === "string"
+        ? issue.msg
+        : "Nilai tidak valid.";
   return message.replace(/^Value error,\s*/i, "").trim();
 }
 
 export function parseApiErrorPayload(
   payload: unknown,
   status: number,
+  responseRequestId?: string,
 ): ParsedApiError {
   if (!isRecord(payload)) {
     return {
-      message: "Permintaan tidak dapat diproses.",
+      message:
+        status >= 500
+          ? "Layanan Yoru sedang mengalami gangguan."
+          : "Permintaan tidak dapat diproses.",
       code: "REQUEST_FAILED",
       fieldErrors: {},
+      requestId: responseRequestId,
     };
   }
 
-  const detail = payload.detail;
   const requestId =
-    typeof payload.request_id === "string" ? payload.request_id : undefined;
+    typeof payload.request_id === "string" ? payload.request_id : responseRequestId;
+  const detail = payload.detail;
+  const rawIssues = Array.isArray(payload.errors)
+    ? payload.errors
+    : Array.isArray(detail)
+      ? detail
+      : [];
 
-  if (Array.isArray(detail)) {
+  if (rawIssues.length > 0) {
     const fieldErrors: ApiFieldErrors = {};
-
-    for (const rawIssue of detail) {
+    for (const rawIssue of rawIssues) {
       if (!isValidationIssue(rawIssue)) continue;
       const field = validationField(rawIssue);
       const message = validationMessage(rawIssue);
       fieldErrors[field] = [...(fieldErrors[field] ?? []), message];
     }
-
     return {
-      message: "Periksa kembali data yang disorot.",
-      code: "REQUEST_VALIDATION_FAILED",
+      message:
+        typeof detail === "string" && detail.trim()
+          ? detail
+          : "Periksa kembali data yang disorot.",
+      code:
+        typeof payload.code === "string" && payload.code
+          ? payload.code
+          : "REQUEST_VALIDATION_FAILED",
       fieldErrors,
       requestId,
     };
   }
 
   const problem = payload as Partial<ProblemDetails>;
-  const message =
-    typeof detail === "string" && detail.trim()
-      ? detail
-      : typeof problem.title === "string" && problem.title.trim()
-        ? problem.title
-        : status === 422
-          ? "Data yang dikirim belum valid."
-          : "Permintaan tidak dapat diproses.";
-
   return {
-    message,
+    message:
+      typeof detail === "string" && detail.trim()
+        ? detail
+        : typeof problem.title === "string" && problem.title.trim()
+          ? problem.title
+          : status === 422
+            ? "Data yang dikirim belum valid."
+            : "Permintaan tidak dapat diproses.",
     code:
       typeof problem.code === "string" && problem.code
         ? problem.code
@@ -127,41 +146,32 @@ export function parseApiErrorPayload(
   };
 }
 
-export async function apiRequest<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const method = (init.method ?? "GET").toUpperCase();
+function shouldSetJsonContentType(body: BodyInit | null | undefined): boolean {
+  if (typeof body !== "string") return false;
+  return body.trimStart().startsWith("{") || body.trimStart().startsWith("[");
+}
+
+function buildHeaders(init: RequestInit, method: string): Headers {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-
-  if (init.body) {
+  if (init.body && shouldSetJsonContentType(init.body) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-
   if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
     const token = csrfToken();
-    if (token) {
-      headers.set("X-CSRF-Token", token);
-    }
+    if (token) headers.set("X-CSRF-Token", token);
   }
+  return headers;
+}
 
-  let response = await fetch(`${getPublicApiBaseUrl()}${path}`, {
-    ...init,
-    method,
-    headers,
-    credentials: "include",
-    cache: "no-store",
-  });
+async function refreshSession(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
 
-  if (
-    response.status === 401 &&
-    !["/auth/login", "/auth/register", "/auth/refresh"].includes(path)
-  ) {
+  refreshPromise = (async () => {
     const token = csrfToken();
-
-    if (token) {
-      const refresh = await fetch(`${getPublicApiBaseUrl()}/auth/refresh`, {
+    if (!token) return false;
+    try {
+      const response = await fetch(`${getPublicApiBaseUrl()}/auth/refresh`, {
         method: "POST",
         credentials: "include",
         cache: "no-store",
@@ -170,30 +180,50 @@ export async function apiRequest<T>(
           "X-CSRF-Token": token,
         },
       });
-
-      if (refresh.ok) {
-        const retryHeaders = new Headers(headers);
-        const refreshedCsrf = csrfToken();
-
-        if (refreshedCsrf && !["GET", "HEAD", "OPTIONS"].includes(method)) {
-          retryHeaders.set("X-CSRF-Token", refreshedCsrf);
-        }
-
-        response = await fetch(`${getPublicApiBaseUrl()}${path}`, {
-          ...init,
-          method,
-          headers: retryHeaders,
-          credentials: "include",
-          cache: "no-store",
-        });
-      }
+      return response.ok;
+    } catch {
+      return false;
     }
+  })().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
+}
+
+async function performRequest(
+  path: string,
+  init: RequestInit,
+  method: string,
+): Promise<Response> {
+  return fetch(`${getPublicApiBaseUrl()}${path}`, {
+    ...init,
+    method,
+    headers: buildHeaders(init, method),
+    credentials: "include",
+    cache: "no-store",
+  });
+}
+
+export async function apiRequest<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const method = (init.method ?? "GET").toUpperCase();
+  let response = await performRequest(path, init, method);
+
+  const mayRefresh = !["/auth/login", "/auth/register", "/auth/refresh"].includes(path);
+  if (response.status === 401 && mayRefresh && (await refreshSession())) {
+    response = await performRequest(path, init, method);
   }
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as unknown;
-    const parsed = parseApiErrorPayload(payload, response.status);
-
+    const parsed = parseApiErrorPayload(
+      payload,
+      response.status,
+      response.headers.get("X-Request-ID") ?? undefined,
+    );
     throw new ApiError(
       parsed.message,
       response.status,
@@ -203,9 +233,8 @@ export async function apiRequest<T>(
     );
   }
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
+  if (response.status === 204) return undefined as T;
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") return undefined as T;
   return (await response.json()) as T;
 }

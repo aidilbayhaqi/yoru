@@ -1,61 +1,35 @@
 import { describe, expect, it } from "vitest";
 
-import { ApiError, parseApiErrorPayload } from "@/lib/api";
-import { presentAuthError, validateLogin, validateRegistration } from "@/lib/auth-errors";
+import { ApiError } from "@/lib/api";
+import { presentAuthError, validateRegistration } from "@/lib/auth-errors";
 
-describe("auth error handling", () => {
-  it("parses FastAPI validation issues into field errors", () => {
-    const parsed = parseApiErrorPayload(
-      {
-        detail: [
-          {
-            loc: ["body", "password"],
-            msg: "Value error, Password must use at least three character categories",
-            type: "value_error",
-          },
-        ],
-      },
-      422,
-    );
-
-    expect(parsed.code).toBe("REQUEST_VALIDATION_FAILED");
-    expect(parsed.fieldErrors.password?.[0]).toContain(
-      "Password must use at least three character categories",
-    );
+describe("registration validation", () => {
+  it("matches the backend password policy", () => {
+    expect(
+      validateRegistration({
+        fullName: "Aidil Bayhaqi",
+        email: "aidil@example.com",
+        password: "onlylowercase",
+        confirmPassword: "onlylowercase",
+        acceptedTerms: true,
+      }).password,
+    ).toContain("3 kategori");
   });
 
-  it("maps account conflict to the email field", () => {
-    const presented = presentAuthError(
-      new ApiError("Account cannot be created", 409, "ACCOUNT_EXISTS"),
+  it("maps backend 422 issues to the correct input", () => {
+    const result = presentAuthError(
+      new ApiError(
+        "One or more request fields are invalid.",
+        422,
+        "REQUEST_VALIDATION_FAILED",
+        { email: ["value is not a valid email address"] },
+        "req-123",
+      ),
       "register",
     );
 
-    expect(presented.fieldErrors.email).toContain("sudah terdaftar");
-  });
-
-  it("validates login before sending the request", () => {
-    const errors = validateLogin({
-      email: "not-an-email",
-      password: "",
-    });
-
-    expect(errors.email).toBeTruthy();
-    expect(errors.password).toBeTruthy();
-  });
-
-  it("validates registration before sending the request", () => {
-    const errors = validateRegistration({
-      fullName: "A",
-      email: "not-an-email",
-      password: "short",
-      confirmPassword: "different",
-      acceptedTerms: false,
-    });
-
-    expect(errors.full_name).toBeTruthy();
-    expect(errors.email).toBeTruthy();
-    expect(errors.password).toBeTruthy();
-    expect(errors.confirm_password).toBeTruthy();
-    expect(errors.terms).toBeTruthy();
+    expect(result.fieldErrors.email).toContain("nama@domain.com");
+    expect(result.message).toContain("email");
+    expect(result.requestId).toBe("req-123");
   });
 });

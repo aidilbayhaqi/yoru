@@ -49,7 +49,7 @@ services:
     environment: &api_environment
       APP_ENV: ${APP_ENV:-local}
       APP_NAME: ${APP_NAME:-Yoru}
-      APP_VERSION: ${APP_VERSION:-0.2.1}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-yoru}:${POSTGRES_PASSWORD:-yoru_local_only}@postgres:5432/${POSTGRES_DB:-yoru}
       REDIS_URL: redis://redis:6379/0
@@ -102,11 +102,20 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+      target: runtime
     environment:
       APP_ENV: ${APP_ENV:-local}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-yoru}:${POSTGRES_PASSWORD:-yoru_local_only}@postgres:5432/${POSTGRES_DB:-yoru}
       REDIS_URL: redis://redis:6379/0
+      BOOKING_MAINTENANCE_ENABLED: ${BOOKING_MAINTENANCE_ENABLED:-true}
+      BOOKING_MAINTENANCE_BATCH_SIZE: ${BOOKING_MAINTENANCE_BATCH_SIZE:-100}
+      BOOKING_AUTO_NO_SHOW_ENABLED: ${BOOKING_AUTO_NO_SHOW_ENABLED:-false}
+      BOOKING_AUTO_NO_SHOW_GRACE_MINUTES: ${BOOKING_AUTO_NO_SHOW_GRACE_MINUTES:-120}
+      BOOKING_TRACKING_PING_RETENTION_DAYS: ${BOOKING_TRACKING_PING_RETENTION_DAYS:-30}
+      WORKER_JOB_MAX_ATTEMPTS: ${WORKER_JOB_MAX_ATTEMPTS:-3}
+      WORKER_JOB_RETRY_BASE_SECONDS: ${WORKER_JOB_RETRY_BASE_SECONDS:-0.5}
+      WORKER_DEAD_LETTER_KEY: ${WORKER_DEAD_LETTER_KEY:-yoru:worker:dead-letter}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -114,6 +123,32 @@ services:
         condition: service_healthy
     networks: [yoru]
 
+
+  worker-test:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+      target: test
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-yoru}:${POSTGRES_PASSWORD:-yoru_local_only}@postgres:5432/${POSTGRES_DB:-yoru}
+      REDIS_URL: redis://redis:6379/0
+      BOOKING_MAINTENANCE_ENABLED: ${BOOKING_MAINTENANCE_ENABLED:-true}
+      BOOKING_MAINTENANCE_BATCH_SIZE: ${BOOKING_MAINTENANCE_BATCH_SIZE:-100}
+      BOOKING_AUTO_NO_SHOW_ENABLED: ${BOOKING_AUTO_NO_SHOW_ENABLED:-false}
+      BOOKING_AUTO_NO_SHOW_GRACE_MINUTES: ${BOOKING_AUTO_NO_SHOW_GRACE_MINUTES:-120}
+      BOOKING_TRACKING_PING_RETENTION_DAYS: ${BOOKING_TRACKING_PING_RETENTION_DAYS:-30}
+      WORKER_JOB_MAX_ATTEMPTS: ${WORKER_JOB_MAX_ATTEMPTS:-3}
+      WORKER_JOB_RETRY_BASE_SECONDS: ${WORKER_JOB_RETRY_BASE_SECONDS:-0.5}
+      WORKER_DEAD_LETTER_KEY: ${WORKER_DEAD_LETTER_KEY:-yoru:worker:dead-letter}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks: [yoru]
   storefront:
     build:
       context: .
