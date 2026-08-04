@@ -30,6 +30,17 @@ const quickPrompts = [
   "Grooming paling cepat",
 ];
 
+const searchModes: Array<{
+  value: SearchMode;
+  title: string;
+  detail: string;
+  icon: "search" | "wand" | "sparkle";
+}> = [
+  { value: "query", title: "Kata kunci", detail: "Cari langsung", icon: "search" },
+  { value: "ai", title: "Dengan AI", detail: "Jelaskan kebutuhan", icon: "wand" },
+  { value: "image", title: "Dengan gambar", detail: "Upload referensi", icon: "sparkle" },
+];
+
 function inferVisualQuery(fileName: string, fallback: string): string {
   const normalized = fileName.toLowerCase();
   const keywordMap = [
@@ -49,23 +60,27 @@ function inferVisualQuery(fileName: string, fallback: string): string {
 function assistantReply(prompt: string): string {
   const value = prompt.toLowerCase();
   if (value.includes("barrier") || value.includes("skincare")) {
-    return "Mulai dari Barrier Cloud Moisturizer untuk rutinitas sederhana. Kalau kulitmu sedang sensitif, hindari menambah terlalu banyak active sekaligus.";
+    return "Mulai dari Barrier Cloud Moisturizer untuk rutinitas sederhana. Kalau kulit sedang sensitif, hindari menambah terlalu banyak active sekaligus.";
   }
   if (value.includes("facial") || value.includes("jakarta")) {
-    return "Home Facial Reset tersedia untuk Jakarta Selatan, Jakarta Pusat, dan Depok. Cek alamat dan slot sebelum pembayaran supaya serviceability tervalidasi.";
+    return "Home Facial Reset tersedia untuk Jakarta Selatan, Jakarta Pusat, dan Depok. Cek alamat dan slot sebelum pembayaran supaya cakupan layanan tervalidasi.";
   }
   if (value.includes("hadiah") || value.includes("300")) {
-    return "Everyday Satin Tote dan Glow Reset Serum masuk rentang pilihan hadiah di bawah Rp300 ribu. Aku sarankan cek preferensi penerima dulu.";
+    return "Everyday Satin Tote dan Glow Reset Serum masuk pilihan hadiah di bawah Rp300 ribu. Kamu bisa lanjutkan dengan preferensi warna atau kebutuhan penerima.";
   }
   if (value.includes("grooming") || value.includes("cepat")) {
     return "Men Grooming Home Visit berdurasi sekitar 60 menit. Waktu kedatangan tetap bergantung area, profesional, dan slot aktif.";
   }
-  return "Aku bisa bantu mempersempit pilihan berdasarkan kebutuhan, budget, area, waktu, dan preferensi. Rekomendasi ini panduan awal; harga, stok, serta slot final tetap diverifikasi sistem.";
+  return "Aku bisa mempersempit pilihan berdasarkan kebutuhan, budget, area, waktu, dan preferensi. Harga, stok, serta slot final tetap diverifikasi sistem.";
 }
 
 export function CommerceOverlays() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const assistantEndRef = useRef<HTMLDivElement>(null);
+  const assistantTimerRef = useRef<number | null>(null);
+  const nextMessageIdRef = useRef(2);
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [mode, setMode] = useState<SearchMode>("query");
@@ -76,8 +91,6 @@ export function CommerceOverlays() {
   const [visualError, setVisualError] = useState("");
   const [assistantInput, setAssistantInput] = useState("");
   const [assistantLoading, setAssistantLoading] = useState(false);
-  const assistantTimerRef = useRef<number | null>(null);
-  const nextMessageIdRef = useRef(2);
   const [messages, setMessages] = useState<AssistantMessage[]>([
     {
       id: 1,
@@ -92,6 +105,7 @@ export function CommerceOverlays() {
       setMode(custom.detail?.mode ?? "query");
       setSearchOpen(true);
     }
+
     function handleKey(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -112,13 +126,17 @@ export function CommerceOverlays() {
   }, []);
 
   useEffect(() => {
-    const locked = searchOpen || assistantOpen;
+    const locked = searchOpen;
     const previous = document.body.style.overflow;
     if (locked) document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [assistantOpen, searchOpen]);
+  }, [searchOpen]);
+
+  useEffect(() => {
+    assistantEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [assistantLoading, assistantOpen, messages]);
 
   useEffect(() => {
     return () => {
@@ -139,20 +157,25 @@ export function CommerceOverlays() {
 
   const suggestions = useMemo(() => {
     const source = [
-      ...products.slice(0, 3).map((product) => ({
+      ...products.slice(0, 4).map((product) => ({
         href: `/products/${product.slug}`,
         label: product.name,
         meta: `${product.category} · ${formatMoney(product.priceMinor)}`,
+        kind: "Produk",
       })),
-      ...services.slice(0, 2).map((service) => ({
+      ...services.slice(0, 3).map((service) => ({
         href: `/services/${service.slug}`,
         label: service.name,
         meta: `${service.category} · ${service.durationMin} menit`,
+        kind: "Layanan",
       })),
     ];
-    if (!debouncedQuery.trim()) return source;
+
+    if (!debouncedQuery.trim()) return source.slice(0, 5);
     const normalized = debouncedQuery.toLowerCase();
-    return source.filter((item) => `${item.label} ${item.meta}`.toLowerCase().includes(normalized));
+    return source
+      .filter((item) => `${item.label} ${item.meta} ${item.kind}`.toLowerCase().includes(normalized))
+      .slice(0, 6);
   }, [debouncedQuery]);
 
   function closeSearch() {
@@ -199,9 +222,11 @@ export function CommerceOverlays() {
   function sendAssistant(text = assistantInput) {
     const normalized = text.trim();
     if (!normalized || assistantLoading) return;
+
     const userMessageId = nextMessageIdRef.current;
     const assistantMessageId = userMessageId + 1;
     nextMessageIdRef.current += 2;
+
     setMessages((current) => [
       ...current,
       { id: userMessageId, role: "user", text: normalized },
@@ -229,8 +254,8 @@ export function CommerceOverlays() {
           onClick={() => setAssistantOpen(true)}
           type="button"
         >
-          <span className="ai-fab__orb"><Icon name="sparkle" width="18" /></span>
-          <span className="ai-fab__label">Yoru AI</span>
+          <span className="ai-fab__orb"><Icon name="sparkle" width="17" /></span>
+          <span className="ai-fab__label"><strong>Yoru AI</strong><small>Tanya apa saja</small></span>
         </button>
       ) : null}
 
@@ -245,8 +270,9 @@ export function CommerceOverlays() {
           >
             <div className="overlay-heading">
               <div>
-                <p className="section-eyebrow">Pencarian Yoru</p>
-                <h2 id="search-dialog-title">Cari lebih cepat.</h2>
+                <p className="section-eyebrow">Discovery</p>
+                <h2 id="search-dialog-title">Apa yang sedang kamu cari?</h2>
+                <p>Pilih cara pencarian yang paling nyaman.</p>
               </div>
               <button aria-label="Tutup pencarian" className="icon-button" onClick={closeSearch} type="button">
                 <Icon name="close" width="20" />
@@ -254,21 +280,17 @@ export function CommerceOverlays() {
             </div>
 
             <div className="search-mode-tabs" role="tablist" aria-label="Mode pencarian">
-              {[
-                ["query", "Kata kunci", "Nama, kategori, atau partner"],
-                ["ai", "Dengan AI", "Ceritakan kebutuhanmu"],
-                ["image", "Dengan gambar", "Upload referensi visual"],
-              ].map(([value, title, detail]) => (
+              {searchModes.map((item) => (
                 <button
-                  aria-selected={mode === value}
-                  className={mode === value ? "is-active" : ""}
-                  key={value}
-                  onClick={() => setMode(value as SearchMode)}
+                  aria-selected={mode === item.value}
+                  className={mode === item.value ? "is-active" : ""}
+                  key={item.value}
+                  onClick={() => setMode(item.value)}
                   role="tab"
                   type="button"
                 >
-                  <Icon name={value === "image" ? "sparkle" : value === "ai" ? "wand" : "search"} width="18" />
-                  <span><strong>{title}</strong><small>{detail}</small></span>
+                  <Icon name={item.icon} width="18" />
+                  <span><strong>{item.title}</strong><small>{item.detail}</small></span>
                 </button>
               ))}
             </div>
@@ -283,8 +305,8 @@ export function CommerceOverlays() {
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder={
                       mode === "ai"
-                        ? "Contoh: aku butuh skincare simpel untuk barrier, budget maksimal Rp350 ribu..."
-                        : "Cari nama produk, kategori, partner, layanan, atau area..."
+                        ? "Contoh: skincare simpel untuk barrier, budget maksimal Rp350 ribu"
+                        : "Cari produk, kategori, partner, layanan, atau area"
                     }
                     rows={mode === "ai" ? 3 : 1}
                     value={query}
@@ -294,31 +316,30 @@ export function CommerceOverlays() {
                     <Icon name="arrow" width="17" />
                   </button>
                 </div>
+
                 {mode === "ai" ? (
                   <p className="ai-disclaimer">
-                    AI menyusun intent pencarian. Harga, stok, cakupan area, dan slot final tetap diverifikasi sistem.
+                    AI membantu menyusun intent. Harga, stok, area, dan slot final tetap diverifikasi sistem.
                   </p>
                 ) : null}
 
                 <div className="search-suggestion-list">
                   <div className="search-suggestion-heading">
-                    <span>{query.trim() ? "Quick matches" : "Sedang populer"}</span>
-                    <small>{suggestions.length} pilihan</small>
+                    <span>{query.trim() ? "Hasil cepat" : "Pilihan populer"}</span>
+                    <small>{suggestions.length} rekomendasi</small>
                   </div>
                   {suggestionsLoading ? (
                     <div aria-label="Mencari saran" className="search-suggestion-skeleton" role="status">
-                      {Array.from({ length: 3 }, (_, index) => (
-                        <span className="skeleton-shimmer" key={index} />
-                      ))}
+                      {Array.from({ length: 4 }, (_, index) => <span className="skeleton-shimmer" key={index} />)}
                     </div>
                   ) : suggestions.length > 0 ? suggestions.map((item) => (
                     <Link href={item.href} key={item.href} onClick={closeSearch}>
-                      <span><Icon name="search" width="17" /></span>
-                      <div><strong>{item.label}</strong><small>{item.meta}</small></div>
-                      <Icon name="arrow" width="17" />
+                      <span className="search-suggestion-icon"><Icon name="search" width="16" /></span>
+                      <div><strong>{item.label}</strong><small>{item.kind} · {item.meta}</small></div>
+                      <Icon name="arrow" width="16" />
                     </Link>
                   )) : (
-                    <p className="search-no-suggestion">Tekan Cari untuk melihat hasil lebih luas.</p>
+                    <p className="search-no-suggestion">Tekan Cari untuk melihat hasil yang lebih luas.</p>
                   )}
                 </div>
               </form>
@@ -332,9 +353,9 @@ export function CommerceOverlays() {
                 >
                   {!previewUrl ? (
                     <>
-                      <span><Icon name="sparkle" width="28" /></span>
+                      <span><Icon name="sparkle" width="25" /></span>
                       <strong>Upload foto referensi</strong>
-                      <small>JPG, PNG, atau WEBP. Maksimal 10 MB.</small>
+                      <small>JPG, PNG, atau WEBP · maksimal 10 MB</small>
                     </>
                   ) : (
                     <span className="visual-preview-label">
@@ -373,7 +394,7 @@ export function CommerceOverlays() {
                   <Icon name="arrow" width="18" />
                 </button>
                 <p className="ai-disclaimer">
-                  Preview ini membuat intent dari nama file dan kategori. Production visual matching membutuhkan endpoint image embedding dan similarity search.
+                  Preview membuat intent dari nama file dan kategori. Similarity production tetap membutuhkan image embedding API.
                 </p>
               </div>
             )}
@@ -385,62 +406,80 @@ export function CommerceOverlays() {
         <div className="assistant-backdrop" onMouseDown={() => setAssistantOpen(false)}>
           <aside
             aria-labelledby="assistant-title"
-            aria-modal="true"
             className="assistant-drawer"
             onMouseDown={(event) => event.stopPropagation()}
             role="dialog"
           >
             <div className="assistant-heading">
-              <div className="assistant-avatar"><Icon name="sparkle" width="22" /></div>
-              <div><strong id="assistant-title">Yoru Assistant</strong><span>Commerce & home service guide</span></div>
+              <div className="assistant-avatar"><Icon name="sparkle" width="20" /></div>
+              <div className="assistant-heading__copy">
+                <div><strong id="assistant-title">Yoru Assistant</strong><span className="assistant-presence">Online</span></div>
+                <span>Belanja dan home service</span>
+              </div>
               <button aria-label="Tutup assistant" className="icon-button" onClick={() => setAssistantOpen(false)} type="button">
-                <Icon name="close" width="19" />
+                <Icon name="close" width="18" />
+              </button>
+            </div>
+
+            <div className="assistant-context-bar">
+              <span><Icon name="shield" width="15" /> Rekomendasi terarah</span>
+              <button onClick={() => {
+                setAssistantOpen(false);
+                setMode("image");
+                setSearchOpen(true);
+              }} type="button">
+                <Icon name="sparkle" width="15" /> Cari dengan gambar
               </button>
             </div>
 
             <div className="assistant-messages" aria-live="polite">
               {messages.map((message) => (
-                <div className={`assistant-message assistant-message--${message.role}`} key={message.id}>
-                  {message.text}
+                <div className={`assistant-message-row assistant-message-row--${message.role}`} key={message.id}>
+                  {message.role === "assistant" ? <span className="assistant-message-avatar"><Icon name="sparkle" width="14" /></span> : null}
+                  <div className={`assistant-message assistant-message--${message.role}`}>{message.text}</div>
                 </div>
               ))}
               {assistantLoading ? (
-                <div aria-label="Yoru Assistant sedang mengetik" className="assistant-typing" role="status">
-                  <span className="skeleton-shimmer" />
-                  <span className="skeleton-shimmer" />
-                  <span className="skeleton-shimmer" />
+                <div className="assistant-message-row assistant-message-row--assistant">
+                  <span className="assistant-message-avatar"><Icon name="sparkle" width="14" /></span>
+                  <div aria-label="Yoru Assistant sedang mengetik" className="assistant-typing" role="status">
+                    <span /><span /><span />
+                  </div>
                 </div>
               ) : null}
+              <div ref={assistantEndRef} />
             </div>
 
-            <div className="assistant-quick-prompts">
+            <div className="assistant-quick-prompts" aria-label="Pertanyaan cepat">
               {quickPrompts.map((prompt) => (
-                <button key={prompt} onClick={() => sendAssistant(prompt)} type="button">{prompt}</button>
+                <button disabled={assistantLoading} key={prompt} onClick={() => sendAssistant(prompt)} type="button">{prompt}</button>
               ))}
             </div>
 
-            <form
-              className="assistant-composer"
-              onSubmit={(event) => {
-                event.preventDefault();
-                sendAssistant();
-              }}
-            >
-              <textarea
-                aria-label="Pesan untuk Yoru Assistant"
-                onChange={(event) => setAssistantInput(event.target.value)}
-                placeholder="Ceritakan kebutuhanmu..."
-                rows={2}
-                value={assistantInput}
-              />
-              <button aria-label="Kirim pesan" className="primary-button" disabled={!assistantInput.trim() || assistantLoading} type="submit">
-                <Icon name="arrow" width="18" />
-              </button>
-            </form>
-            <Link className="assistant-full-link" href="/assistant" onClick={() => setAssistantOpen(false)}>
-              Buka advisor lengkap
-              <Icon name="arrow" width="16" />
-            </Link>
+            <div className="assistant-composer-shell">
+              <form
+                className="assistant-composer"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  sendAssistant();
+                }}
+              >
+                <textarea
+                  aria-label="Pesan untuk Yoru Assistant"
+                  onChange={(event) => setAssistantInput(event.target.value)}
+                  placeholder="Tulis kebutuhanmu..."
+                  rows={2}
+                  value={assistantInput}
+                />
+                <button aria-label="Kirim pesan" className="primary-button" disabled={!assistantInput.trim() || assistantLoading} type="submit">
+                  <Icon name="arrow" width="18" />
+                </button>
+              </form>
+              <div className="assistant-footer-row">
+                <span>AI dapat keliru. Verifikasi detail transaksi.</span>
+                <Link href="/assistant" onClick={() => setAssistantOpen(false)}>Buka penuh <Icon name="arrow" width="14" /></Link>
+              </div>
+            </div>
           </aside>
         </div>
       ) : null}

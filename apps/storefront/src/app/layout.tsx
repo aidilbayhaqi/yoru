@@ -6,6 +6,7 @@ import { StorefrontProvider } from "@/lib/storefront-store";
 
 import "./globals.css";
 import "./experience.css";
+import "./polish-v8.css";
 
 export const metadata: Metadata = {
   title: {

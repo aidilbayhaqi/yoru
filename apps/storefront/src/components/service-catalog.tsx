@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { Icon } from "@/components/icons";
 import { CatalogGridSkeleton } from "@/components/catalog-skeleton";
+import { Icon } from "@/components/icons";
 import { ServiceCard } from "@/components/service-card";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { serviceCategories, services } from "@/lib/storefront-data";
@@ -43,9 +43,7 @@ export function ServiceCatalog() {
     [effectiveFilters],
   );
   const results = useMemo(
-    () => area === "Semua area"
-      ? baseResults
-      : baseResults.filter((service) => service.serviceArea === area),
+    () => area === "Semua area" ? baseResults : baseResults.filter((service) => service.serviceArea === area),
     [area, baseResults],
   );
   const visibleResults = useMemo(
@@ -53,14 +51,18 @@ export function ServiceCatalog() {
     [results, visibleCount],
   );
   const isFiltering = searchInput.trim() !== debouncedQuery.trim();
-  const activeCount = useMemo(() => [
-    searchInput.trim().length > 0,
-    filters.category !== "Semua",
-    filters.maxPriceMinor !== null,
-    filters.maxDurationMin !== null,
-    filters.minRating > 0,
-    area !== "Semua area",
-  ].filter(Boolean).length, [area, filters, searchInput]);
+  const activeCount = useMemo(
+    () =>
+      [
+        searchInput.trim().length > 0,
+        filters.category !== "Semua",
+        filters.maxPriceMinor !== null,
+        filters.maxDurationMin !== null,
+        filters.minRating > 0,
+        area !== "Semua area",
+      ].filter(Boolean).length,
+    [area, filters, searchInput],
+  );
 
   function update<Key extends keyof ServiceFilters>(key: Key, value: ServiceFilters[Key]) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -80,14 +82,17 @@ export function ServiceCatalog() {
   }
 
   const filterPanel = (
-    <aside className="filter-panel filter-panel--service v5-filter-panel" aria-label="Filter home service">
+    <aside className="filter-panel filter-panel--clean filter-panel--service" aria-label="Filter home service">
       <div className="filter-panel__heading">
-        <div><p className="section-eyebrow">Refine</p><h2>Filter layanan</h2></div>
-        {activeCount > 0 ? <span>{activeCount} aktif</span> : null}
+        <div>
+          <p className="section-eyebrow">Filter</p>
+          <h2>Pilih layananmu</h2>
+        </div>
+        {activeCount > 0 ? <span>{activeCount}</span> : null}
       </div>
 
       <label className="filter-search">
-        <span>Cari layanan</span>
+        <span className="filter-label">Cari layanan</span>
         <div>
           <Icon name="search" width="17" />
           <input
@@ -95,64 +100,90 @@ export function ServiceCatalog() {
               setSearchInput(event.target.value);
               setVisibleCount(PAGE_SIZE);
             }}
-            placeholder="Facial, hair, partner..."
+            placeholder="Facial, hair, partner"
             type="search"
             value={searchInput}
           />
+          {isFiltering ? <span className="filter-search__loading" aria-label="Menyaring" /> : null}
         </div>
       </label>
 
-      <label className="filter-field">
-        <span>Kategori</span>
-        <select onChange={(event) => update("category", event.target.value)} value={filters.category}>
-          {serviceCategories.map((category) => <option key={category} value={category}>{category}</option>)}
-        </select>
-      </label>
+      <div className="filter-section">
+        <div className="filter-section__heading">
+          <span>Kategori</span>
+          {filters.category !== "Semua" ? (
+            <button onClick={() => update("category", "Semua")} type="button">Reset</button>
+          ) : null}
+        </div>
+        <div className="filter-choice-grid">
+          {serviceCategories.map((category) => (
+            <button
+              aria-pressed={filters.category === category}
+              className={filters.category === category ? "is-active" : ""}
+              key={category}
+              onClick={() => update("category", category)}
+              type="button"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <label className="filter-field">
-        <span>Service area</span>
-        <select onChange={(event) => updateArea(event.target.value)} value={area}>
-          {serviceAreas.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
-      </label>
+      <div className="filter-section filter-section--stacked">
+        <label className="filter-field">
+          <span className="filter-label">Area layanan</span>
+          <select onChange={(event) => updateArea(event.target.value)} value={area}>
+            {serviceAreas.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
 
-      <label className="filter-field">
-        <span>Budget maksimum</span>
-        <select onChange={(event) => update("maxPriceMinor", event.target.value ? Number(event.target.value) : null)} value={filters.maxPriceMinor ?? ""}>
-          <option value="">Semua budget</option>
-          <option value="20000000">Sampai Rp200 ribu</option>
-          <option value="25000000">Sampai Rp250 ribu</option>
-          <option value="35000000">Sampai Rp350 ribu</option>
-          <option value="50000000">Sampai Rp500 ribu</option>
-        </select>
-      </label>
+        <label className="filter-field">
+          <span className="filter-label">Budget maksimum</span>
+          <select onChange={(event) => update("maxPriceMinor", event.target.value ? Number(event.target.value) : null)} value={filters.maxPriceMinor ?? ""}>
+            <option value="">Semua budget</option>
+            <option value="20000000">Sampai Rp200 ribu</option>
+            <option value="25000000">Sampai Rp250 ribu</option>
+            <option value="35000000">Sampai Rp350 ribu</option>
+            <option value="50000000">Sampai Rp500 ribu</option>
+          </select>
+        </label>
 
-      <label className="filter-field">
-        <span>Durasi maksimum</span>
-        <select onChange={(event) => update("maxDurationMin", event.target.value ? Number(event.target.value) : null)} value={filters.maxDurationMin ?? ""}>
-          <option value="">Semua durasi</option>
-          <option value="60">Up to 60 minutes</option>
-          <option value="75">Up to 75 minutes</option>
-          <option value="90">Up to 90 minutes</option>
-          <option value="120">Up to 120 minutes</option>
-        </select>
-      </label>
+        <label className="filter-field">
+          <span className="filter-label">Durasi maksimum</span>
+          <select onChange={(event) => update("maxDurationMin", event.target.value ? Number(event.target.value) : null)} value={filters.maxDurationMin ?? ""}>
+            <option value="">Semua durasi</option>
+            <option value="60">60 menit</option>
+            <option value="75">75 menit</option>
+            <option value="90">90 menit</option>
+            <option value="120">120 menit</option>
+          </select>
+        </label>
+      </div>
 
-      <label className="filter-field">
-        <span>Rating minimum</span>
-        <select onChange={(event) => update("minRating", Number(event.target.value))} value={filters.minRating}>
-          <option value="0">Semua rating</option>
-          <option value="4.7">4,7 ke atas</option>
-          <option value="4.8">4,8 ke atas</option>
-          <option value="4.9">4,9</option>
-        </select>
-      </label>
+      <div className="filter-section">
+        <span className="filter-label">Rating minimum</span>
+        <div className="filter-segmented">
+          {[0, 4.7, 4.8, 4.9].map((rating) => (
+            <button
+              aria-pressed={filters.minRating === rating}
+              className={filters.minRating === rating ? "is-active" : ""}
+              key={rating}
+              onClick={() => update("minRating", rating)}
+              type="button"
+            >
+              {rating === 0 ? "Semua" : `${rating}+`}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="filter-information">
         <Icon name="pin" width="18" />
-        <p>Alamat lengkap dan serviceability tetap diverifikasi ulang sebelum slot booking dikunci.</p>
+        <p>Alamat lengkap dan ketersediaan slot diverifikasi lagi sebelum booking dikunci.</p>
       </div>
-      <button className="filter-reset" disabled={activeCount === 0} onClick={reset} type="button">Reset all filters</button>
+
+      <button className="filter-reset" disabled={activeCount === 0} onClick={reset} type="button">Reset semua filter</button>
     </aside>
   );
 
@@ -161,57 +192,57 @@ export function ServiceCatalog() {
       <section className="catalog-hero catalog-hero--service v5-catalog-hero">
         <div>
           <p className="section-eyebrow">Trusted home service</p>
-          <h1>Professional care, scheduled around your life.</h1>
-          <p>Filter berdasarkan area, kategori, durasi, budget, rating, dan preferensi layanan.</p>
+          <h1>Perawatan profesional, dijadwalkan sesuai harimu.</h1>
+          <p>Saring berdasarkan area, kategori, durasi, budget, dan rating.</p>
         </div>
-        <div className="v5-catalog-hero__stat"><strong>{services.length}</strong><span>bookable services</span></div>
+        <div className="v5-catalog-hero__stat"><strong>{services.length}</strong><span>layanan tersedia</span></div>
       </section>
-
-      <div className="quick-filter-rail">
-        {serviceCategories.map((category) => (
-          <button className={filters.category === category ? "is-active" : ""} key={category} onClick={() => update("category", category)} type="button">{category}</button>
-        ))}
-        <button className={filters.maxDurationMin === 60 ? "is-active" : ""} onClick={() => update("maxDurationMin", filters.maxDurationMin === 60 ? null : 60)} type="button">60 min or less</button>
-        <button className={filters.minRating === 4.8 ? "is-active" : ""} onClick={() => update("minRating", filters.minRating === 4.8 ? 0 : 4.8)} type="button">Rated 4.8+</button>
-      </div>
 
       <section className="catalog-browser v5-catalog-browser">
         <div className="desktop-filter">{filterPanel}</div>
+
         <div className="catalog-results">
           <div className="catalog-results__toolbar v5-results-toolbar">
-            <div><strong>{results.length} services</strong><span>from {services.length} available treatments</span></div>
+            <div className="catalog-results__summary">
+              <strong>{results.length} layanan</strong>
+              <span>{activeCount > 0 ? `${activeCount} filter aktif` : "Semua layanan"}</span>
+            </div>
             <div className="v5-toolbar-actions">
-              <button className="mobile-filter-button" onClick={() => setFilterOpen(true)} type="button"><Icon name="menu" width="17" /> Filters {activeCount > 0 ? `(${activeCount})` : ""}</button>
-              <label>
-                <span>Sort</span>
-                <select onChange={(event) => update("sort", event.target.value as ServiceSort)} value={filters.sort}>
-                  <option value="recommended">Recommended</option>
-                  <option value="price_asc">Price: low to high</option>
-                  <option value="price_desc">Price: high to low</option>
-                  <option value="rating_desc">Top rated</option>
-                  <option value="duration_asc">Shortest duration</option>
+              <button className="mobile-filter-button" onClick={() => setFilterOpen(true)} type="button">
+                <Icon name="menu" width="17" /> Filter
+                {activeCount > 0 ? <span>{activeCount}</span> : null}
+              </button>
+              <label className="catalog-sort">
+                <span className="visually-hidden">Urutkan layanan</span>
+                <select aria-label="Urutkan layanan" onChange={(event) => update("sort", event.target.value as ServiceSort)} value={filters.sort}>
+                  <option value="recommended">Paling relevan</option>
+                  <option value="price_asc">Harga terendah</option>
+                  <option value="price_desc">Harga tertinggi</option>
+                  <option value="rating_desc">Rating tertinggi</option>
+                  <option value="duration_asc">Durasi tercepat</option>
                 </select>
               </label>
               <div className="view-switcher" aria-label="Tampilan katalog">
-                <button className={view === "grid" ? "is-active" : ""} onClick={() => setView("grid")} type="button">▦</button>
-                <button className={view === "list" ? "is-active" : ""} onClick={() => setView("list")} type="button">☷</button>
+                <button aria-label="Tampilan grid" className={view === "grid" ? "is-active" : ""} onClick={() => setView("grid")} type="button">▦</button>
+                <button aria-label="Tampilan daftar" className={view === "list" ? "is-active" : ""} onClick={() => setView("list")} type="button">☷</button>
               </div>
             </div>
           </div>
 
           {activeCount > 0 ? (
-            <div className="active-filter-row">
-              {searchInput.trim() ? <button onClick={() => setSearchInput("")} type="button">“{searchInput.trim()}” ×</button> : null}
-              {filters.category !== "Semua" ? <button onClick={() => update("category", "Semua")} type="button">{filters.category} ×</button> : null}
-              {area !== "Semua area" ? <button onClick={() => updateArea("Semua area")} type="button">{area} ×</button> : null}
-              {filters.maxDurationMin ? <button onClick={() => update("maxDurationMin", null)} type="button">≤ {filters.maxDurationMin} min ×</button> : null}
-              {filters.minRating > 0 ? <button onClick={() => update("minRating", 0)} type="button">Rating {filters.minRating}+ ×</button> : null}
-              <button className="active-filter-reset" onClick={reset} type="button">Clear all</button>
+            <div className="active-filter-row" aria-label="Filter aktif">
+              {searchInput.trim() ? <button onClick={() => setSearchInput("")} type="button">“{searchInput.trim()}” <span>×</span></button> : null}
+              {filters.category !== "Semua" ? <button onClick={() => update("category", "Semua")} type="button">{filters.category} <span>×</span></button> : null}
+              {area !== "Semua area" ? <button onClick={() => updateArea("Semua area")} type="button">{area} <span>×</span></button> : null}
+              {filters.maxPriceMinor !== null ? <button onClick={() => update("maxPriceMinor", null)} type="button">Batas budget <span>×</span></button> : null}
+              {filters.maxDurationMin !== null ? <button onClick={() => update("maxDurationMin", null)} type="button">≤ {filters.maxDurationMin} menit <span>×</span></button> : null}
+              {filters.minRating > 0 ? <button onClick={() => update("minRating", 0)} type="button">Rating {filters.minRating}+ <span>×</span></button> : null}
+              <button className="active-filter-reset" onClick={reset} type="button">Hapus semua</button>
             </div>
           ) : null}
 
           {isFiltering ? (
-            <CatalogGridSkeleton label="Menyaring home service" view={view} />
+            <CatalogGridSkeleton label="Menyaring layanan" view={view} />
           ) : results.length > 0 ? (
             <>
               <div className={`catalog-grid catalog-grid--filtered ${view === "list" ? "is-list" : ""}`}>
@@ -219,17 +250,17 @@ export function ServiceCatalog() {
               </div>
               {visibleCount < results.length ? (
                 <button className="secondary-button load-more-button" onClick={() => setVisibleCount((value) => value + PAGE_SIZE)} type="button">
-                  Load more services
+                  Tampilkan lebih banyak
                   <Icon name="plus" width="17" />
                 </button>
               ) : null}
             </>
           ) : (
             <section className="filter-empty-state">
-              <span><Icon name="calendar" width="25" /></span>
-              <h2>No services found.</h2>
-              <p>Try changing area, category, budget, duration, rating, or keywords.</p>
-              <button className="secondary-button" onClick={reset} type="button">Reset filters</button>
+              <span><Icon name="search" width="24" /></span>
+              <h2>Belum ada layanan yang cocok</h2>
+              <p>Coba ubah area, kategori, durasi, budget, rating, atau kata pencarian.</p>
+              <button className="secondary-button" onClick={reset} type="button">Reset filter</button>
             </section>
           )}
         </div>
@@ -239,11 +270,14 @@ export function ServiceCatalog() {
         <div className="filter-drawer-backdrop" onMouseDown={() => setFilterOpen(false)}>
           <div className="filter-drawer" onMouseDown={(event) => event.stopPropagation()}>
             <div className="filter-drawer__heading">
-              <strong>Service filters</strong>
+              <div><span>Filter layanan</span><small>{results.length} hasil</small></div>
               <button aria-label="Tutup filter" className="icon-button" onClick={() => setFilterOpen(false)} type="button"><Icon name="close" width="19" /></button>
             </div>
-            {filterPanel}
-            <button className="primary-button filter-apply-button" onClick={() => setFilterOpen(false)} type="button">Show {results.length} services</button>
+            <div className="filter-drawer__body">{filterPanel}</div>
+            <div className="filter-drawer__footer">
+              <button className="secondary-button" disabled={activeCount === 0} onClick={reset} type="button">Reset</button>
+              <button className="primary-button filter-apply-button" onClick={() => setFilterOpen(false)} type="button">Lihat {results.length} layanan</button>
+            </div>
           </div>
         </div>
       ) : null}
