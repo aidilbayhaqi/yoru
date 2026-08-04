@@ -95,7 +95,7 @@ export function CommerceOverlays() {
     {
       id: 1,
       role: "assistant",
-      text: "Hai, aku Yoru Assistant. Ceritakan kebutuhan, budget, area, atau jadwalmu. Aku bantu menyaring pilihan tanpa menggantikan keputusanmu.",
+      text: "Hai, aku Yoru Assistant. Ceritakan kebutuhan, budget, area, atau jadwalmu—aku bantu menyaring pilihan yang relevan.",
     },
   ]);
 

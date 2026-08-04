@@ -6,7 +6,7 @@ import { CatalogGridSkeleton } from "@/components/catalog-skeleton";
 import { Icon } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { productCategories, products } from "@/lib/storefront-data";
+import type { Product } from "@/lib/storefront-types";
 import {
   filterProducts,
   type ProductFilters,
@@ -23,11 +23,12 @@ const defaultFilters: ProductFilters = {
   sort: "recommended",
 };
 
-const partners = ["Semua", ...new Set(products.map((product) => product.partner))];
 const PAGE_SIZE = 6;
 
-export function ProductCatalog() {
+export function ProductCatalog({ items }: { items: Product[] }) {
   const [filters, setFilters] = useState<ProductFilters>(defaultFilters);
+  const productCategories = useMemo(() => ["Semua", ...new Set(items.map((product) => product.category))], [items]);
+  const partners = useMemo(() => ["Semua", ...new Set(items.map((product) => product.partner))], [items]);
   const [searchInput, setSearchInput] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -39,8 +40,8 @@ export function ProductCatalog() {
     [debouncedQuery, filters],
   );
   const results = useMemo(
-    () => filterProducts(products, effectiveFilters),
-    [effectiveFilters],
+    () => filterProducts(items, effectiveFilters),
+    [effectiveFilters, items],
   );
   const visibleResults = useMemo(
     () => results.slice(0, visibleCount),
@@ -189,7 +190,7 @@ export function ProductCatalog() {
           <h1>Produk terpilih, tanpa katalog yang terasa penuh.</h1>
           <p>Gunakan pencarian dan filter untuk mempersempit pilihan berdasarkan kebutuhanmu.</p>
         </div>
-        <div className="v5-catalog-hero__stat"><strong>{products.length}</strong><span>produk terkurasi</span></div>
+        <div className="v5-catalog-hero__stat"><strong>{items.length}</strong><span>produk terkurasi</span></div>
       </section>
 
       <section className="catalog-browser v5-catalog-browser">

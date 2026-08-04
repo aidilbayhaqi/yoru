@@ -6,7 +6,7 @@ import { CatalogGridSkeleton } from "@/components/catalog-skeleton";
 import { Icon } from "@/components/icons";
 import { ServiceCard } from "@/components/service-card";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { serviceCategories, services } from "@/lib/storefront-data";
+import type { Service } from "@/lib/storefront-types";
 import {
   filterServices,
   type ServiceFilters,
@@ -22,11 +22,12 @@ const defaultFilters: ServiceFilters = {
   sort: "recommended",
 };
 
-const serviceAreas = ["Semua area", ...new Set(services.map((service) => service.serviceArea))];
 const PAGE_SIZE = 6;
 
-export function ServiceCatalog() {
+export function ServiceCatalog({ items }: { items: Service[] }) {
   const [filters, setFilters] = useState<ServiceFilters>(defaultFilters);
+  const serviceCategories = useMemo(() => ["Semua", ...new Set(items.map((service) => service.category))], [items]);
+  const serviceAreas = useMemo(() => ["Semua area", ...new Set(items.map((service) => service.serviceArea))], [items]);
   const [searchInput, setSearchInput] = useState("");
   const [area, setArea] = useState("Semua area");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -39,8 +40,8 @@ export function ServiceCatalog() {
     [debouncedQuery, filters],
   );
   const baseResults = useMemo(
-    () => filterServices(services, effectiveFilters),
-    [effectiveFilters],
+    () => filterServices(items, effectiveFilters),
+    [effectiveFilters, items],
   );
   const results = useMemo(
     () => area === "Semua area" ? baseResults : baseResults.filter((service) => service.serviceArea === area),
@@ -195,7 +196,7 @@ export function ServiceCatalog() {
           <h1>Perawatan profesional, dijadwalkan sesuai harimu.</h1>
           <p>Saring berdasarkan area, kategori, durasi, budget, dan rating.</p>
         </div>
-        <div className="v5-catalog-hero__stat"><strong>{services.length}</strong><span>layanan tersedia</span></div>
+        <div className="v5-catalog-hero__stat"><strong>{items.length}</strong><span>layanan tersedia</span></div>
       </section>
 
       <section className="catalog-browser v5-catalog-browser">

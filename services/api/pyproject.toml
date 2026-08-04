@@ -31,6 +31,7 @@ dev = [
 
 [project.scripts]
 yoru-bootstrap-admin = "yoru_api.cli.bootstrap_admin:main"
+yoru-seed-demo = "yoru_api.cli.seed_demo:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

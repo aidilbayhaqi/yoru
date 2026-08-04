@@ -175,7 +175,39 @@ class CatalogRepository:
         return ProductBundle(product=product, inventory=inventory, media=media)
 
     async def product_bundles(self, products: list[Product]) -> list[ProductBundle]:
-        return [await self.product_bundle(product) for product in products]
+        if not products:
+            return []
+        product_ids = [product.id for product in products]
+        inventories = list(
+            await self._session.scalars(
+                select(InventoryItem).where(InventoryItem.product_id.in_(product_ids))
+            )
+        )
+        media_items = list(
+            await self._session.scalars(
+                select(ProductMedia)
+                .where(ProductMedia.product_id.in_(product_ids))
+                .order_by(
+                    ProductMedia.product_id.asc(),
+                    ProductMedia.sort_order.asc(),
+                    ProductMedia.id.asc(),
+                )
+            )
+        )
+        inventory_by_product = {item.product_id: item for item in inventories}
+        media_by_product: dict[uuid.UUID, list[ProductMedia]] = {
+            product_id: [] for product_id in product_ids
+        }
+        for media in media_items:
+            media_by_product.setdefault(media.product_id, []).append(media)
+        return [
+            ProductBundle(
+                product=product,
+                inventory=inventory_by_product.get(product.id),
+                media=media_by_product.get(product.id, []),
+            )
+            for product in products
+        ]
 
     async def get_service(
         self,
@@ -340,7 +372,74 @@ class CatalogRepository:
         self,
         services: list[ServiceOffering],
     ) -> list[ServiceBundle]:
-        return [await self.service_bundle(service) for service in services]
+        if not services:
+            return []
+        service_ids = [service.id for service in services]
+        availability_items = list(
+            await self._session.scalars(
+                select(ServiceAvailability)
+                .where(ServiceAvailability.service_id.in_(service_ids))
+                .order_by(
+                    ServiceAvailability.service_id.asc(),
+                    ServiceAvailability.weekday.asc(),
+                    ServiceAvailability.start_time.asc(),
+                    ServiceAvailability.id.asc(),
+                )
+            )
+        )
+        assignments = list(
+            await self._session.scalars(
+                select(ServiceProfessionalAssignment).where(
+                    ServiceProfessionalAssignment.service_id.in_(service_ids)
+                )
+            )
+        )
+        professional_ids = {
+            assignment.professional_id for assignment in assignments
+        }
+        professionals = (
+            list(
+                await self._session.scalars(
+                    select(ServiceProfessional)
+                    .where(ServiceProfessional.id.in_(professional_ids))
+                    .order_by(
+                        ServiceProfessional.name.asc(),
+                        ServiceProfessional.id.asc(),
+                    )
+                )
+            )
+            if professional_ids
+            else []
+        )
+        professional_by_id = {
+            professional.id: professional for professional in professionals
+        }
+        availability_by_service: dict[
+            uuid.UUID, list[ServiceAvailability]
+        ] = {service_id: [] for service_id in service_ids}
+        for availability in availability_items:
+            availability_by_service.setdefault(
+                availability.service_id, []
+            ).append(availability)
+
+        professionals_by_service: dict[
+            uuid.UUID, list[ServiceProfessional]
+        ] = {service_id: [] for service_id in service_ids}
+        for assignment in assignments:
+            professional = professional_by_id.get(assignment.professional_id)
+            if professional is not None:
+                professionals_by_service.setdefault(
+                    assignment.service_id, []
+                ).append(professional)
+
+        return [
+            ServiceBundle(
+                service=service,
+                availability=availability_by_service.get(service.id, []),
+                professionals=professionals_by_service.get(service.id, []),
+            )
+            for service in services
+        ]
 
     def add_audit(
         self,

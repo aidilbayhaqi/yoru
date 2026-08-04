@@ -71,6 +71,19 @@ services:
     networks: [yoru]
     restart: "no"
 
+  seed-demo:
+    profiles: ["demo"]
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    command: ["yoru-seed-demo"]
+    environment: *api_environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks: [yoru]
+    restart: "no"
+
   api:
     build:
       context: .
@@ -155,6 +168,7 @@ services:
       dockerfile: apps/storefront/Dockerfile
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000/api/v1}
+      API_INTERNAL_BASE_URL: ${API_INTERNAL_BASE_URL:-http://api:8000/api/v1}
     ports:
       - "3000:3000"
     depends_on:
