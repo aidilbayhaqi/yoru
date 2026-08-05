@@ -13,7 +13,9 @@ ORDER_TRANSITIONS: dict[str, frozenset[str]] = {
 
 PAYMENT_TRANSITIONS: dict[str, frozenset[str]] = {
     "pending": frozenset({"succeeded", "failed", "cancelled", "expired"}),
-    "requires_action": frozenset({"pending", "succeeded", "failed", "cancelled", "expired"}),
+    "requires_action": frozenset(
+        {"pending", "succeeded", "failed", "cancelled", "expired"}
+    ),
     "succeeded": frozenset(),
     "failed": frozenset(),
     "cancelled": frozenset(),

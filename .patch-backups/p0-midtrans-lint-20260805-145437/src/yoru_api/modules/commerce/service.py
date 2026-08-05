@@ -13,18 +13,10 @@ from yoru_api.modules.commerce.payment_providers import (
     ensure_payment_provider_enabled,
     parse_payment_webhook,
 )
-from yoru_api.modules.commerce.repository import (
-    CartBundle,
-    CartLine,
-    CommerceRepository,
-    OrderBundle,
-)
+from yoru_api.modules.commerce.repository import CartBundle, CartLine, CommerceRepository, OrderBundle
 from yoru_api.modules.commerce.schemas import PaymentWebhookPayload
 from yoru_api.modules.commerce.shipping import build_shipping_quote
-from yoru_api.modules.commerce.state_machine import (
-    ensure_order_transition,
-    ensure_payment_transition,
-)
+from yoru_api.modules.commerce.state_machine import ensure_order_transition, ensure_payment_transition
 from yoru_api.modules.finance.repository import FinanceRepository
 from yoru_api.modules.finance.service import FinanceService
 from yoru_api.modules.identity.permissions import Actor, require_permission
@@ -84,9 +76,7 @@ class CommerceService:
             raise AppError(404, "CATALOG_PRODUCT_NOT_FOUND", "Catalog product not found")
         return product
 
-    async def _required_cart(
-        self, cart_id: uuid.UUID, actor: Actor, *, for_update: bool = False
-    ) -> Cart:
+    async def _required_cart(self, cart_id: uuid.UUID, actor: Actor, *, for_update: bool = False) -> Cart:
         cart = await self._repository.get_cart(cart_id, for_update=for_update)
         if cart is None or cart.customer_id != actor.user_id:
             raise AppError(404, "CART_NOT_FOUND", "Cart not found")
@@ -142,9 +132,7 @@ class CommerceService:
             await self._repository.commit()
         return await self._cart_bundle(cart)
 
-    async def add_cart_item(
-        self, *, actor: Actor, product_id: uuid.UUID, quantity: int
-    ) -> CartBundle:
+    async def add_cart_item(self, *, actor: Actor, product_id: uuid.UUID, quantity: int) -> CartBundle:
         cart = await self._repository.get_active_cart(actor.user_id, for_update=True)
         if cart is None:
             cart = await self._repository.add_cart(
@@ -178,9 +166,7 @@ class CommerceService:
         await self._repository.commit()
         return await self._cart_bundle(cart)
 
-    async def update_cart_item(
-        self, *, actor: Actor, item_id: uuid.UUID, quantity: int
-    ) -> CartBundle:
+    async def update_cart_item(self, *, actor: Actor, item_id: uuid.UUID, quantity: int) -> CartBundle:
         item = await self._repository.get_cart_item(item_id, for_update=True)
         if item is None or item.customer_id != actor.user_id:
             raise AppError(404, "CART_ITEM_NOT_FOUND", "Cart item not found")
@@ -233,9 +219,7 @@ class CommerceService:
         totals_input: list[tuple[int, int]] = []
         for line in lines:
             if line.product.status != "published":
-                raise AppError(
-                    409, "CATALOG_ITEM_UNAVAILABLE", "A cart item is no longer available"
-                )
+                raise AppError(409, "CATALOG_ITEM_UNAVAILABLE", "A cart item is no longer available")
             self._ensure_stock(line.product, line.inventory, line.item.quantity)
             unit_amount = self._line_amount(line)
             totals_input.append((unit_amount, line.item.quantity))
@@ -464,9 +448,7 @@ class CommerceService:
         for reservation in await self._repository.list_reservations(order.id, for_update=True):
             if reservation.status != "active":
                 continue
-            inventory = await self._repository.get_inventory(
-                reservation.product_id, for_update=True
-            )
+            inventory = await self._repository.get_inventory(reservation.product_id, for_update=True)
             if inventory is not None:
                 inventory.reserved = max(0, inventory.reserved - reservation.quantity)
                 inventory.version += 1
@@ -660,7 +642,9 @@ class CommerceService:
             order.payment_status = "paid"
             order.paid_at = payload.occurred_at
             order.version += 1
-            finance_service = FinanceService(FinanceRepository(self._repository.session))
+            finance_service = FinanceService(
+                FinanceRepository(self._repository.session)
+            )
             await finance_service.record_paid_order(
                 order=order,
                 payment=payment,

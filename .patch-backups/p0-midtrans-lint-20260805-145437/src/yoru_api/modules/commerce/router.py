@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Query, Request, status
+from fastapi import APIRouter, Depends, Header, Query, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from yoru_api.core.database import session_scope
@@ -51,7 +51,6 @@ CommerceServiceDependency = Annotated[CommerceService, Depends(get_commerce_serv
 
 def _validate_csrf(request: Request) -> None:
     validate_csrf_or_bearer(request, csrf_cookie_name=CSRF_COOKIE)
-
 
 def _require_idempotency_key(value: str | None) -> str:
     if value is None or not (8 <= len(value) <= 120):
@@ -117,9 +116,7 @@ async def add_cart_item(
 ) -> CartResponse:
     _validate_csrf(request)
     return _cart_response(
-        await service.add_cart_item(
-            actor=actor, product_id=payload.product_id, quantity=payload.quantity
-        )
+        await service.add_cart_item(actor=actor, product_id=payload.product_id, quantity=payload.quantity)
     )
 
 
@@ -152,7 +149,6 @@ async def delete_cart_item(
 async def list_shipping_options(actor: CurrentActor) -> list[ShippingOptionResponse]:
     return [ShippingOptionResponse.model_validate(item) for item in available_shipping_options()]
 
-
 @router.post("/checkout/quote", response_model=QuoteResponse, status_code=status.HTTP_201_CREATED)
 async def create_quote(
     payload: QuoteRequest,
@@ -177,9 +173,7 @@ async def create_quote(
     )
 
 
-@router.post(
-    "/checkout/confirm", response_model=CheckoutResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/checkout/confirm", response_model=CheckoutResponse, status_code=status.HTTP_201_CREATED)
 async def confirm_checkout(
     payload: CheckoutConfirmRequest,
     request: Request,
@@ -207,9 +201,7 @@ async def list_orders(
     service: CommerceServiceDependency,
     limit: int = Query(default=50, ge=1, le=100),
 ) -> OrderListResponse:
-    return OrderListResponse(
-        data=[_order_response(item) for item in await service.list_orders(actor=actor, limit=limit)]
-    )
+    return OrderListResponse(data=[_order_response(item) for item in await service.list_orders(actor=actor, limit=limit)])
 
 
 @router.get("/orders/{order_id}", response_model=OrderResponse)
@@ -247,10 +239,7 @@ async def get_payment_intent(
     )
     return PaymentIntentResponse.model_validate(payment)
 
-
-@router.post(
-    "/payments/intents", response_model=PaymentIntentResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/payments/intents", response_model=PaymentIntentResponse, status_code=status.HTTP_201_CREATED)
 async def create_payment_intent(
     payload: CreatePaymentIntentRequest,
     request: Request,

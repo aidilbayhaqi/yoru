@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -96,3 +97,15 @@ class SessionListItem(BaseModel):
     created_at: datetime
     last_used_at: datetime
     current: bool
+
+class MobileRefreshRequest(BaseModel):
+    refresh_token: str = Field(min_length=32, max_length=512)
+
+
+class MobileTokenResponse(BaseModel):
+    token_type: Literal["Bearer"] = "Bearer"
+    access_token: str
+    refresh_token: str
+    expires_in: int
+    refresh_expires_in: int
+    session: SessionResponse

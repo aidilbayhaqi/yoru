@@ -260,8 +260,7 @@ class PaymentIntent(Base):
         UniqueConstraint("order_id", "idempotency_key", name="uq_payment_intents_order_key"),
         Index("ix_payment_intents_order_created", "order_id", "created_at"),
         CheckConstraint(
-            "status IN ('requires_action', 'pending', 'succeeded', "
-            "'failed', 'cancelled', 'expired')",
+            "status IN ('requires_action', 'pending', 'succeeded', 'failed', 'cancelled', 'expired')",
             name="ck_payment_intents_status",
         ),
         CheckConstraint("amount >= 0", name="ck_payment_intents_amount"),

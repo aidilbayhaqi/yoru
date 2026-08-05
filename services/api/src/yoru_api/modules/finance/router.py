@@ -9,17 +9,15 @@ from yoru_api.modules.finance.repository import FinanceRepository
 from yoru_api.modules.finance.schemas import BalanceResponse, DisputeCreate, DisputeResponse, EvidenceCreate, EvidenceResponse, LedgerEntryResponse, PayoutCreate, PayoutResponse, ReconciliationCreate, ReconciliationResponse, RefundCreate, RefundResponse, ResolveDispute, ResultRequest, SettlementResponse
 from yoru_api.modules.finance.service import FinanceService
 from yoru_api.modules.identity.router import CSRF_COOKIE, CurrentActor
-from yoru_api.modules.identity.security import constant_time_equal
+from yoru_api.modules.identity.transport import validate_csrf_or_bearer
 router=APIRouter(tags=['Ledger, refund, payout, and dispute'])
 async def db(request:Request)->AsyncIterator[AsyncSession]:
  async for s in session_scope(request.app.state.session_factory): yield s
 def service(s:Annotated[AsyncSession,Depends(db)])->FinanceService:return FinanceService(FinanceRepository(s))
 S=Annotated[FinanceService,Depends(service)]
-def csrf(r:Request):
- origin=r.headers.get('Origin')
- if origin is not None and origin not in r.app.state.settings.cors_allowed_origins: raise AppError(403,'ORIGIN_DENIED','Request origin is not allowed')
- cookie=r.cookies.get(CSRF_COOKIE,''); header=r.headers.get('X-CSRF-Token','')
- if not cookie or not header or not constant_time_equal(cookie,header): raise AppError(403,'CSRF_VALIDATION_FAILED','CSRF validation failed')
+def csrf(r: Request) -> None:
+    validate_csrf_or_bearer(r, csrf_cookie_name=CSRF_COOKIE)
+
 def key(v):
  if v is None or not 8<=len(v)<=120: raise AppError(400,'IDEMPOTENCY_KEY_REQUIRED','A valid Idempotency-Key is required')
  return v

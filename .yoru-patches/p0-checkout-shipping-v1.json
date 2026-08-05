@@ -1,0 +1,15 @@
+{
+  "applied_at": "2026-08-05T06:34:04.171917+00:00",
+  "backup": ".yoru-backups\\p0-checkout-shipping-v1-20260805T063404Z",
+  "changed_files": [
+    "docs\\MOBILE_CHECKOUT_SHIPPING.md",
+    "services\\api\\alembic\\versions\\20260805_0011_checkout_shipping_snapshot.py",
+    "services\\api\\src\\yoru_api\\modules\\commerce\\models.py",
+    "services\\api\\src\\yoru_api\\modules\\commerce\\router.py",
+    "services\\api\\src\\yoru_api\\modules\\commerce\\schemas.py",
+    "services\\api\\src\\yoru_api\\modules\\commerce\\service.py",
+    "services\\api\\src\\yoru_api\\modules\\commerce\\shipping.py",
+    "services\\api\\tests\\test_commerce_shipping.py"
+  ],
+  "patch_id": "p0-checkout-shipping-v1"
+}

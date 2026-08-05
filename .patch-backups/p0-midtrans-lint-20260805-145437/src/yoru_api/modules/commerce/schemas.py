@@ -62,7 +62,6 @@ class ShippingOptionResponse(BaseModel):
     estimated_days_max: int
     rate_version: str
 
-
 class QuoteRequest(BaseModel):
     cart_id: UUID | None = None
     fulfillment_type: Literal["pickup", "shipping"] = "pickup"
@@ -121,7 +120,6 @@ class PaymentActionResponse(BaseModel):
     type: str
     descriptor: str
     value: str
-
 
 class PaymentIntentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

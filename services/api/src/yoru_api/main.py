@@ -31,6 +31,7 @@ from yoru_api.modules.bookings.router import router as bookings_router
 from yoru_api.modules.catalog.router import router as catalog_router
 from yoru_api.modules.commerce.router import router as commerce_router
 from yoru_api.modules.finance.router import router as finance_router
+from yoru_api.modules.identity.mobile_router import router as mobile_identity_router
 from yoru_api.modules.identity.rate_limit import LoginRateLimiter
 from yoru_api.modules.identity.router import router as identity_router
 from yoru_api.modules.ops.router import router as ops_router
@@ -125,6 +126,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router)
     app.include_router(meta_router, prefix=app_settings.api_v1_prefix)
     app.include_router(identity_router, prefix=app_settings.api_v1_prefix)
+    app.include_router(mobile_identity_router, prefix=app_settings.api_v1_prefix)
     app.include_router(partners_router, prefix=app_settings.api_v1_prefix)
     app.include_router(catalog_router, prefix=app_settings.api_v1_prefix)
     app.include_router(commerce_router, prefix=app_settings.api_v1_prefix)

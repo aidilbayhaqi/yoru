@@ -22,8 +22,13 @@ from yoru_api.modules.identity.schemas import (
     SessionResponse,
     UserResponse,
 )
-from yoru_api.modules.identity.security import TokenPair, constant_time_equal
+from yoru_api.modules.identity.security import TokenPair
 from yoru_api.modules.identity.service import IdentityService
+from yoru_api.modules.identity.transport import (
+    access_token_from_request,
+    validate_csrf_or_bearer,
+    validate_request_origin,
+)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -56,26 +61,18 @@ def _request_ip_prefix(request: Request) -> str | None:
 
 
 def _validate_origin(request: Request) -> None:
-    origin = request.headers.get("Origin")
-    if origin is not None and origin not in request.app.state.settings.cors_allowed_origins:
-        raise AppError(403, "ORIGIN_DENIED", "Request origin is not allowed")
-
+    validate_request_origin(request)
 
 def _validate_csrf(request: Request) -> None:
-    _validate_origin(request)
-    cookie_token = request.cookies.get(CSRF_COOKIE, "")
-    header_token = request.headers.get("X-CSRF-Token", "")
-    if not cookie_token or not header_token or not constant_time_equal(
-        cookie_token, header_token
-    ):
-        raise AppError(403, "CSRF_VALIDATION_FAILED", "CSRF validation failed")
-
+    validate_csrf_or_bearer(request, csrf_cookie_name=CSRF_COOKIE)
 
 async def get_current_actor(
     request: Request,
     service: Annotated[IdentityService, Depends(get_identity_service)],
 ) -> Actor:
-    return await service.authenticate_access(request.cookies.get(ACCESS_COOKIE))
+    return await service.authenticate_access(
+        access_token_from_request(request, cookie_name=ACCESS_COOKIE)
+    )
 
 
 CurrentActor = Annotated[Actor, Depends(get_current_actor)]
@@ -242,7 +239,7 @@ async def select_active_partner(
     service: IdentityServiceDependency,
 ) -> SessionResponse:
     _validate_csrf(request)
-    access_token = request.cookies.get(ACCESS_COOKIE)
+    access_token = access_token_from_request(request, cookie_name=ACCESS_COOKIE)
     if access_token is None:
         raise AppError(401, "AUTHENTICATION_REQUIRED", "Authentication required")
     refreshed_actor = await service.select_partner(

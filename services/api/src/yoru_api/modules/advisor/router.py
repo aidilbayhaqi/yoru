@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from yoru_api.core.database import session_scope
-from yoru_api.core.problem import AppError
 from yoru_api.modules.advisor.repository import AdvisorRepository
 from yoru_api.modules.advisor.schemas import (
     AdvisorSessionCreate,
@@ -26,7 +25,7 @@ from yoru_api.modules.advisor.schemas import (
 )
 from yoru_api.modules.advisor.service import AdvisorService
 from yoru_api.modules.identity.router import CSRF_COOKIE, CurrentActor
-from yoru_api.modules.identity.security import constant_time_equal
+from yoru_api.modules.identity.transport import validate_csrf_or_bearer
 
 router = APIRouter(tags=["Customer AI Advisor"])
 
@@ -47,16 +46,7 @@ AdvisorServiceDependency = Annotated[AdvisorService, Depends(get_advisor_service
 
 
 def validate_csrf(request: Request) -> None:
-    origin = request.headers.get("Origin")
-    if origin is not None and origin not in request.app.state.settings.cors_allowed_origins:
-        raise AppError(403, "ORIGIN_DENIED", "Request origin is not allowed")
-    cookie_token = request.cookies.get(CSRF_COOKIE, "")
-    header_token = request.headers.get("X-CSRF-Token", "")
-    if not cookie_token or not header_token or not constant_time_equal(
-        cookie_token, header_token
-    ):
-        raise AppError(403, "CSRF_VALIDATION_FAILED", "CSRF validation failed")
-
+    validate_csrf_or_bearer(request, csrf_cookie_name=CSRF_COOKIE)
 
 def detail_response(item: object, media: list[object], recommendations: list[object]):
     payload = AdvisorSessionResponse.model_validate(item).model_dump()

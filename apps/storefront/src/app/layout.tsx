@@ -10,7 +10,7 @@ import "./polish-v8.css";
 
 import "./system-v9.css";
 import "./visual-repair-v9.2.css";
-import "./gold-design-system-v9.5.css";
+import "./gold-flex-design-v9.6.css";
 export const metadata: Metadata = {
   title: {
     default: "Yoru — Curated commerce & trusted home service",
