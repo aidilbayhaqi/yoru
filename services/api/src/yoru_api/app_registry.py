@@ -28,6 +28,7 @@ from yoru_api.modules.identity.router import router as identity_router
 from yoru_api.modules.ops.router import router as ops_router
 from yoru_api.modules.partner_copilot.router import router as partner_copilot_router
 from yoru_api.modules.partners.router import router as partners_router
+from yoru_api.runtime_contract import validate_runtime_contract
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,22 +63,22 @@ ROUTER_MOUNTS: Final[tuple[RouterMount, ...]] = (
 # app.user_middleware and runtime request traversal use this effective order.
 MIDDLEWARE_REQUEST_ORDER: Final[tuple[str, ...]] = (
     "request_context",
+    "security_headers",
     "metrics",
+    "cors",
     "request_timeout",
     "request_size_limit",
-    "security_headers",
     "trusted_host",
-    "cors",
 )
 
 MIDDLEWARE_CLASS_ORDER: Final[tuple[str, ...]] = (
     "RequestContextMiddleware",
+    "SecurityHeadersMiddleware",
     "MetricsMiddleware",
+    "CORSMiddleware",
     "RequestTimeoutMiddleware",
     "RequestSizeLimitMiddleware",
-    "SecurityHeadersMiddleware",
     "TrustedHostMiddleware",
-    "CORSMiddleware",
 )
 
 
@@ -86,7 +87,20 @@ def configure_middleware(
     settings: Settings,
     metrics_registry: MetricsRegistry,
 ) -> None:
-    # Starlette inserts each middleware at the front. Existing add order is preserved.
+    # Starlette prepends each middleware. Register inner layers first so every
+    # guard response still receives CORS, security headers, metrics, and request ID.
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=list(settings.trusted_hosts),
+    )
+    app.add_middleware(
+        RequestSizeLimitMiddleware,
+        max_bytes=settings.max_request_body_bytes,
+    )
+    app.add_middleware(
+        RequestTimeoutMiddleware,
+        timeout_seconds=settings.request_timeout_seconds,
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_allowed_origins),
@@ -105,24 +119,12 @@ def configure_middleware(
         expose_headers=["X-Request-ID"],
         max_age=600,
     )
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=list(settings.trusted_hosts),
-    )
+    app.add_middleware(MetricsMiddleware, registry=metrics_registry)
     app.add_middleware(
         SecurityHeadersMiddleware,
         production=settings.app_env == "production",
         auth_path_prefix=f"{settings.api_v1_prefix}/auth",
     )
-    app.add_middleware(
-        RequestSizeLimitMiddleware,
-        max_bytes=settings.max_request_body_bytes,
-    )
-    app.add_middleware(
-        RequestTimeoutMiddleware,
-        timeout_seconds=settings.request_timeout_seconds,
-    )
-    app.add_middleware(MetricsMiddleware, registry=metrics_registry)
     app.add_middleware(RequestContextMiddleware)
     app.state.middleware_names = MIDDLEWARE_REQUEST_ORDER
 
@@ -144,6 +146,7 @@ def register_routers(app: FastAPI, api_v1_prefix: str) -> None:
     app.state.router_names = tuple(router_names)
     app.state.router_route_counts = router_route_counts
     assert_unique_routes(app)
+    validate_runtime_contract(app)
 
 
 def route_manifest(app: FastAPI) -> tuple[RouteManifestEntry, ...]:

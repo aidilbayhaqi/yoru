@@ -17,6 +17,7 @@ from yoru_api.core.problem import (
 )
 from yoru_api.core.settings import Settings, get_settings
 from yoru_api.modules.identity.rate_limit import LoginRateLimiter
+from yoru_api.runtime_contract import RUNTIME_STAGE
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -63,7 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {
             "name": "Yoru API",
             "version": __version__,
-            "stage": "phase-9-pre-production",
+            "stage": RUNTIME_STAGE,
             "release_id": app_settings.release_id,
         }
 

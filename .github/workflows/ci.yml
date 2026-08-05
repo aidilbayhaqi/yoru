@@ -77,6 +77,7 @@ jobs:
       - run: python -m pip install -e "services/api[dev]" -e "services/worker[dev]"
       - run: ruff check services
       - run: mypy services/api/src services/worker/src
+      - run: python scripts/check-runtime-contract.py
       - run: alembic -c services/api/alembic.ini upgrade head
       - run: pytest services/api/tests services/worker/tests
       - name: Validate offline migration SQL

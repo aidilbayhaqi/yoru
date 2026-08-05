@@ -8,7 +8,7 @@ import uuid
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from starlette.types import ASGIApp
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from yoru_api.core.metrics import MetricsRegistry
 
@@ -63,36 +63,93 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         return response
 
 
-class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
+class _RequestBodyTooLarge(Exception):
+    pass
+
+
+class RequestSizeLimitMiddleware:
     def __init__(self, app: ASGIApp, *, max_bytes: int) -> None:
-        super().__init__(app)
+        self._app = app
         self._max_bytes = max_bytes
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        content_length = request.headers.get("Content-Length")
-        if content_length is not None:
+    @staticmethod
+    def _problem(status_code: int, title: str, code: str) -> JSONResponse:
+        return JSONResponse(
+            status_code=status_code,
+            content={
+                "type": "about:blank",
+                "title": title,
+                "status": status_code,
+                "code": code,
+            },
+        )
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self._app(scope, receive, send)
+            return
+
+        content_lengths = [
+            value
+            for name, value in scope.get("headers", [])
+            if name.lower() == b"content-length"
+        ]
+        if len(content_lengths) > 1:
+            response = self._problem(400, "Invalid Content-Length header", "INVALID_CONTENT_LENGTH")
+            await response(scope, receive, send)
+            return
+
+        if content_lengths:
             try:
-                if int(content_length) > self._max_bytes:
-                    return JSONResponse(
-                        status_code=413,
-                        content={
-                            "type": "about:blank",
-                            "title": "Request body too large",
-                            "status": 413,
-                            "code": "REQUEST_BODY_TOO_LARGE",
-                        },
-                    )
-            except ValueError:
-                return JSONResponse(
-                    status_code=400,
-                    content={
-                        "type": "about:blank",
-                        "title": "Invalid Content-Length header",
-                        "status": 400,
-                        "code": "INVALID_CONTENT_LENGTH",
-                    },
+                content_length = int(content_lengths[0].decode("ascii"))
+                if content_length < 0:
+                    raise ValueError
+            except (UnicodeDecodeError, ValueError):
+                response = self._problem(
+                    400,
+                    "Invalid Content-Length header",
+                    "INVALID_CONTENT_LENGTH",
                 )
-        return await call_next(request)
+                await response(scope, receive, send)
+                return
+            if content_length > self._max_bytes:
+                response = self._problem(
+                    413,
+                    "Request body too large",
+                    "REQUEST_BODY_TOO_LARGE",
+                )
+                await response(scope, receive, send)
+                return
+
+        received_bytes = 0
+        response_started = False
+
+        async def limited_receive() -> Message:
+            nonlocal received_bytes
+            message = await receive()
+            if message["type"] == "http.request":
+                received_bytes += len(message.get("body", b""))
+                if received_bytes > self._max_bytes:
+                    raise _RequestBodyTooLarge
+            return message
+
+        async def tracked_send(message: Message) -> None:
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+
+        try:
+            await self._app(scope, limited_receive, tracked_send)
+        except _RequestBodyTooLarge:
+            if response_started:
+                raise
+            response = self._problem(
+                413,
+                "Request body too large",
+                "REQUEST_BODY_TOO_LARGE",
+            )
+            await response(scope, receive, send)
 
 
 class RequestTimeoutMiddleware(BaseHTTPMiddleware):
@@ -140,7 +197,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             return response
         finally:
             route = request.scope.get("route")
-            route_path = getattr(route, "path", request.url.path)
+            route_path = getattr(route, "path", "<unmatched>")
             duration_ms = (time.perf_counter() - started) * 1000
             self._registry.end_request(request.method, route_path, status_code, duration_ms)
 
