@@ -17,7 +17,7 @@ from yoru_api.runtime_contract import (  # noqa: E402
     EXPECTED_ROUTER_NAMES,
     RUNTIME_CONTRACT_VERSION,
     RUNTIME_STAGE,
-    openapi_route_keys,
+    openapi_operations,
     validate_runtime_contract,
 )
 
@@ -51,7 +51,7 @@ def main() -> int:
     print(
         f"Runtime contract v{RUNTIME_CONTRACT_VERSION} OK · "
         f"{len(EXPECTED_ROUTER_NAMES)} routers · "
-        f"{len(openapi_route_keys(app, refresh=True))} OpenAPI operations"
+        f"{len(openapi_operations(app, refresh=True))} OpenAPI operations"
     )
     return 0
 

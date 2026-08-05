@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "stage": "phase-9-pre-production",
   "routers": [
     "health",
@@ -26,12 +26,13 @@
   ],
   "validation_policies": [
     "exact-router-registry",
+    "router-count-registry-matches-source",
     "non-empty-router-membership",
     "exact-middleware-order",
-    "unique-runtime-route-keys",
-    "runtime-openapi-route-parity",
+    "unique-registered-route-keys",
+    "registered-router-openapi-parity",
     "unique-openapi-operation-ids",
-    "duck-typed-runtime-route-discovery",
-    "fresh-openapi-schema-validation"
+    "complete-openapi-operation-ids",
+    "ci-and-test-contract-validation"
   ]
 }

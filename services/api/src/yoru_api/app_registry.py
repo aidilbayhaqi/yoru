@@ -28,7 +28,6 @@ from yoru_api.modules.identity.router import router as identity_router
 from yoru_api.modules.ops.router import router as ops_router
 from yoru_api.modules.partner_copilot.router import router as partner_copilot_router
 from yoru_api.modules.partners.router import router as partners_router
-from yoru_api.runtime_contract import validate_runtime_contract
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,24 +145,52 @@ def register_routers(app: FastAPI, api_v1_prefix: str) -> None:
     app.state.router_names = tuple(router_names)
     app.state.router_route_counts = router_route_counts
     assert_unique_routes(app)
-    validate_runtime_contract(app)
+
+
+# YORU_PRIORITY1_ROUTE_MANIFEST_V5_2
+_ROUTE_MANIFEST_METHODS: Final[frozenset[str]] = frozenset(
+    {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE"}
+)
+
+
+def _registered_route_manifest(api_v1_prefix: str) -> tuple[RouteManifestEntry, ...]:
+    entries: list[RouteManifestEntry] = []
+
+    for mount in ROUTER_MOUNTS:
+        prefix = api_v1_prefix if mount.versioned else ""
+        for route in mount.router.routes:
+            path = getattr(route, "path", None)
+            methods = getattr(route, "methods", None)
+            if not isinstance(path, str) or methods is None:
+                continue
+
+            route_name = str(getattr(route, "name", "unnamed"))
+            normalized_methods = sorted(
+                {
+                    str(method).upper()
+                    for method in methods
+                    if str(method).upper() in _ROUTE_MANIFEST_METHODS
+                }
+            )
+            entries.extend(
+                RouteManifestEntry(
+                    method=method,
+                    path=f"{prefix}{path}",
+                    name=route_name,
+                )
+                for method in normalized_methods
+            )
+
+    return tuple(sorted(entries))
 
 
 def route_manifest(app: FastAPI) -> tuple[RouteManifestEntry, ...]:
-    entries: list[RouteManifestEntry] = []
-    for route in app.routes:
-        path = getattr(route, "path", None)
-        methods = getattr(route, "methods", None)
-        if not isinstance(path, str) or methods is None:
-            continue
+    settings = getattr(app.state, "settings", None)
+    api_v1_prefix = getattr(settings, "api_v1_prefix", None)
+    if not isinstance(api_v1_prefix, str):
+        raise RuntimeError("app.state.settings.api_v1_prefix is missing")
 
-        route_name = str(getattr(route, "name", "unnamed"))
-        entries.extend(
-            RouteManifestEntry(method=method, path=path, name=route_name)
-            for method in methods
-        )
-
-    return tuple(sorted(entries))
+    return _registered_route_manifest(api_v1_prefix)
 
 
 def assert_unique_routes(app: FastAPI) -> None:
@@ -173,4 +200,4 @@ def assert_unique_routes(app: FastAPI) -> None:
         return
 
     rendered = ", ".join(f"{method} {path}" for method, path in duplicates)
-    raise RuntimeError(f"Duplicate API routes detected: {rendered}")
+    raise RuntimeError(f"Duplicate registered API routes detected: {rendered}")

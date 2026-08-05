@@ -1,26 +1,31 @@
 from __future__ import annotations
 
+import inspect
 from collections.abc import AsyncIterator
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
 from fastapi import FastAPI
-from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from starlette.types import Message, Receive, Scope, Send
 
+from yoru_api.app_registry import register_routers
 from yoru_api.core.middleware import RequestSizeLimitMiddleware
 from yoru_api.runtime_contract import (
     EXPECTED_MIDDLEWARE_CLASS_NAMES,
     EXPECTED_ROUTER_NAMES,
     RUNTIME_CONTRACT_VERSION,
     RUNTIME_STAGE,
+    openapi_operations,
     openapi_route_keys,
-    runtime_schema_route_keys,
-    schema_route_keys_from_routes,
+    registered_router_route_keys,
     validate_runtime_contract,
 )
+
+
+def test_app_construction_does_not_run_release_contract_validation() -> None:
+    source = inspect.getsource(register_routers)
+    assert "validate_runtime_contract" not in source
 
 
 def test_runtime_contract_accepts_assembled_app(app: FastAPI) -> None:
@@ -38,12 +43,10 @@ def test_every_registered_router_has_routes(app: FastAPI) -> None:
 
 
 def test_metadata_reports_runtime_truth(client: TestClient, app: FastAPI) -> None:
-    meta_route = next(
-        route
-        for route in app.routes
-        if isinstance(route, APIRoute) and route.name == "api_metadata"
-    )
-    response = client.get(meta_route.path)
+    meta_path = f"{app.state.settings.api_v1_prefix}/meta"
+    assert ("GET", meta_path) in openapi_route_keys(app, refresh=True)
+
+    response = client.get(meta_path)
     assert response.status_code == 200
 
     payload = response.json()
@@ -55,17 +58,16 @@ def test_metadata_reports_runtime_truth(client: TestClient, app: FastAPI) -> Non
     assert payload["features"]["mobile_identity"] is True
 
 
-def test_openapi_matches_runtime_routes(app: FastAPI) -> None:
-    assert runtime_schema_route_keys(app) == openapi_route_keys(app, refresh=True)
+def test_openapi_matches_declared_router_registry(app: FastAPI) -> None:
+    assert registered_router_route_keys(app) == openapi_route_keys(app, refresh=True)
 
 
-def test_runtime_route_discovery_is_not_bound_to_apiroute_identity() -> None:
-    wrapped_route = SimpleNamespace(
-        path="/wrapped",
-        methods={"GET", "HEAD"},
-        include_in_schema=True,
-    )
-    assert schema_route_keys_from_routes([wrapped_route]) == {("GET", "/wrapped")}
+def test_openapi_operation_ids_are_present_and_unique(app: FastAPI) -> None:
+    operations = openapi_operations(app, refresh=True)
+    operation_ids = [operation_id for _method, _path, operation_id in operations]
+    assert operations
+    assert all(operation_id is not None for operation_id in operation_ids)
+    assert len(operation_ids) == len(set(operation_ids))
 
 
 def test_guard_responses_keep_request_id_security_and_cors(client: TestClient) -> None:
@@ -101,7 +103,6 @@ async def test_streaming_body_without_content_length_is_limited() -> None:
         await send({"type": "http.response.body", "body": b""})
 
     middleware = RequestSizeLimitMiddleware(downstream, max_bytes=4)
-    incoming: AsyncIterator[Message]
 
     async def incoming_messages() -> AsyncIterator[Message]:
         yield {"type": "http.request", "body": b"abc", "more_body": True}
