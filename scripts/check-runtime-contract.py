@@ -12,11 +12,12 @@ if str(API_SRC) not in sys.path:
 from yoru_api.core.settings import Settings  # noqa: E402
 from yoru_api.main import create_app  # noqa: E402
 from yoru_api.runtime_contract import (  # noqa: E402
+    CONTRACT_POLICIES,
     EXPECTED_MIDDLEWARE_CLASS_NAMES,
     EXPECTED_ROUTER_NAMES,
-    REQUIRED_ROUTES,
     RUNTIME_CONTRACT_VERSION,
     RUNTIME_STAGE,
+    openapi_route_keys,
     validate_runtime_contract,
 )
 
@@ -30,10 +31,7 @@ def main() -> int:
         "stage": RUNTIME_STAGE,
         "routers": list(EXPECTED_ROUTER_NAMES),
         "middleware": list(EXPECTED_MIDDLEWARE_CLASS_NAMES),
-        "required_routes": [
-            {"method": method, "path": path}
-            for method, path in sorted(REQUIRED_ROUTES)
-        ],
+        "validation_policies": list(CONTRACT_POLICIES),
     }
     if contract != expected_document:
         print("runtime-contract.json tidak sinkron dengan source contract", file=sys.stderr)
@@ -50,15 +48,10 @@ def main() -> int:
     app = create_app(settings)
     validate_runtime_contract(app)
 
-    operation_count = sum(
-        1
-        for path_item in app.openapi()["paths"].values()
-        for operation in path_item.values()
-        if isinstance(operation, dict)
-    )
     print(
         f"Runtime contract v{RUNTIME_CONTRACT_VERSION} OK · "
-        f"{len(EXPECTED_ROUTER_NAMES)} routers · {operation_count} OpenAPI operations"
+        f"{len(EXPECTED_ROUTER_NAMES)} routers · "
+        f"{len(openapi_route_keys(app))} OpenAPI operations"
     )
     return 0
 

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "stage": "phase-9-pre-production",
   "routers": [
     "health",
@@ -24,18 +24,12 @@
     "RequestSizeLimitMiddleware",
     "TrustedHostMiddleware"
   ],
-  "required_routes": [
-    {"method": "GET", "path": "/api/v1/bookings/{booking_id}"},
-    {"method": "GET", "path": "/api/v1/catalog/services/{service_id}"},
-    {"method": "GET", "path": "/api/v1/copilot/digest"},
-    {"method": "GET", "path": "/api/v1/disputes"},
-    {"method": "GET", "path": "/api/v1/meta"},
-    {"method": "GET", "path": "/api/v1/platform/ops/launch-gates/latest"},
-    {"method": "GET", "path": "/health/live"},
-    {"method": "POST", "path": "/api/v1/ai/advisor/sessions"},
-    {"method": "POST", "path": "/api/v1/auth/login"},
-    {"method": "POST", "path": "/api/v1/checkout/quote"},
-    {"method": "POST", "path": "/api/v1/mobile/auth/login"},
-    {"method": "POST", "path": "/api/v1/partners"}
+  "validation_policies": [
+    "exact-router-registry",
+    "non-empty-router-membership",
+    "exact-middleware-order",
+    "unique-runtime-route-keys",
+    "runtime-openapi-route-parity",
+    "unique-openapi-operation-ids"
   ]
 }

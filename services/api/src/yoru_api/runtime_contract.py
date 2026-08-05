@@ -1,4 +1,3 @@
-# YORU_PRIORITY1_RUNTIME_TRUTH_V4
 from __future__ import annotations
 
 from collections import Counter
@@ -7,8 +6,9 @@ from typing import Final
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
-RUNTIME_CONTRACT_VERSION: Final[int] = 1
+RUNTIME_CONTRACT_VERSION: Final[int] = 2
 RUNTIME_STAGE: Final[str] = "phase-9-pre-production"
+RUNTIME_CONTRACT_MARKER: Final[str] = "YORU_PRIORITY1_RUNTIME_CONTRACT_V4_1"
 
 EXPECTED_ROUTER_NAMES: Final[tuple[str, ...]] = (
     "health",
@@ -35,23 +35,13 @@ EXPECTED_MIDDLEWARE_CLASS_NAMES: Final[tuple[str, ...]] = (
     "TrustedHostMiddleware",
 )
 
-# One representative route per mounted module. This catches a module that is
-# imported but accidentally empty, versioned incorrectly, or no longer exposed.
-REQUIRED_ROUTES: Final[frozenset[tuple[str, str]]] = frozenset(
-    {
-        ("GET", "/health/live"),
-        ("GET", "/api/v1/meta"),
-        ("POST", "/api/v1/auth/login"),
-        ("POST", "/api/v1/mobile/auth/login"),
-        ("POST", "/api/v1/partners"),
-        ("GET", "/api/v1/catalog/services/{service_id}"),
-        ("POST", "/api/v1/checkout/quote"),
-        ("GET", "/api/v1/bookings/{booking_id}"),
-        ("GET", "/api/v1/disputes"),
-        ("POST", "/api/v1/ai/advisor/sessions"),
-        ("GET", "/api/v1/copilot/digest"),
-        ("GET", "/api/v1/platform/ops/launch-gates/latest"),
-    }
+CONTRACT_POLICIES: Final[tuple[str, ...]] = (
+    "exact-router-registry",
+    "non-empty-router-membership",
+    "exact-middleware-order",
+    "unique-runtime-route-keys",
+    "runtime-openapi-route-parity",
+    "unique-openapi-operation-ids",
 )
 
 
@@ -59,18 +49,21 @@ class RuntimeContractError(RuntimeError):
     """Raised when the assembled application no longer matches its release contract."""
 
 
-def _route_keys(app: FastAPI) -> set[tuple[str, str]]:
+def runtime_schema_route_keys(app: FastAPI) -> set[tuple[str, str]]:
+    """Return runtime routes that are expected to be represented in OpenAPI."""
     keys: set[tuple[str, str]] = set()
     for route in app.routes:
-        path = getattr(route, "path", None)
-        methods = getattr(route, "methods", None)
-        if not isinstance(path, str) or methods is None:
+        if not isinstance(route, APIRoute) or not route.include_in_schema:
             continue
-        keys.update((method, path) for method in methods if method not in {"HEAD", "OPTIONS"})
+        keys.update(
+            (method.upper(), route.path)
+            for method in route.methods
+            if method.upper() not in {"HEAD", "OPTIONS"}
+        )
     return keys
 
 
-def _schema_route_keys(app: FastAPI) -> set[tuple[str, str]]:
+def openapi_route_keys(app: FastAPI) -> set[tuple[str, str]]:
     keys: set[tuple[str, str]] = set()
     for path, path_item in app.openapi().get("paths", {}).items():
         if not isinstance(path_item, dict):
@@ -79,6 +72,21 @@ def _schema_route_keys(app: FastAPI) -> set[tuple[str, str]]:
             if isinstance(operation, dict):
                 keys.add((method.upper(), path))
     return keys
+
+
+def _duplicate_runtime_route_keys(app: FastAPI) -> list[tuple[str, str]]:
+    keys: list[tuple[str, str]] = []
+    for route in app.routes:
+        path = getattr(route, "path", None)
+        methods = getattr(route, "methods", None)
+        if not isinstance(path, str) or methods is None:
+            continue
+        keys.extend(
+            (method.upper(), path)
+            for method in methods
+            if method.upper() not in {"HEAD", "OPTIONS"}
+        )
+    return sorted(key for key, count in Counter(keys).items() if count > 1)
 
 
 def _duplicate_operation_ids(app: FastAPI) -> list[str]:
@@ -106,6 +114,22 @@ def validate_runtime_contract(app: FastAPI) -> None:
             f"expected={EXPECTED_ROUTER_NAMES!r}, actual={router_names!r}"
         )
 
+    raw_counts = getattr(app.state, "router_route_counts", {})
+    router_route_counts = dict(raw_counts) if isinstance(raw_counts, dict) else {}
+    if tuple(router_route_counts) != EXPECTED_ROUTER_NAMES:
+        errors.append(
+            "router count registry mismatch: "
+            f"expected={EXPECTED_ROUTER_NAMES!r}, actual={tuple(router_route_counts)!r}"
+        )
+    empty_routers = sorted(
+        name
+        for name in EXPECTED_ROUTER_NAMES
+        if not isinstance(router_route_counts.get(name), int)
+        or router_route_counts.get(name, 0) <= 0
+    )
+    if empty_routers:
+        errors.append(f"registered routers without routes: {empty_routers!r}")
+
     middleware_names = tuple(item.cls.__name__ for item in app.user_middleware)
     if middleware_names != EXPECTED_MIDDLEWARE_CLASS_NAMES:
         errors.append(
@@ -113,15 +137,18 @@ def validate_runtime_contract(app: FastAPI) -> None:
             f"expected={EXPECTED_MIDDLEWARE_CLASS_NAMES!r}, actual={middleware_names!r}"
         )
 
-    runtime_routes = _route_keys(app)
-    missing_runtime = sorted(REQUIRED_ROUTES - runtime_routes)
-    if missing_runtime:
-        errors.append(f"required runtime routes missing: {missing_runtime!r}")
+    duplicate_runtime_routes = _duplicate_runtime_route_keys(app)
+    if duplicate_runtime_routes:
+        errors.append(f"duplicate runtime route keys: {duplicate_runtime_routes!r}")
 
-    schema_routes = _schema_route_keys(app)
-    missing_schema = sorted(REQUIRED_ROUTES - schema_routes)
-    if missing_schema:
-        errors.append(f"required OpenAPI routes missing: {missing_schema!r}")
+    runtime_routes = runtime_schema_route_keys(app)
+    schema_routes = openapi_route_keys(app)
+    missing_from_openapi = sorted(runtime_routes - schema_routes)
+    unexpected_in_openapi = sorted(schema_routes - runtime_routes)
+    if missing_from_openapi:
+        errors.append(f"runtime routes missing from OpenAPI: {missing_from_openapi!r}")
+    if unexpected_in_openapi:
+        errors.append(f"OpenAPI routes missing from runtime: {unexpected_in_openapi!r}")
 
     duplicate_operation_ids = _duplicate_operation_ids(app)
     if duplicate_operation_ids:
