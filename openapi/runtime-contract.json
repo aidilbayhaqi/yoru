@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "stage": "phase-9-pre-production",
   "routers": [
     "health",
@@ -30,6 +30,8 @@
     "exact-middleware-order",
     "unique-runtime-route-keys",
     "runtime-openapi-route-parity",
-    "unique-openapi-operation-ids"
+    "unique-openapi-operation-ids",
+    "duck-typed-runtime-route-discovery",
+    "fresh-openapi-schema-validation"
   ]
 }

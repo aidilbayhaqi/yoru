@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from typing import Final
 
 from fastapi import FastAPI
-from fastapi.routing import APIRoute
 
-RUNTIME_CONTRACT_VERSION: Final[int] = 2
+RUNTIME_CONTRACT_VERSION: Final[int] = 3
 RUNTIME_STAGE: Final[str] = "phase-9-pre-production"
-RUNTIME_CONTRACT_MARKER: Final[str] = "YORU_PRIORITY1_RUNTIME_CONTRACT_V4_1"
+RUNTIME_CONTRACT_MARKER: Final[str] = "YORU_PRIORITY1_RUNTIME_CONTRACT_V4_2"
 
 EXPECTED_ROUTER_NAMES: Final[tuple[str, ...]] = (
     "health",
@@ -35,6 +35,11 @@ EXPECTED_MIDDLEWARE_CLASS_NAMES: Final[tuple[str, ...]] = (
     "TrustedHostMiddleware",
 )
 
+HTTP_METHODS: Final[frozenset[str]] = frozenset(
+    {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "TRACE"}
+)
+SCHEMA_HTTP_METHODS: Final[frozenset[str]] = HTTP_METHODS - {"HEAD", "OPTIONS"}
+
 CONTRACT_POLICIES: Final[tuple[str, ...]] = (
     "exact-router-registry",
     "non-empty-router-membership",
@@ -42,6 +47,8 @@ CONTRACT_POLICIES: Final[tuple[str, ...]] = (
     "unique-runtime-route-keys",
     "runtime-openapi-route-parity",
     "unique-openapi-operation-ids",
+    "duck-typed-runtime-route-discovery",
+    "fresh-openapi-schema-validation",
 )
 
 
@@ -49,28 +56,47 @@ class RuntimeContractError(RuntimeError):
     """Raised when the assembled application no longer matches its release contract."""
 
 
-def runtime_schema_route_keys(app: FastAPI) -> set[tuple[str, str]]:
-    """Return runtime routes that are expected to be represented in OpenAPI."""
+def schema_route_keys_from_routes(routes: Iterable[object]) -> set[tuple[str, str]]:
+    """Read schema routes without depending on a specific APIRoute class identity.
+
+    Some packaging/instrumentation setups can wrap or reload FastAPI route classes.
+    Runtime validation only needs the stable route protocol: path, methods, and
+    include_in_schema.
+    """
     keys: set[tuple[str, str]] = set()
-    for route in app.routes:
-        if not isinstance(route, APIRoute) or not route.include_in_schema:
+    for route in routes:
+        path = getattr(route, "path", None)
+        methods = getattr(route, "methods", None)
+        include_in_schema = getattr(route, "include_in_schema", False)
+        if not isinstance(path, str) or not include_in_schema or methods is None:
             continue
-        keys.update(
-            (method.upper(), route.path)
-            for method in route.methods
-            if method.upper() not in {"HEAD", "OPTIONS"}
-        )
+
+        for raw_method in methods:
+            method = str(raw_method).upper()
+            if method in SCHEMA_HTTP_METHODS:
+                keys.add((method, path))
     return keys
 
 
-def openapi_route_keys(app: FastAPI) -> set[tuple[str, str]]:
+def runtime_schema_route_keys(app: FastAPI) -> set[tuple[str, str]]:
+    """Return runtime routes expected to be represented in OpenAPI."""
+    return schema_route_keys_from_routes(app.routes)
+
+
+def openapi_route_keys(app: FastAPI, *, refresh: bool = False) -> set[tuple[str, str]]:
+    if refresh:
+        # FastAPI caches the generated schema. Runtime validation must compare
+        # against the routes currently mounted, not an earlier partial schema.
+        app.openapi_schema = None
+
     keys: set[tuple[str, str]] = set()
     for path, path_item in app.openapi().get("paths", {}).items():
-        if not isinstance(path_item, dict):
+        if not isinstance(path, str) or not isinstance(path_item, dict):
             continue
-        for method, operation in path_item.items():
-            if isinstance(operation, dict):
-                keys.add((method.upper(), path))
+        for raw_method, operation in path_item.items():
+            method = str(raw_method).upper()
+            if method in SCHEMA_HTTP_METHODS and isinstance(operation, dict):
+                keys.add((method, path))
     return keys
 
 
@@ -81,21 +107,22 @@ def _duplicate_runtime_route_keys(app: FastAPI) -> list[tuple[str, str]]:
         methods = getattr(route, "methods", None)
         if not isinstance(path, str) or methods is None:
             continue
-        keys.extend(
-            (method.upper(), path)
-            for method in methods
-            if method.upper() not in {"HEAD", "OPTIONS"}
-        )
+        for raw_method in methods:
+            method = str(raw_method).upper()
+            if method not in {"HEAD", "OPTIONS"}:
+                keys.append((method, path))
     return sorted(key for key, count in Counter(keys).items() if count > 1)
 
 
 def _duplicate_operation_ids(app: FastAPI) -> list[str]:
     operation_ids: list[str] = []
     for route in app.routes:
-        if not isinstance(route, APIRoute) or not route.include_in_schema:
+        if not getattr(route, "include_in_schema", False):
             continue
-        operation_id = route.operation_id or route.unique_id
-        if operation_id:
+        operation_id = getattr(route, "operation_id", None) or getattr(
+            route, "unique_id", None
+        )
+        if isinstance(operation_id, str) and operation_id:
             operation_ids.append(operation_id)
     return sorted(
         operation_id
@@ -142,7 +169,7 @@ def validate_runtime_contract(app: FastAPI) -> None:
         errors.append(f"duplicate runtime route keys: {duplicate_runtime_routes!r}")
 
     runtime_routes = runtime_schema_route_keys(app)
-    schema_routes = openapi_route_keys(app)
+    schema_routes = openapi_route_keys(app, refresh=True)
     missing_from_openapi = sorted(runtime_routes - schema_routes)
     unexpected_in_openapi = sorted(schema_routes - runtime_routes)
     if missing_from_openapi:

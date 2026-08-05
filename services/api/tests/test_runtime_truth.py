@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -17,6 +18,7 @@ from yoru_api.runtime_contract import (
     RUNTIME_STAGE,
     openapi_route_keys,
     runtime_schema_route_keys,
+    schema_route_keys_from_routes,
     validate_runtime_contract,
 )
 
@@ -54,7 +56,16 @@ def test_metadata_reports_runtime_truth(client: TestClient, app: FastAPI) -> Non
 
 
 def test_openapi_matches_runtime_routes(app: FastAPI) -> None:
-    assert runtime_schema_route_keys(app) == openapi_route_keys(app)
+    assert runtime_schema_route_keys(app) == openapi_route_keys(app, refresh=True)
+
+
+def test_runtime_route_discovery_is_not_bound_to_apiroute_identity() -> None:
+    wrapped_route = SimpleNamespace(
+        path="/wrapped",
+        methods={"GET", "HEAD"},
+        include_in_schema=True,
+    )
+    assert schema_route_keys_from_routes([wrapped_route]) == {("GET", "/wrapped")}
 
 
 def test_guard_responses_keep_request_id_security_and_cors(client: TestClient) -> None:
