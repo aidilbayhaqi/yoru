@@ -38,7 +38,13 @@ class FinanceRepository:
     async def list_ledger(self, partner_id, limit): return list(await self._session.scalars(select(LedgerEntry).where(LedgerEntry.partner_id==partner_id).order_by(LedgerEntry.created_at.desc()).limit(limit)))
     async def refund(self,item_id,for_update=False):
         s=select(Refund).where(Refund.id==item_id); s=s.with_for_update() if for_update else s; return await self._session.scalar(s)
-    async def refund_by_key(self,key): return await self._session.scalar(select(Refund).where(Refund.idempotency_key==key))
+    async def refund_by_key(self, requested_by_user_id, key):
+        return await self._session.scalar(
+            select(Refund).where(
+                Refund.requested_by_user_id == requested_by_user_id,
+                Refund.idempotency_key == key,
+            )
+        )
     async def add_refund(self,**v): item=Refund(**v); self._session.add(item); await self._session.flush(); return item
     async def list_refunds(self, customer_id=None, partner_id=None, limit=50):
         s=select(Refund); s=s.where(Refund.customer_id==customer_id) if customer_id else s; s=s.where(Refund.partner_id==partner_id) if partner_id else s
@@ -64,4 +70,6 @@ class FinanceRepository:
     async def add_reconciliation(self,**v): item=ReconciliationRun(**v); self._session.add(item); await self._session.flush(); return item
     def audit(self,actor_id,partner_id,action,resource_type,resource_id,metadata=None): self._session.add(AuditEvent(actor_id=actor_id,partner_id=partner_id,action=action,resource_type=resource_type,resource_id=resource_id,event_metadata=metadata or {}))
     def outbox(self,aggregate_type,aggregate_id,event_type,payload): self._session.add(OutboxEvent(aggregate_type=aggregate_type,aggregate_id=aggregate_id,event_type=event_type,payload=payload))
+    async def rollback(self):
+        await self._session.rollback()
     async def commit(self): await self._session.commit()

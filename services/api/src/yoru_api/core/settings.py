@@ -51,6 +51,15 @@ class Settings(BaseSettings):
     payment_webhook_secret: SecretStr = SecretStr(
         "local-payment-webhook-secret-change-before-production"
     )
+    # YORU_PRIORITY3_PAYMENT_SETTINGS_V1
+    payment_enabled_providers: tuple[str, ...] = ("mock",)
+    midtrans_server_key: SecretStr | None = None
+    midtrans_client_key: SecretStr | None = None
+    midtrans_is_production: bool = False
+    midtrans_snap_base_url: str = ""
+    midtrans_enabled_payments: tuple[str, ...] = ()
+    midtrans_finish_redirect_url: str = ""
+    midtrans_error_redirect_url: str = ""
 
     metrics_enabled: bool = True
     metrics_token: SecretStr | None = None
@@ -64,12 +73,29 @@ class Settings(BaseSettings):
     feature_live_tracking: bool = False
     feature_dental_service: bool = False
 
-    @field_validator("cors_allowed_origins", "trusted_hosts", mode="before")
+    @field_validator(
+        "cors_allowed_origins",
+        "trusted_hosts",
+        "payment_enabled_providers",
+        "midtrans_enabled_payments",
+        mode="before",
+    )
     @classmethod
     def split_csv(cls, value: object) -> object:
         if isinstance(value, str):
             return tuple(item.strip() for item in value.split(",") if item.strip())
         return value
+
+    @field_validator("payment_enabled_providers")
+    @classmethod
+    def validate_payment_providers(
+        cls, value: tuple[str, ...]
+    ) -> tuple[str, ...]:
+        normalized = tuple(dict.fromkeys(item.strip().lower() for item in value if item.strip()))
+        unsupported = set(normalized) - {"mock", "midtrans_snap"}
+        if unsupported:
+            raise ValueError(f"Unsupported payment providers: {sorted(unsupported)}")
+        return normalized or ("mock",)
 
     @field_validator("cookie_domain", mode="before")
     @classmethod
@@ -123,6 +149,14 @@ class Settings(BaseSettings):
             raise ValueError("Production trusted hosts must be explicit public hostnames")
         if "yoru_local_only" in self.database_url or "yoru123" in self.database_url:
             raise ValueError("Production database URL still uses local credentials")
+        if "midtrans_snap" in self.payment_enabled_providers:
+            server_key = (
+                self.midtrans_server_key.get_secret_value()
+                if self.midtrans_server_key
+                else ""
+            )
+            if len(server_key) < 16:
+                raise ValueError("Production Midtrans server key is missing or too short")
         if self.metrics_enabled:
             token = self.metrics_token.get_secret_value() if self.metrics_token else ""
             if len(token) < 32:

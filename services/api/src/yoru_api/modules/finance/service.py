@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime, timedelta
+from sqlalchemy.exc import IntegrityError
 from yoru_api.core.problem import AppError
 from yoru_api.modules.commerce.models import Order, PaymentIntent
 from yoru_api.modules.finance.domain import COMMISSION_BPS, DISPUTE_TRANSITIONS, PAYOUT_TRANSITIONS, REFUND_TRANSITIONS, SETTLEMENT_HOLD_DAYS, calculate_commission, ensure_balanced, ensure_transition, proportional_commission, reference
@@ -61,8 +62,19 @@ class FinanceService:
         bal.pending_amount-=amount; bal.available_amount+=amount; bal.version+=1; item.status='released'; item.released_at=now
         self.r.outbox('settlement',str(item.id),'finance.settlement.released',{'settlement_id':str(item.id)}); await self.r.commit(); return item
     async def create_refund(self,actor,payload:RefundCreate,key):
-        existing=await self.r.refund_by_key(key)
-        if existing: return existing
+        existing=await self.r.refund_by_key(actor.user_id,key)
+        if existing:
+            if (
+                existing.order_id != payload.order_id
+                or existing.amount != payload.amount
+                or existing.reason != payload.reason
+            ):
+                raise AppError(
+                    409,
+                    'IDEMPOTENCY_CONFLICT',
+                    'Idempotency key was already used with a different refund payload',
+                )
+            return existing
         order=await self.r.get_order(payload.order_id)
         if order is None or order.customer_id!=actor.user_id: raise AppError(404,'ORDER_NOT_FOUND','Order not found')
         if order.payment_status not in {'paid','partially_refunded'}: raise AppError(409,'REFUND_ORDER_INVALID','Order is not refundable')
@@ -71,7 +83,35 @@ class FinanceService:
         payment=await self.r.latest_succeeded_payment(order.id)
         if payment is None: raise AppError(409,'REFUND_PAYMENT_MISSING','Succeeded payment not found')
         now=self.now(); item=await self.r.add_refund(order_id=order.id,payment_intent_id=payment.id,dispute_id=None,customer_id=order.customer_id,partner_id=order.partner_id,requested_by_user_id=actor.user_id,reviewed_by_user_id=None,provider=payment.provider,provider_reference=None,idempotency_key=key,amount=payload.amount,currency=order.currency,status='requested',reason=payload.reason,failure_code=None,requested_at=now,reviewed_at=None,processed_at=None)
-        self.r.outbox('refund',str(item.id),'finance.refund.requested',{'refund_id':str(item.id)}); await self.r.commit(); return item
+        self.r.outbox(
+            'refund',
+            str(item.id),
+            'finance.refund.requested',
+            {'refund_id': str(item.id)},
+        )
+        try:
+            await self.r.commit()
+        except IntegrityError as exc:
+            await self.r.rollback()
+            existing = await self.r.refund_by_key(actor.user_id, key)
+            if existing is None:
+                raise AppError(
+                    409,
+                    'IDEMPOTENCY_RACE_CONFLICT',
+                    'A concurrent refund request used the same idempotency key',
+                ) from exc
+            if (
+                existing.order_id != payload.order_id
+                or existing.amount != payload.amount
+                or existing.reason != payload.reason
+            ):
+                raise AppError(
+                    409,
+                    'IDEMPOTENCY_CONFLICT',
+                    'Idempotency key was already used with a different refund payload',
+                ) from exc
+            return existing
+        return item
     async def approve_refund(self,actor,item_id):
         require_permission(actor,'platform.finance.manage',require_mfa=True); item=await self.r.refund(item_id,True)
         if item is None: raise AppError(404,'REFUND_NOT_FOUND','Refund not found')

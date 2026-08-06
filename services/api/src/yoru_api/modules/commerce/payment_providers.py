@@ -61,16 +61,30 @@ def _env_bool(name: str, default: bool = False) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
-def enabled_payment_providers() -> frozenset[str]:
-    raw = os.getenv("PAYMENT_ENABLED_PROVIDERS", "mock")
-    values = {item.strip().lower() for item in raw.split(",") if item.strip()}
+# YORU_PRIORITY3_SETTINGS_DRIVEN_PAYMENT_PROVIDERS_V1
+def enabled_payment_providers(
+    settings: object | None = None,
+) -> frozenset[str]:
+    configured = getattr(settings, "payment_enabled_providers", None)
+    if configured:
+        values = {
+            str(item).strip().lower()
+            for item in configured
+            if str(item).strip()
+        }
+    else:
+        raw = os.getenv("PAYMENT_ENABLED_PROVIDERS", "mock")
+        values = {item.strip().lower() for item in raw.split(",") if item.strip()}
     return frozenset(values or {"mock"})
 
 
-def ensure_payment_provider_enabled(provider: str) -> None:
+def ensure_payment_provider_enabled(
+    provider: str,
+    settings: object | None = None,
+) -> None:
     if provider not in {"mock", "midtrans_snap"}:
         raise AppError(404, "PAYMENT_PROVIDER_NOT_FOUND", "Payment provider not found")
-    if provider not in enabled_payment_providers():
+    if provider not in enabled_payment_providers(settings):
         raise AppError(503, "PAYMENT_PROVIDER_DISABLED", "Payment provider is disabled")
 
 
@@ -137,12 +151,23 @@ def _snap_base_url(settings: object | None) -> str:
     )
     if configured:
         return configured.rstrip("/")
-    if _env_bool("MIDTRANS_IS_PRODUCTION"):
-        return _MIDTRANS_PRODUCTION_URL
-    return _MIDTRANS_SANDBOX_URL
+    configured_production = getattr(settings, "midtrans_is_production", None)
+    production = (
+        bool(configured_production)
+        if configured_production is not None
+        else _env_bool("MIDTRANS_IS_PRODUCTION")
+    )
+    return _MIDTRANS_PRODUCTION_URL if production else _MIDTRANS_SANDBOX_URL
 
 
-def _enabled_payments() -> list[str]:
+def _enabled_payments(settings: object | None) -> list[str]:
+    configured = getattr(settings, "midtrans_enabled_payments", None)
+    if configured:
+        return [
+            str(item).strip()
+            for item in configured
+            if str(item).strip()
+        ]
     raw = os.getenv("MIDTRANS_ENABLED_PAYMENTS", "")
     return [item.strip() for item in raw.split(",") if item.strip()]
 
@@ -157,7 +182,7 @@ async def create_payment(
     idempotency_key: str,
     settings: object | None,
 ) -> PaymentProviderResult:
-    ensure_payment_provider_enabled(provider)
+    ensure_payment_provider_enabled(provider, settings)
     now = datetime.now(UTC)
     if provider == "mock":
         return PaymentProviderResult(
@@ -202,12 +227,22 @@ async def create_payment(
         "custom_field1": str(order_id),
         "custom_field2": idempotency_key[:255],
     }
-    enabled_payments = _enabled_payments()
+    enabled_payments = _enabled_payments(settings)
     if enabled_payments:
         body["enabled_payments"] = enabled_payments
 
-    finish_url = os.getenv("MIDTRANS_FINISH_REDIRECT_URL", "").strip()
-    error_url = os.getenv("MIDTRANS_ERROR_REDIRECT_URL", "").strip()
+    finish_url = _setting_value(
+        settings,
+        "midtrans_finish_redirect_url",
+        "MIDTRANS_FINISH_REDIRECT_URL",
+        "",
+    )
+    error_url = _setting_value(
+        settings,
+        "midtrans_error_redirect_url",
+        "MIDTRANS_ERROR_REDIRECT_URL",
+        "",
+    )
     callbacks: dict[str, str] = {}
     if finish_url:
         callbacks["finish"] = finish_url
@@ -397,7 +432,7 @@ def parse_payment_webhook(
     headers: Mapping[str, str],
     settings: object | None,
 ) -> tuple[PaymentWebhookPayload, dict[str, object]]:
-    ensure_payment_provider_enabled(provider)
+    ensure_payment_provider_enabled(provider, settings)
     if provider == "mock":
         return _parse_mock_webhook(raw_body=raw_body, headers=headers, settings=settings)
     return _parse_midtrans_webhook(raw_body=raw_body, settings=settings)

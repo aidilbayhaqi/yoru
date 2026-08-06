@@ -103,6 +103,11 @@ def _session_response(actor: Actor) -> SessionResponse:
     )
 
 
+# YORU_PRIORITY3_DYNAMIC_REFRESH_COOKIE_PATH_V1
+def _refresh_cookie_path(settings: Settings) -> str:
+    return f"{settings.api_v1_prefix}/auth"
+
+
 def _set_session_cookies(
     response: Response,
     *,
@@ -127,7 +132,7 @@ def _set_session_cookies(
         httponly=True,
         samesite="lax",
         domain=settings.cookie_domain,
-        path="/api/v1/auth",
+        path=_refresh_cookie_path(settings),
     )
     response.set_cookie(
         CSRF_COOKIE,
@@ -149,7 +154,7 @@ def _clear_session_cookies(response: Response, settings: Settings) -> None:
     response.delete_cookie(
         REFRESH_COOKIE,
         domain=settings.cookie_domain,
-        path="/api/v1/auth",
+        path=_refresh_cookie_path(settings),
     )
     response.delete_cookie(CSRF_COOKIE, domain=settings.cookie_domain, path="/")
     response.headers["Cache-Control"] = "no-store"

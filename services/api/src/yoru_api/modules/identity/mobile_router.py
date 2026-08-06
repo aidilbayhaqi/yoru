@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Request, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Request, Response, status
+from yoru_api.core.problem import AppError
+from yoru_api.modules.identity.permissions import Actor
 
 from yoru_api.modules.identity.rate_limit import LoginRateLimiter
 from yoru_api.modules.identity.router import (
-    CurrentActor,
     IdentityServiceDependency,
     _request_ip_prefix,
     _session_response,
@@ -16,9 +19,29 @@ from yoru_api.modules.identity.schemas import (
     SessionResponse,
 )
 from yoru_api.modules.identity.security import TokenPair
-from yoru_api.modules.identity.transport import validate_request_origin
+from yoru_api.modules.identity.transport import (
+    bearer_token_from_request,
+    validate_request_origin,
+)
 
 router = APIRouter(prefix="/mobile/auth", tags=["Mobile Authentication"])
+
+# YORU_PRIORITY3_MOBILE_BEARER_AUTH_V1
+async def get_current_mobile_actor(
+    request: Request,
+    service: IdentityServiceDependency,
+) -> Actor:
+    token = bearer_token_from_request(request)
+    if token is None:
+        raise AppError(
+            401,
+            "AUTHENTICATION_REQUIRED",
+            "Mobile endpoints require a Bearer access token",
+        )
+    return await service.authenticate_access(token)
+
+
+MobileActor = Annotated[Actor, Depends(get_current_mobile_actor)]
 
 
 def _disable_caching(response: Response) -> None:
@@ -28,7 +51,7 @@ def _disable_caching(response: Response) -> None:
 
 def _token_response(
     *,
-    actor: CurrentActor,
+    actor: Actor,
     tokens: TokenPair,
     request: Request,
 ) -> MobileTokenResponse:
@@ -113,14 +136,14 @@ async def refresh(
 
 
 @router.get("/me", response_model=SessionResponse)
-async def me(actor: CurrentActor, response: Response) -> SessionResponse:
+async def me(actor: MobileActor, response: Response) -> SessionResponse:
     _disable_caching(response)
     return _session_response(actor)
 
 
 @router.post("/logout", response_model=MessageResponse)
 async def logout(
-    actor: CurrentActor,
+    actor: MobileActor,
     response: Response,
     service: IdentityServiceDependency,
 ) -> MessageResponse:
@@ -131,7 +154,7 @@ async def logout(
 
 @router.post("/logout-all", response_model=MessageResponse)
 async def logout_all(
-    actor: CurrentActor,
+    actor: MobileActor,
     response: Response,
     service: IdentityServiceDependency,
 ) -> MessageResponse:

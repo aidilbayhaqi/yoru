@@ -14,7 +14,7 @@
     "phase-8-partner-copilot",
     "phase-9-hardening-production-launch"
   ],
-  "alembic_head": "20260805_0012",
+  "alembic_head": "20260806_0013",
   "package_mode": "incremental-patch",
   "released_at": "2026-08-02"
 }

@@ -54,7 +54,7 @@ class Settlement(Base):
 
 class Refund(Base):
     __tablename__ = "refunds"
-    __table_args__ = (UniqueConstraint("idempotency_key", name="uq_refunds_idempotency"), Index("ix_refunds_order_status", "order_id", "status"), CheckConstraint("amount > 0", name="ck_refunds_amount_positive"),)
+    __table_args__ = (UniqueConstraint("requested_by_user_id", "idempotency_key", name="uq_refunds_requester_key"), Index("ix_refunds_order_status", "order_id", "status"), CheckConstraint("amount > 0", name="ck_refunds_amount_positive"),)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     order_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("orders.id", ondelete="RESTRICT"), nullable=False)
     payment_intent_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("payment_intents.id", ondelete="RESTRICT"), nullable=False)
