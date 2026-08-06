@@ -40,3 +40,7 @@ Thumbs.db
 .yoru-hardening-backup/
 .yoru-last-*
 migrate-error.txt
+
+# Yoru generated artifacts
+*.tsbuildinfo
+_audit/

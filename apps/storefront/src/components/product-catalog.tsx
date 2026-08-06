@@ -7,11 +7,7 @@ import { Icon } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { Product } from "@/lib/storefront-types";
-import {
-  filterProducts,
-  type ProductFilters,
-  type ProductSort,
-} from "@/lib/storefront-filters";
+import { filterProducts, type ProductFilters, type ProductSort } from "@/lib/storefront-filters";
 
 const defaultFilters: ProductFilters = {
   query: "",
@@ -27,8 +23,14 @@ const PAGE_SIZE = 6;
 
 export function ProductCatalog({ items }: { items: Product[] }) {
   const [filters, setFilters] = useState<ProductFilters>(defaultFilters);
-  const productCategories = useMemo(() => ["Semua", ...new Set(items.map((product) => product.category))], [items]);
-  const partners = useMemo(() => ["Semua", ...new Set(items.map((product) => product.partner))], [items]);
+  const productCategories = useMemo(
+    () => ["Semua", ...new Set(items.map((product) => product.category))],
+    [items],
+  );
+  const partners = useMemo(
+    () => ["Semua", ...new Set(items.map((product) => product.partner))],
+    [items],
+  );
   const [searchInput, setSearchInput] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -39,14 +41,8 @@ export function ProductCatalog({ items }: { items: Product[] }) {
     () => ({ ...filters, query: debouncedQuery }),
     [debouncedQuery, filters],
   );
-  const results = useMemo(
-    () => filterProducts(items, effectiveFilters),
-    [effectiveFilters, items],
-  );
-  const visibleResults = useMemo(
-    () => results.slice(0, visibleCount),
-    [results, visibleCount],
-  );
+  const results = useMemo(() => filterProducts(items, effectiveFilters), [effectiveFilters, items]);
+  const visibleResults = useMemo(() => results.slice(0, visibleCount), [results, visibleCount]);
   const isFiltering = searchInput.trim() !== debouncedQuery.trim();
   const activeCount = useMemo(
     () =>
@@ -103,7 +99,9 @@ export function ProductCatalog({ items }: { items: Product[] }) {
         <div className="filter-section__heading">
           <span>Kategori</span>
           {filters.category !== "Semua" ? (
-            <button onClick={() => update("category", "Semua")} type="button">Reset</button>
+            <button onClick={() => update("category", "Semua")} type="button">
+              Reset
+            </button>
           ) : null}
         </div>
         <div className="filter-choice-grid">
@@ -124,9 +122,14 @@ export function ProductCatalog({ items }: { items: Product[] }) {
       <div className="filter-section filter-section--stacked">
         <label className="filter-field">
           <span className="filter-label">Partner</span>
-          <select onChange={(event) => update("partner", event.target.value)} value={filters.partner}>
+          <select
+            onChange={(event) => update("partner", event.target.value)}
+            value={filters.partner}
+          >
             {partners.map((partner) => (
-              <option key={partner} value={partner}>{partner}</option>
+              <option key={partner} value={partner}>
+                {partner}
+              </option>
             ))}
           </select>
         </label>
@@ -134,7 +137,9 @@ export function ProductCatalog({ items }: { items: Product[] }) {
         <label className="filter-field">
           <span className="filter-label">Harga maksimum</span>
           <select
-            onChange={(event) => update("maxPriceMinor", event.target.value ? Number(event.target.value) : null)}
+            onChange={(event) =>
+              update("maxPriceMinor", event.target.value ? Number(event.target.value) : null)
+            }
             value={filters.maxPriceMinor ?? ""}
           >
             <option value="">Semua harga</option>
@@ -190,7 +195,10 @@ export function ProductCatalog({ items }: { items: Product[] }) {
           <h1>Produk terpilih, tanpa katalog yang terasa penuh.</h1>
           <p>Gunakan pencarian dan filter untuk mempersempit pilihan berdasarkan kebutuhanmu.</p>
         </div>
-        <div className="v5-catalog-hero__stat"><strong>{items.length}</strong><span>produk terkurasi</span></div>
+        <div className="v5-catalog-hero__stat">
+          <strong>{items.length}</strong>
+          <span>produk terkurasi</span>
+        </div>
       </section>
 
       <section className="catalog-browser v5-catalog-browser">
@@ -203,7 +211,11 @@ export function ProductCatalog({ items }: { items: Product[] }) {
               <span>{activeCount > 0 ? `${activeCount} filter aktif` : "Semua koleksi"}</span>
             </div>
             <div className="v5-toolbar-actions">
-              <button className="mobile-filter-button" onClick={() => setFilterOpen(true)} type="button">
+              <button
+                className="mobile-filter-button"
+                onClick={() => setFilterOpen(true)}
+                type="button"
+              >
                 <Icon name="menu" width="17" /> Filter
                 {activeCount > 0 ? <span>{activeCount}</span> : null}
               </button>
@@ -221,21 +233,61 @@ export function ProductCatalog({ items }: { items: Product[] }) {
                 </select>
               </label>
               <div className="view-switcher" aria-label="Tampilan katalog">
-                <button aria-label="Tampilan grid" className={view === "grid" ? "is-active" : ""} onClick={() => setView("grid")} type="button">▦</button>
-                <button aria-label="Tampilan daftar" className={view === "list" ? "is-active" : ""} onClick={() => setView("list")} type="button">☷</button>
+                <button
+                  aria-label="Tampilan grid"
+                  className={view === "grid" ? "is-active" : ""}
+                  onClick={() => setView("grid")}
+                  type="button"
+                >
+                  ▦
+                </button>
+                <button
+                  aria-label="Tampilan daftar"
+                  className={view === "list" ? "is-active" : ""}
+                  onClick={() => setView("list")}
+                  type="button"
+                >
+                  ☷
+                </button>
               </div>
             </div>
           </div>
 
           {activeCount > 0 ? (
             <div className="active-filter-row" aria-label="Filter aktif">
-              {searchInput.trim() ? <button onClick={() => setSearchInput("")} type="button">“{searchInput.trim()}” <span>×</span></button> : null}
-              {filters.category !== "Semua" ? <button onClick={() => update("category", "Semua")} type="button">{filters.category} <span>×</span></button> : null}
-              {filters.partner !== "Semua" ? <button onClick={() => update("partner", "Semua")} type="button">{filters.partner} <span>×</span></button> : null}
-              {filters.maxPriceMinor !== null ? <button onClick={() => update("maxPriceMinor", null)} type="button">Batas harga <span>×</span></button> : null}
-              {filters.minRating > 0 ? <button onClick={() => update("minRating", 0)} type="button">Rating {filters.minRating}+ <span>×</span></button> : null}
-              {filters.onlyInStock ? <button onClick={() => update("onlyInStock", false)} type="button">Ready stock <span>×</span></button> : null}
-              <button className="active-filter-reset" onClick={reset} type="button">Hapus semua</button>
+              {searchInput.trim() ? (
+                <button onClick={() => setSearchInput("")} type="button">
+                  “{searchInput.trim()}” <span>×</span>
+                </button>
+              ) : null}
+              {filters.category !== "Semua" ? (
+                <button onClick={() => update("category", "Semua")} type="button">
+                  {filters.category} <span>×</span>
+                </button>
+              ) : null}
+              {filters.partner !== "Semua" ? (
+                <button onClick={() => update("partner", "Semua")} type="button">
+                  {filters.partner} <span>×</span>
+                </button>
+              ) : null}
+              {filters.maxPriceMinor !== null ? (
+                <button onClick={() => update("maxPriceMinor", null)} type="button">
+                  Batas harga <span>×</span>
+                </button>
+              ) : null}
+              {filters.minRating > 0 ? (
+                <button onClick={() => update("minRating", 0)} type="button">
+                  Rating {filters.minRating}+ <span>×</span>
+                </button>
+              ) : null}
+              {filters.onlyInStock ? (
+                <button onClick={() => update("onlyInStock", false)} type="button">
+                  Ready stock <span>×</span>
+                </button>
+              ) : null}
+              <button className="active-filter-reset" onClick={reset} type="button">
+                Hapus semua
+              </button>
             </div>
           ) : null}
 
@@ -243,11 +295,19 @@ export function ProductCatalog({ items }: { items: Product[] }) {
             <CatalogGridSkeleton label="Menyaring produk" view={view} />
           ) : results.length > 0 ? (
             <>
-              <div className={`catalog-grid catalog-grid--filtered ${view === "list" ? "is-list" : ""}`}>
-                {visibleResults.map((product) => <ProductCard key={product.id} product={product} />)}
+              <div
+                className={`catalog-grid catalog-grid--filtered ${view === "list" ? "is-list" : ""}`}
+              >
+                {visibleResults.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
               </div>
               {visibleCount < results.length ? (
-                <button className="secondary-button load-more-button" onClick={() => setVisibleCount((value) => value + PAGE_SIZE)} type="button">
+                <button
+                  className="secondary-button load-more-button"
+                  onClick={() => setVisibleCount((value) => value + PAGE_SIZE)}
+                  type="button"
+                >
                   Tampilkan lebih banyak
                   <Icon name="plus" width="17" />
                 </button>
@@ -255,10 +315,14 @@ export function ProductCatalog({ items }: { items: Product[] }) {
             </>
           ) : (
             <section className="filter-empty-state">
-              <span><Icon name="search" width="24" /></span>
+              <span>
+                <Icon name="search" width="24" />
+              </span>
               <h2>Belum ada hasil yang cocok</h2>
               <p>Coba longgarkan kategori, harga, rating, partner, atau kata pencarian.</p>
-              <button className="secondary-button" onClick={reset} type="button">Reset filter</button>
+              <button className="secondary-button" onClick={reset} type="button">
+                Reset filter
+              </button>
             </section>
           )}
         </div>
@@ -268,13 +332,36 @@ export function ProductCatalog({ items }: { items: Product[] }) {
         <div className="filter-drawer-backdrop" onMouseDown={() => setFilterOpen(false)}>
           <div className="filter-drawer" onMouseDown={(event) => event.stopPropagation()}>
             <div className="filter-drawer__heading">
-              <div><span>Filter produk</span><small>{results.length} hasil</small></div>
-              <button aria-label="Tutup filter" className="icon-button" onClick={() => setFilterOpen(false)} type="button"><Icon name="close" width="19" /></button>
+              <div>
+                <span>Filter produk</span>
+                <small>{results.length} hasil</small>
+              </div>
+              <button
+                aria-label="Tutup filter"
+                className="icon-button"
+                onClick={() => setFilterOpen(false)}
+                type="button"
+              >
+                <Icon name="close" width="19" />
+              </button>
             </div>
             <div className="filter-drawer__body">{filterPanel}</div>
             <div className="filter-drawer__footer">
-              <button className="secondary-button" disabled={activeCount === 0} onClick={reset} type="button">Reset</button>
-              <button className="primary-button filter-apply-button" onClick={() => setFilterOpen(false)} type="button">Lihat {results.length} produk</button>
+              <button
+                className="secondary-button"
+                disabled={activeCount === 0}
+                onClick={reset}
+                type="button"
+              >
+                Reset
+              </button>
+              <button
+                className="primary-button filter-apply-button"
+                onClick={() => setFilterOpen(false)}
+                type="button"
+              >
+                Lihat {results.length} produk
+              </button>
             </div>
           </div>
         </div>

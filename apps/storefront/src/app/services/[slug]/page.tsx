@@ -16,5 +16,11 @@ export default async function ServicePage({ params }: Props) {
   const { slug } = await params;
   const service = serviceBySlug(slug);
   if (!service) notFound();
-  return <><SiteHeader /><ServiceDetail service={service} /><SiteFooter /></>;
+  return (
+    <>
+      <SiteHeader />
+      <ServiceDetail service={service} />
+      <SiteFooter />
+    </>
+  );
 }

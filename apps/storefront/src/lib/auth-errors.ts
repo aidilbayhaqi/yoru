@@ -10,14 +10,12 @@ const knownMessages: Record<string, string> = {
   ACCOUNT_EXISTS:
     "Email ini sudah terdaftar. Masuk dengan akun tersebut atau gunakan alamat email lain.",
   INVALID_CREDENTIALS: "Email atau password tidak cocok.",
-  AUTH_RATE_LIMITED:
-    "Terlalu banyak percobaan. Tunggu beberapa saat sebelum mencoba kembali.",
+  AUTH_RATE_LIMITED: "Terlalu banyak percobaan. Tunggu beberapa saat sebelum mencoba kembali.",
   AUTH_PROTECTION_UNAVAILABLE:
     "Layanan perlindungan autentikasi sedang tidak tersedia. Coba kembali nanti.",
   ORIGIN_DENIED:
     "Alamat storefront belum diizinkan oleh API. Periksa CORS_ALLOWED_ORIGINS pada backend.",
-  CSRF_VALIDATION_FAILED:
-    "Sesi keamanan tidak valid. Muat ulang halaman lalu coba kembali.",
+  CSRF_VALIDATION_FAILED: "Sesi keamanan tidak valid. Muat ulang halaman lalu coba kembali.",
   AUTHENTICATION_REQUIRED: "Silakan masuk untuk melanjutkan.",
   INVALID_SESSION: "Sesi sudah berakhir. Silakan masuk kembali.",
 };
@@ -29,7 +27,6 @@ const fieldLabels: Record<string, string> = {
   confirm_password: "konfirmasi password",
   terms: "persetujuan syarat",
 };
-
 
 function translateFieldMessage(field: string, message: string): string {
   const value = message.toLowerCase();
@@ -130,10 +127,7 @@ export function presentAuthError(
   };
 }
 
-export function validateLogin(input: {
-  email: string;
-  password: string;
-}): Record<string, string> {
+export function validateLogin(input: { email: string; password: string }): Record<string, string> {
   const errors: Record<string, string> = {};
   const email = input.email.trim();
 

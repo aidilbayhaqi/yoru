@@ -8,7 +8,7 @@
     position: fixed;
     inset: 0;
     z-index: 90;
-    background: rgba(5, 5, 7, 0.30);
+    background: rgba(5, 5, 7, 0.3);
     backdrop-filter: none;
   }
 
@@ -366,7 +366,7 @@
     padding: 14px 16px !important;
     border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 16px !important;
-    background: rgba(255, 255, 255, 0.90) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
     color: #18181b !important;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16);
     backdrop-filter: blur(14px);

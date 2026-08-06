@@ -8,6 +8,8 @@ COPY packages/ui/package.json packages/ui/package.json
 RUN pnpm install --frozen-lockfile
 
 FROM dependencies AS builder
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 COPY apps/storefront apps/storefront
 COPY packages packages
 RUN pnpm --filter @yoru/storefront build

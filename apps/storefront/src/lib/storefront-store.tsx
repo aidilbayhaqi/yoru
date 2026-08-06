@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
 import { buildBooking, buildOrder, randomId } from "@/lib/storefront-domain";
 import { products, services } from "@/lib/storefront-data";
@@ -194,9 +188,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
         quantity <= 0
           ? current.cart.filter((line) => line.lineId !== lineId)
           : current.cart.map((line) =>
-              line.lineId === lineId
-                ? { ...line, quantity: Math.min(20, quantity) }
-                : line,
+              line.lineId === lineId ? { ...line, quantity: Math.min(20, quantity) } : line,
             ),
     }));
   }
@@ -336,9 +328,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
           timeline: appendTimeline(
             order.timeline,
             "Pesanan dibatalkan",
-            wasPaid
-              ? `${reason} Pembayaran demo dikembalikan.`
-              : reason,
+            wasPaid ? `${reason} Pembayaran demo dikembalikan.` : reason,
             updatedAt,
           ),
         };
@@ -357,10 +347,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
               status: "delivered",
               fulfillmentStatus: "delivered",
               updatedAt,
-              timeline: completeTimeline(order.timeline, [
-                "Dalam pengiriman",
-                "Selesai",
-              ]),
+              timeline: completeTimeline(order.timeline, ["Dalam pengiriman", "Selesai"]),
             }
           : order,
       ),
@@ -407,9 +394,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
           timeline: appendTimeline(
             booking.timeline,
             "Booking dibatalkan",
-            wasPaid
-              ? `${reason} Pembayaran demo dikembalikan.`
-              : reason,
+            wasPaid ? `${reason} Pembayaran demo dikembalikan.` : reason,
             updatedAt,
           ),
         };
@@ -468,11 +453,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
     rescheduleBooking,
   };
 
-  return (
-    <StorefrontContext.Provider value={value}>
-      {children}
-    </StorefrontContext.Provider>
-  );
+  return <StorefrontContext.Provider value={value}>{children}</StorefrontContext.Provider>;
 }
 
 export function useStorefront(): StorefrontContextValue {

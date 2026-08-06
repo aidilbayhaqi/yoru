@@ -27,16 +27,16 @@ flowchart LR
 
 ## 3. Container view
 
-| Container | Tanggung jawab | Tidak boleh |
-| --- | --- | --- |
-| `apps/storefront` | Ecommerce customer, booking, account, tracking, AI advisor | Menghitung harga/komisi sebagai authority |
-| `apps/console` | Partner dashboard, professional workspace, admin operations | Melewati permission API |
-| `services/api` | Business rules, auth, orchestration, transaction boundary | Menjalankan job lama dalam request |
-| `services/worker` | Outbox, webhook retry, notification, indexing, AI jobs | Menjadi system of record |
-| PostgreSQL | Data transaksi, ledger, audit, state | Menyimpan file besar |
-| Redis | Cache, rate-limit counter, ephemeral locks, job coordination | Menyimpan ledger/order sebagai satu-satunya copy |
-| Qdrant | Semantic retrieval dengan tenant payload | Menyimpan raw image/PII atau angka finansial authority |
-| Object storage | Product assets, verification docs, private photo objects | Public bucket untuk data sensitif |
+| Container         | Tanggung jawab                                               | Tidak boleh                                            |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| `apps/storefront` | Ecommerce customer, booking, account, tracking, AI advisor   | Menghitung harga/komisi sebagai authority              |
+| `apps/console`    | Partner dashboard, professional workspace, admin operations  | Melewati permission API                                |
+| `services/api`    | Business rules, auth, orchestration, transaction boundary    | Menjalankan job lama dalam request                     |
+| `services/worker` | Outbox, webhook retry, notification, indexing, AI jobs       | Menjadi system of record                               |
+| PostgreSQL        | Data transaksi, ledger, audit, state                         | Menyimpan file besar                                   |
+| Redis             | Cache, rate-limit counter, ephemeral locks, job coordination | Menyimpan ledger/order sebagai satu-satunya copy       |
+| Qdrant            | Semantic retrieval dengan tenant payload                     | Menyimpan raw image/PII atau angka finansial authority |
+| Object storage    | Product assets, verification docs, private photo objects     | Public bucket untuk data sensitif                      |
 
 ## 4. Frontend boundaries
 
@@ -166,17 +166,17 @@ transactional outbox agar event tidak hilang di antara commit dan publish.
 
 ## 7. Source-of-truth matrix
 
-| Data | Source of truth | Derived/cache |
-| --- | --- | --- |
-| User, role, membership | PostgreSQL | Redis session/cache |
-| Product/service | PostgreSQL | Redis/API cache, Qdrant embeddings |
-| Stock available | PostgreSQL stock/reservation | Redis read cache opsional |
-| Order/booking state | PostgreSQL | Search/read model |
-| Payment state | PostgreSQL setelah verified webhook | Provider reference |
-| Ledger/balance | PostgreSQL ledger entries | Materialized balance |
-| Live location | Redis/time-series store sementara | Last-known snapshot di PostgreSQL bila perlu |
-| AI recommendation | Request/result record terbatas | Qdrant retrieval |
-| Revenue insight | SQL analytics snapshot | LLM narrative |
+| Data                   | Source of truth                     | Derived/cache                                |
+| ---------------------- | ----------------------------------- | -------------------------------------------- |
+| User, role, membership | PostgreSQL                          | Redis session/cache                          |
+| Product/service        | PostgreSQL                          | Redis/API cache, Qdrant embeddings           |
+| Stock available        | PostgreSQL stock/reservation        | Redis read cache opsional                    |
+| Order/booking state    | PostgreSQL                          | Search/read model                            |
+| Payment state          | PostgreSQL setelah verified webhook | Provider reference                           |
+| Ledger/balance         | PostgreSQL ledger entries           | Materialized balance                         |
+| Live location          | Redis/time-series store sementara   | Last-known snapshot di PostgreSQL bila perlu |
+| AI recommendation      | Request/result record terbatas      | Qdrant retrieval                             |
+| Revenue insight        | SQL analytics snapshot              | LLM narrative                                |
 
 ## 8. Scalability strategy
 

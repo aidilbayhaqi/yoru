@@ -23,9 +23,7 @@ describe("parseApiErrorPayload", () => {
 
     expect(result.code).toBe("REQUEST_VALIDATION_FAILED");
     expect(result.requestId).toBe("req-422");
-    expect(result.fieldErrors.email).toEqual([
-      "value is not a valid email address",
-    ]);
+    expect(result.fieldErrors.email).toEqual(["value is not a valid email address"]);
   });
 
   it("remains compatible with FastAPI's default validation payload", () => {
@@ -43,9 +41,7 @@ describe("parseApiErrorPayload", () => {
       "header-request-id",
     );
 
-    expect(result.fieldErrors.full_name).toEqual([
-      "String should have at least 2 characters",
-    ]);
+    expect(result.fieldErrors.full_name).toEqual(["String should have at least 2 characters"]);
     expect(result.requestId).toBe("header-request-id");
   });
 });

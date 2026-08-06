@@ -73,7 +73,9 @@ export function SiteHeader() {
           <nav className="commerce-nav" aria-label="Navigasi utama">
             {navigation.map((item) => (
               <Link
-                className={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "is-active" : ""}
+                className={
+                  pathname === item.href || pathname.startsWith(`${item.href}/`) ? "is-active" : ""
+                }
                 href={item.href}
                 key={item.href}
               >
@@ -82,7 +84,11 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <button className="header-search header-search--button" onClick={() => openSearch("query")} type="button">
+          <button
+            className="header-search header-search--button"
+            onClick={() => openSearch("query")}
+            type="button"
+          >
             <Icon name="search" width="18" />
             <span>Cari produk, layanan, atau gambar</span>
             <kbd>⌘K</kbd>
@@ -97,11 +103,19 @@ export function SiteHeader() {
               title={`Mode ${theme === "dark" ? "terang" : "gelap"}`}
               type="button"
             >
-              <span className="theme-toggle__track" aria-hidden="true"><span /></span>
-              <span className="visually-hidden">{theme === "dark" ? "Mode gelap aktif" : "Mode terang aktif"}</span>
+              <span className="theme-toggle__track" aria-hidden="true">
+                <span />
+              </span>
+              <span className="visually-hidden">
+                {theme === "dark" ? "Mode gelap aktif" : "Mode terang aktif"}
+              </span>
             </button>
 
-            <Link aria-label="Wishlist" className="icon-button header-action-secondary" href="/wishlist">
+            <Link
+              aria-label="Wishlist"
+              className="icon-button header-action-secondary"
+              href="/wishlist"
+            >
               <Icon name="heart" width="19" />
             </Link>
 
@@ -113,7 +127,11 @@ export function SiteHeader() {
               <Icon name="user" width="19" />
             </Link>
 
-            <Link aria-label={`Keranjang berisi ${cartCount} item`} className="icon-button" href="/cart">
+            <Link
+              aria-label={`Keranjang berisi ${cartCount} item`}
+              className="icon-button"
+              href="/cart"
+            >
               <Icon name="bag" width="19" />
               {cartCount > 0 ? <span className="cart-count">{cartCount}</span> : null}
             </Link>
@@ -150,8 +168,12 @@ export function SiteHeader() {
                 <Icon name="arrow" width="18" />
               </Link>
             ))}
-            <Link href="/wishlist" onClick={() => setMobileOpen(false)}>Wishlist <Icon name="arrow" width="18" /></Link>
-            <Link href="/history" onClick={() => setMobileOpen(false)}>Riwayat transaksi <Icon name="arrow" width="18" /></Link>
+            <Link href="/wishlist" onClick={() => setMobileOpen(false)}>
+              Wishlist <Icon name="arrow" width="18" />
+            </Link>
+            <Link href="/history" onClick={() => setMobileOpen(false)}>
+              Riwayat transaksi <Icon name="arrow" width="18" />
+            </Link>
             <Link href={session ? "/account" : "/login"} onClick={() => setMobileOpen(false)}>
               {session ? "Akun saya" : "Masuk"}
               <Icon name="arrow" width="18" />

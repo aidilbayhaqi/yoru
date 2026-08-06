@@ -21,15 +21,17 @@ function paymentLabel(status: DemoOrder["paymentStatus"]): string {
 
 function fulfillmentLabel(order: DemoOrder): string {
   const status = order.fulfillmentStatus ?? order.status;
-  return {
-    unfulfilled: "Belum diproses",
-    packing: "Sedang dikemas",
-    processing: "Sedang diproses",
-    shipped: "Dalam pengiriman",
-    delivered: "Sudah diterima",
-    cancelled: "Dibatalkan",
-    awaiting_payment: "Menunggu pembayaran",
-  }[status] ?? status;
+  return (
+    {
+      unfulfilled: "Belum diproses",
+      packing: "Sedang dikemas",
+      processing: "Sedang diproses",
+      shipped: "Dalam pengiriman",
+      delivered: "Sudah diterima",
+      cancelled: "Dibatalkan",
+      awaiting_payment: "Menunggu pembayaran",
+    }[status] ?? status
+  );
 }
 
 function bookingLabel(status: DemoBooking["status"]): string {
@@ -45,13 +47,7 @@ function bookingLabel(status: DemoBooking["status"]): string {
   }[status];
 }
 
-function Progress({
-  completed,
-  total,
-}: {
-  completed: number;
-  total: number;
-}) {
+function Progress({ completed, total }: { completed: number; total: number }) {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   return (
     <div
@@ -96,9 +92,7 @@ export function TransactionHistory() {
         order.paymentStatus,
         order.fulfillmentStatus ?? "",
         order.trackingNumber ?? "",
-        ...order.items.map(
-          (line) => productById(line.productId)?.name ?? line.productId,
-        ),
+        ...order.items.map((line) => productById(line.productId)?.name ?? line.productId),
       ]
         .join(" ")
         .toLowerCase(),
@@ -127,9 +121,7 @@ export function TransactionHistory() {
         return matchesType && (!normalized || item.searchable.includes(normalized));
       })
       .sort(
-        (left, right) =>
-          new Date(right.occurredAt).getTime() -
-          new Date(left.occurredAt).getTime(),
+        (left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime(),
       );
   }, [filter, query, state.bookings, state.orders]);
 
@@ -163,10 +155,7 @@ export function TransactionHistory() {
   }
 
   function handleCancelBooking(booking: DemoBooking) {
-    const reason = window.prompt(
-      "Alasan pembatalan booking:",
-      "Jadwal tidak lagi sesuai.",
-    );
+    const reason = window.prompt("Alasan pembatalan booking:", "Jadwal tidak lagi sesuai.");
     if (!reason?.trim()) return;
     cancelBooking(booking.id, reason.trim());
     announce("Booking dibatalkan dan status refund diperbarui.");
@@ -179,8 +168,8 @@ export function TransactionHistory() {
           <p className="section-eyebrow">Customer transaction center</p>
           <h1>Riwayat dan tracking.</h1>
           <p>
-            Pantau pembayaran, proses partner, pengiriman, booking, profesional,
-            refund, serta dispute dari satu halaman.
+            Pantau pembayaran, proses partner, pengiriman, booking, profesional, refund, serta
+            dispute dari satu halaman.
           </p>
         </div>
         <div className="history-summary">
@@ -198,13 +187,9 @@ export function TransactionHistory() {
               {
                 [
                   ...state.orders.filter(
-                    (order) =>
-                      order.paymentStatus === "pending" ||
-                      order.status === "shipped",
+                    (order) => order.paymentStatus === "pending" || order.status === "shipped",
                   ),
-                  ...state.bookings.filter(
-                    (booking) => booking.status === "requested",
-                  ),
+                  ...state.bookings.filter((booking) => booking.status === "requested"),
                 ].length
               }
             </strong>
@@ -251,11 +236,13 @@ export function TransactionHistory() {
 
       {state.orders.length === 0 && state.bookings.length === 0 ? (
         <section className="history-empty">
-          <span><Icon name="clock" width="30" /></span>
+          <span>
+            <Icon name="clock" width="30" />
+          </span>
           <h2>Belum ada riwayat transaksi.</h2>
           <p>
-            Lakukan checkout atau booking pertama. Untuk menguji seluruh status
-            sekarang, muat contoh riwayat development.
+            Lakukan checkout atau booking pertama. Untuk menguji seluruh status sekarang, muat
+            contoh riwayat development.
           </p>
           <div>
             <button
@@ -284,15 +271,12 @@ export function TransactionHistory() {
           {records.map((item) => {
             if (item.kind === "order") {
               const order = item.record;
-              const completed = order.timeline.filter(
-                (timeline) => timeline.completed,
-              ).length;
+              const completed = order.timeline.filter((timeline) => timeline.completed).length;
               const canCancel =
                 ["awaiting_payment", "processing"].includes(order.status) &&
                 order.fulfillmentStatus !== "shipped";
               const canConfirm =
-                order.status === "shipped" ||
-                order.fulfillmentStatus === "shipped";
+                order.status === "shipped" || order.fulfillmentStatus === "shipped";
               const canRefund =
                 order.paymentStatus === "paid" &&
                 !["cancelled"].includes(order.status) &&
@@ -314,8 +298,7 @@ export function TransactionHistory() {
                     <div>
                       <span>Status pembayaran</span>
                       <strong>{paymentLabel(order.paymentStatus)}</strong>
-                      {order.paymentExpiresAt &&
-                      order.paymentStatus === "pending" ? (
+                      {order.paymentExpiresAt && order.paymentStatus === "pending" ? (
                         <small>
                           Batas{" "}
                           {new Intl.DateTimeFormat("id-ID", {
@@ -360,17 +343,13 @@ export function TransactionHistory() {
                   <div className="history-card__items">
                     {order.items.map((line) => (
                       <span key={line.lineId}>
-                        {line.quantity}×{" "}
-                        {productById(line.productId)?.name ?? "Produk Yoru"}
+                        {line.quantity}× {productById(line.productId)?.name ?? "Produk Yoru"}
                       </span>
                     ))}
                   </div>
 
                   <div className="history-card__actions">
-                    <Link
-                      className="secondary-button"
-                      href={`/orders/${order.id}`}
-                    >
+                    <Link className="secondary-button" href={`/orders/${order.id}`}>
                       Detail dan timeline
                     </Link>
                     {order.paymentStatus === "pending" ? (
@@ -421,9 +400,7 @@ export function TransactionHistory() {
             }
 
             const booking = item.record;
-            const completed = booking.timeline.filter(
-              (timeline) => timeline.completed,
-            ).length;
+            const completed = booking.timeline.filter((timeline) => timeline.completed).length;
             const canModify = ![
               "en_route",
               "arrived",
@@ -433,10 +410,7 @@ export function TransactionHistory() {
             ].includes(booking.status);
 
             return (
-              <article
-                className="history-card history-card--booking"
-                key={`booking-${booking.id}`}
-              >
+              <article className="history-card history-card--booking" key={`booking-${booking.id}`}>
                 <div className="history-card__header">
                   <div>
                     <span>Home service</span>
@@ -461,9 +435,7 @@ export function TransactionHistory() {
                         timeStyle: "short",
                       }).format(new Date(booking.scheduledAt))}
                     </strong>
-                    <small>
-                      Reschedule {booking.rescheduleCount ?? 0} kali
-                    </small>
+                    <small>Reschedule {booking.rescheduleCount ?? 0} kali</small>
                   </div>
                   <div>
                     <span>Profesional</span>
@@ -477,16 +449,10 @@ export function TransactionHistory() {
                   </div>
                 </div>
 
-                <Progress
-                  completed={completed}
-                  total={booking.timeline.length}
-                />
+                <Progress completed={completed} total={booking.timeline.length} />
 
                 <div className="history-card__actions">
-                  <Link
-                    className="secondary-button"
-                    href={`/bookings/${booking.id}`}
-                  >
+                  <Link className="secondary-button" href={`/bookings/${booking.id}`}>
                     Detail, OTP, dan tracking
                   </Link>
                   {canModify ? (

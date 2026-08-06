@@ -7,11 +7,7 @@ import { type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/icons";
 import { apiRequest } from "@/lib/api";
-import {
-  presentAuthError,
-  validateLogin,
-  validateRegistration,
-} from "@/lib/auth-errors";
+import { presentAuthError, validateLogin, validateRegistration } from "@/lib/auth-errors";
 import { safeReturnPath } from "@/lib/storefront-auth";
 
 type AuthMode = "login" | "register";
@@ -67,13 +63,7 @@ function PasswordInput({
   );
 }
 
-export function AuthForm({
-  mode,
-  nextPath,
-}: {
-  mode: AuthMode;
-  nextPath?: string;
-}) {
+export function AuthForm({ mode, nextPath }: { mode: AuthMode; nextPath?: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState("");
@@ -84,7 +74,9 @@ export function AuthForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = String(data.get("email") ?? "").trim().toLowerCase();
+    const email = String(data.get("email") ?? "")
+      .trim()
+      .toLowerCase();
     const password = String(data.get("password") ?? "");
     const fullName = String(data.get("full_name") ?? "").trim();
     const confirmPassword = String(data.get("confirm_password") ?? "");
@@ -116,9 +108,7 @@ export function AuthForm({
 
     setPending(true);
     const payload =
-      mode === "register"
-        ? { email, full_name: fullName, password }
-        : { email, password };
+      mode === "register" ? { email, full_name: fullName, password } : { email, password };
 
     try {
       await apiRequest<AuthSession>(`/auth/${mode}`, {

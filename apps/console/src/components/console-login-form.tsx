@@ -75,24 +75,51 @@ export function ConsoleLoginForm() {
 
   return (
     <form className={styles.form} onSubmit={submit}>
-      {notice && !error ? <p className={styles.notice} role="status">{notice}</p> : null}
+      {notice && !error ? (
+        <p className={styles.notice} role="status">
+          {notice}
+        </p>
+      ) : null}
       <label className={styles.field}>
         <span>Email kerja</span>
-        <input autoComplete="email" name="email" placeholder="nama@perusahaan.id" required type="email" />
+        <input
+          autoComplete="email"
+          name="email"
+          placeholder="nama@perusahaan.id"
+          required
+          type="email"
+        />
       </label>
       <label className={styles.field}>
         <span>Password</span>
-        <input autoComplete="current-password" maxLength={128} name="password" placeholder="Masukkan password" required type="password" />
+        <input
+          autoComplete="current-password"
+          maxLength={128}
+          name="password"
+          placeholder="Masukkan password"
+          required
+          type="password"
+        />
       </label>
       <div className={styles.formMeta}>
-        <label className={styles.checkbox}><input type="checkbox" /> <span>Ingat perangkat ini</span></label>
-        <button className={styles.linkButton} type="button">Lupa password?</button>
+        <label className={styles.checkbox}>
+          <input type="checkbox" /> <span>Ingat perangkat ini</span>
+        </label>
+        <button className={styles.linkButton} type="button">
+          Lupa password?
+        </button>
       </div>
-      {error ? <p className={styles.error} role="alert">{error}</p> : null}
+      {error ? (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      ) : null}
       <button className={styles.submit} disabled={pending} type="submit">
         {pending ? "Memverifikasi akses..." : "Masuk ke dashboard"}
       </button>
-      <p className={styles.switchText}>Belum punya akun kemitraan? <Link href="/register">Daftar sekarang</Link></p>
+      <p className={styles.switchText}>
+        Belum punya akun kemitraan? <Link href="/register">Daftar sekarang</Link>
+      </p>
     </form>
   );
 }

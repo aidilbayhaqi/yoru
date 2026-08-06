@@ -74,23 +74,58 @@ export function AssistantPanel() {
     const data = new FormData(form);
     const text = String(data.get("message") ?? "").trim();
     if (!text) return;
-    setMessages((current) => [...current, { id: `user-${Date.now()}`, role: "user", text }, recommendationFor(text)]);
+    setMessages((current) => [
+      ...current,
+      { id: `user-${Date.now()}`, role: "user", text },
+      recommendationFor(text),
+    ]);
     form.reset();
   }
 
   return (
     <main className="assistant-page">
-      <section className="assistant-intro"><p className="section-eyebrow">Customer AI Advisor</p><h1>Bantu aku memilih.</h1><p>Advisor ini tidak mendiagnosis kondisi medis. Rekomendasi production wajib memiliki consent, evidence, policy version, dan jalur eskalasi.</p></section>
+      <section className="assistant-intro">
+        <p className="section-eyebrow">Customer AI Advisor</p>
+        <h1>Bantu aku memilih.</h1>
+        <p>
+          Advisor ini tidak mendiagnosis kondisi medis. Rekomendasi production wajib memiliki
+          consent, evidence, policy version, dan jalur eskalasi.
+        </p>
+      </section>
       <section className="assistant-workspace">
         <div className="assistant-messages">
           {messages.map((message) => (
             <div className={`assistant-message message-${message.role}`} key={message.id}>
-              <span className="message-avatar">{message.role === "assistant" ? <Icon name="wand" width="18" /> : "You"}</span>
-              <div><p>{message.text}</p>{message.links ? <div className="assistant-links">{message.links.map((link) => <Link href={link.href} key={link.href}>{link.label}<Icon name="arrow" width="15" /></Link>)}</div> : null}</div>
+              <span className="message-avatar">
+                {message.role === "assistant" ? <Icon name="wand" width="18" /> : "You"}
+              </span>
+              <div>
+                <p>{message.text}</p>
+                {message.links ? (
+                  <div className="assistant-links">
+                    {message.links.map((link) => (
+                      <Link href={link.href} key={link.href}>
+                        {link.label}
+                        <Icon name="arrow" width="15" />
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </div>
           ))}
         </div>
-        <form className="assistant-form" onSubmit={submit}><input aria-label="Pesan untuk Yoru Advisor" name="message" placeholder="Contoh: kulitku terlihat kusam, budget 400 ribu" /><button className="primary-button" type="submit">Kirim<Icon name="arrow" width="17" /></button></form>
+        <form className="assistant-form" onSubmit={submit}>
+          <input
+            aria-label="Pesan untuk Yoru Advisor"
+            name="message"
+            placeholder="Contoh: kulitku terlihat kusam, budget 400 ribu"
+          />
+          <button className="primary-button" type="submit">
+            Kirim
+            <Icon name="arrow" width="17" />
+          </button>
+        </form>
       </section>
     </main>
   );

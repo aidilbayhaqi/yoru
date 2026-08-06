@@ -43,7 +43,12 @@ export const products: Product[] = [
     badge: "Skin barrier",
     description:
       "Moisturizer dengan tekstur cloud-gel yang memberi rasa nyaman tanpa meninggalkan sensasi berat.",
-    highlights: ["Ceramide complex", "Fragrance free", "Nyaman untuk kulit sensitif", "Kemasan refillable"],
+    highlights: [
+      "Ceramide complex",
+      "Fragrance free",
+      "Nyaman untuk kulit sensitif",
+      "Kemasan refillable",
+    ],
     variants: [
       { id: "var_cloud_50", name: "50 g", sku: "LUMA-BCM-50", priceMinor: 22900000, stock: 31 },
     ],
@@ -65,7 +70,12 @@ export const products: Product[] = [
     badge: "Salon finish",
     description:
       "Masker rambut intensif untuk rambut kering, sering di-styling, dan membutuhkan kelembutan ekstra.",
-    highlights: ["Hydrolyzed protein", "Bebas mineral oil", "Aroma lembut", "Hasil terasa setelah 10 menit"],
+    highlights: [
+      "Hydrolyzed protein",
+      "Bebas mineral oil",
+      "Aroma lembut",
+      "Hasil terasa setelah 10 menit",
+    ],
     variants: [
       { id: "var_mask_180", name: "180 g", sku: "AHL-SRM-180", priceMinor: 14900000, stock: 55 },
     ],
@@ -86,10 +96,27 @@ export const products: Product[] = [
     badge: "Limited drop",
     description:
       "Tote berstruktur lembut dengan finishing satin matte untuk kebutuhan kerja, kampus, dan agenda akhir pekan.",
-    highlights: ["Kompartemen laptop 14 inci", "Inner pocket beritsleting", "Tali bahu lebar", "Material mudah dibersihkan"],
+    highlights: [
+      "Kompartemen laptop 14 inci",
+      "Inner pocket beritsleting",
+      "Tali bahu lebar",
+      "Material mudah dibersihkan",
+    ],
     variants: [
-      { id: "var_tote_ink", name: "Ink black", sku: "NARA-EST-INK", priceMinor: 27900000, stock: 12 },
-      { id: "var_tote_olive", name: "Soft olive", sku: "NARA-EST-OLV", priceMinor: 27900000, stock: 9 },
+      {
+        id: "var_tote_ink",
+        name: "Ink black",
+        sku: "NARA-EST-INK",
+        priceMinor: 27900000,
+        stock: 12,
+      },
+      {
+        id: "var_tote_olive",
+        name: "Soft olive",
+        sku: "NARA-EST-OLV",
+        priceMinor: 27900000,
+        stock: 9,
+      },
     ],
     shippingEta: "Tiba 2–5 hari",
     tags: ["bag", "tote", "fashion"],
@@ -129,9 +156,20 @@ export const products: Product[] = [
     badge: "New shades",
     description:
       "Lip tint dengan warna buildable dan stain yang tetap nyaman untuk aktivitas sehari-hari.",
-    highlights: ["Buildable pigment", "Soft blur finish", "Tidak membuat bibir terasa kering", "Enam pilihan warna"],
+    highlights: [
+      "Buildable pigment",
+      "Soft blur finish",
+      "Tidak membuat bibir terasa kering",
+      "Enam pilihan warna",
+    ],
     variants: [
-      { id: "var_lip_rose", name: "After Rose", sku: "NOIR-MLT-ROS", priceMinor: 9900000, stock: 33 },
+      {
+        id: "var_lip_rose",
+        name: "After Rose",
+        sku: "NOIR-MLT-ROS",
+        priceMinor: 9900000,
+        stock: 33,
+      },
       { id: "var_lip_fig", name: "Deep Fig", sku: "NOIR-MLT-FIG", priceMinor: 9900000, stock: 27 },
       { id: "var_lip_tea", name: "Brick Tea", sku: "NOIR-MLT-TEA", priceMinor: 9900000, stock: 21 },
     ],
@@ -155,11 +193,30 @@ export const services: Service[] = [
     badge: "Most booked",
     description:
       "Facial lengkap di rumah dengan konsultasi singkat, cleansing, gentle extraction, hydration, dan aftercare.",
-    includes: ["Konsultasi kondisi kulit", "Double cleansing dan exfoliation", "Gentle extraction sesuai kebutuhan", "Hydrating mask dan finishing routine"],
+    includes: [
+      "Konsultasi kondisi kulit",
+      "Double cleansing dan exfoliation",
+      "Gentle extraction sesuai kebutuhan",
+      "Hydrating mask dan finishing routine",
+    ],
     serviceArea: "Jakarta Selatan, Jakarta Pusat, dan Depok",
     professionals: [
-      { id: "pro_nadia", name: "Nadia Rahma", title: "Senior aesthetician", rating: 4.9, completedJobs: 684, avatar: "NR" },
-      { id: "pro_ayla", name: "Ayla Putri", title: "Skin therapist", rating: 4.8, completedJobs: 438, avatar: "AP" },
+      {
+        id: "pro_nadia",
+        name: "Nadia Rahma",
+        title: "Senior aesthetician",
+        rating: 4.9,
+        completedJobs: 684,
+        avatar: "NR",
+      },
+      {
+        id: "pro_ayla",
+        name: "Ayla Putri",
+        title: "Skin therapist",
+        rating: 4.8,
+        completedJobs: 438,
+        avatar: "AP",
+      },
     ],
     tags: ["facial", "home treatment", "skin"],
   },
@@ -177,11 +234,30 @@ export const services: Service[] = [
     badge: "Relax at home",
     description:
       "Perawatan rambut dan kulit kepala di rumah, lengkap dengan pijat ringan dan blow dry natural.",
-    includes: ["Scalp consultation", "Hair wash portable setup", "Treatment mask dan massage", "Natural blow dry"],
+    includes: [
+      "Scalp consultation",
+      "Hair wash portable setup",
+      "Treatment mask dan massage",
+      "Natural blow dry",
+    ],
     serviceArea: "Bandung Kota dan Cimahi",
     professionals: [
-      { id: "pro_raka", name: "Raka Pradana", title: "Hair therapist", rating: 4.8, completedJobs: 512, avatar: "RP" },
-      { id: "pro_laras", name: "Laras Wening", title: "Hair stylist", rating: 4.9, completedJobs: 367, avatar: "LW" },
+      {
+        id: "pro_raka",
+        name: "Raka Pradana",
+        title: "Hair therapist",
+        rating: 4.8,
+        completedJobs: 512,
+        avatar: "RP",
+      },
+      {
+        id: "pro_laras",
+        name: "Laras Wening",
+        title: "Hair stylist",
+        rating: 4.9,
+        completedJobs: 367,
+        avatar: "LW",
+      },
     ],
     tags: ["hair spa", "scalp", "home salon"],
   },
@@ -199,11 +275,30 @@ export const services: Service[] = [
     badge: "Event ready",
     description:
       "Makeup artist datang ke lokasi untuk wisuda, pesta, lamaran, atau agenda formal lainnya.",
-    includes: ["Brief look sebelum hari H", "Complexion dan eye makeup", "Basic hair styling", "Touch-up kit mini"],
+    includes: [
+      "Brief look sebelum hari H",
+      "Complexion dan eye makeup",
+      "Basic hair styling",
+      "Touch-up kit mini",
+    ],
     serviceArea: "Jabodetabek",
     professionals: [
-      { id: "pro_meira", name: "Meira Anjani", title: "Professional makeup artist", rating: 4.9, completedJobs: 298, avatar: "MA" },
-      { id: "pro_sasha", name: "Sasha Nirmala", title: "Beauty artist", rating: 4.8, completedJobs: 206, avatar: "SN" },
+      {
+        id: "pro_meira",
+        name: "Meira Anjani",
+        title: "Professional makeup artist",
+        rating: 4.9,
+        completedJobs: 298,
+        avatar: "MA",
+      },
+      {
+        id: "pro_sasha",
+        name: "Sasha Nirmala",
+        title: "Beauty artist",
+        rating: 4.8,
+        completedJobs: 206,
+        avatar: "SN",
+      },
     ],
     tags: ["makeup", "event", "mua"],
   },
@@ -224,7 +319,14 @@ export const services: Service[] = [
     includes: ["Style consultation", "Haircut", "Neck cleanup", "Hair styling"],
     serviceArea: "Jakarta, Bekasi, dan Tangerang",
     professionals: [
-      { id: "pro_dimas", name: "Dimas Arga", title: "Senior barber", rating: 4.8, completedJobs: 741, avatar: "DA" },
+      {
+        id: "pro_dimas",
+        name: "Dimas Arga",
+        title: "Senior barber",
+        rating: 4.8,
+        completedJobs: 741,
+        avatar: "DA",
+      },
     ],
     tags: ["barber", "haircut", "grooming"],
   },
@@ -244,7 +346,14 @@ export const services: Service[] = [
     includes: ["Nail shaping", "Cuticle care", "Basic gel color", "Hand massage"],
     serviceArea: "Jakarta Selatan dan Tangerang Selatan",
     professionals: [
-      { id: "pro_citra", name: "Citra Maharani", title: "Nail artist", rating: 4.8, completedJobs: 312, avatar: "CM" },
+      {
+        id: "pro_citra",
+        name: "Citra Maharani",
+        title: "Nail artist",
+        rating: 4.8,
+        completedJobs: 312,
+        avatar: "CM",
+      },
     ],
     tags: ["nail", "manicure", "home treatment"],
   },
@@ -260,12 +369,18 @@ export const services: Service[] = [
     rating: 4.9,
     reviewCount: 118,
     badge: "Occasion styling",
-    description:
-      "Styling hijab personal untuk wisuda, lamaran, pesta, dan kebutuhan konten.",
+    description: "Styling hijab personal untuk wisuda, lamaran, pesta, dan kebutuhan konten.",
     includes: ["Look consultation", "Hijab styling", "Pin dan inner basic", "Foto hasil akhir"],
     serviceArea: "Yogyakarta dan Sleman",
     professionals: [
-      { id: "pro_salsha", name: "Salsha Kirana", title: "Hijab stylist", rating: 4.9, completedJobs: 244, avatar: "SK" },
+      {
+        id: "pro_salsha",
+        name: "Salsha Kirana",
+        title: "Hijab stylist",
+        rating: 4.9,
+        completedJobs: 244,
+        avatar: "SK",
+      },
     ],
     tags: ["hijab", "styling", "event"],
   },

@@ -16,11 +16,19 @@ export function CartScreen() {
   if (state.cart.length === 0) {
     return (
       <section className="empty-state">
-        <span className="empty-state__icon"><Icon name="bag" width="34" /></span>
+        <span className="empty-state__icon">
+          <Icon name="bag" width="34" />
+        </span>
         <p className="section-eyebrow">Cart masih kosong</p>
         <h1>Temukan produk untuk rutinitasmu.</h1>
-        <p>Produk dan layanan memiliki alur transaksi berbeda. Layanan dapat dipesan langsung dari halaman layanan.</p>
-        <Link className="primary-button" href="/products">Jelajahi produk<Icon name="arrow" width="18" /></Link>
+        <p>
+          Produk dan layanan memiliki alur transaksi berbeda. Layanan dapat dipesan langsung dari
+          halaman layanan.
+        </p>
+        <Link className="primary-button" href="/products">
+          Jelajahi produk
+          <Icon name="arrow" width="18" />
+        </Link>
       </section>
     );
   }
@@ -44,17 +52,37 @@ export function CartScreen() {
                 <Image alt={product.name} height={220} src={product.image} width={220} />
                 <div className="cart-line__content">
                   <p>{product.partner}</p>
-                  <Link href={`/products/${product.slug}`}><h2>{product.name}</h2></Link>
+                  <Link href={`/products/${product.slug}`}>
+                    <h2>{product.name}</h2>
+                  </Link>
                   <span>{variant.name}</span>
                   <strong>{formatMoney(variant.priceMinor)}</strong>
                 </div>
                 <div className="cart-line__actions">
                   <div className="quantity-control">
-                    <button aria-label="Kurangi jumlah" onClick={() => updateCartQuantity(line.lineId, line.quantity - 1)} type="button"><Icon name="minus" width="16" /></button>
+                    <button
+                      aria-label="Kurangi jumlah"
+                      onClick={() => updateCartQuantity(line.lineId, line.quantity - 1)}
+                      type="button"
+                    >
+                      <Icon name="minus" width="16" />
+                    </button>
                     <span>{line.quantity}</span>
-                    <button aria-label="Tambah jumlah" onClick={() => updateCartQuantity(line.lineId, line.quantity + 1)} type="button"><Icon name="plus" width="16" /></button>
+                    <button
+                      aria-label="Tambah jumlah"
+                      onClick={() => updateCartQuantity(line.lineId, line.quantity + 1)}
+                      type="button"
+                    >
+                      <Icon name="plus" width="16" />
+                    </button>
                   </div>
-                  <button className="text-danger" onClick={() => removeCartLine(line.lineId)} type="button">Hapus</button>
+                  <button
+                    className="text-danger"
+                    onClick={() => removeCartLine(line.lineId)}
+                    type="button"
+                  >
+                    Hapus
+                  </button>
                 </div>
               </article>
             );
@@ -64,11 +92,25 @@ export function CartScreen() {
       <aside className="summary-card">
         <p className="summary-kicker">Ringkasan</p>
         <h2>Subtotal produk</h2>
-        <div className="summary-row"><span>Subtotal</span><strong>{formatMoney(subtotal)}</strong></div>
-        <div className="summary-row"><span>Pengiriman</span><span>Dihitung di checkout</span></div>
-        <div className="summary-note"><Icon name="shield" width="18" /><span>Harga dan stok akan divalidasi ulang oleh server saat checkout.</span></div>
-        <Link className="primary-button summary-button" href="/checkout">Lanjut checkout<Icon name="arrow" width="18" /></Link>
-        <Link className="text-link centered-link" href="/products">Lanjut belanja</Link>
+        <div className="summary-row">
+          <span>Subtotal</span>
+          <strong>{formatMoney(subtotal)}</strong>
+        </div>
+        <div className="summary-row">
+          <span>Pengiriman</span>
+          <span>Dihitung di checkout</span>
+        </div>
+        <div className="summary-note">
+          <Icon name="shield" width="18" />
+          <span>Harga dan stok akan divalidasi ulang oleh server saat checkout.</span>
+        </div>
+        <Link className="primary-button summary-button" href="/checkout">
+          Lanjut checkout
+          <Icon name="arrow" width="18" />
+        </Link>
+        <Link className="text-link centered-link" href="/products">
+          Lanjut belanja
+        </Link>
       </aside>
     </main>
   );

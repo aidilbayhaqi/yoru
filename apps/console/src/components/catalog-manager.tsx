@@ -104,7 +104,12 @@ function describeError(error: unknown): { message: string; requestId?: string } 
 
 function CatalogManagerSkeleton({ view }: { view: ViewMode }) {
   return (
-    <section aria-busy="true" aria-label="Memuat katalog partner" className={styles.panel} role="status">
+    <section
+      aria-busy="true"
+      aria-label="Memuat katalog partner"
+      className={styles.panel}
+      role="status"
+    >
       <header className={styles.toolbar}>
         <div className={styles.skeletonHeading}>
           <span className={styles.skeletonLineSmall} />
@@ -136,7 +141,9 @@ function CatalogManagerSkeleton({ view }: { view: ViewMode }) {
             <div className={styles.skeletonInventoryCard} key={index}>
               <span className={styles.skeletonLineTitle} />
               <div className={styles.skeletonInventoryStats}>
-                {Array.from({ length: 4 }, (_, item) => <span key={item} />)}
+                {Array.from({ length: 4 }, (_, item) => (
+                  <span key={item} />
+                ))}
               </div>
               <span className={styles.skeletonInput} />
             </div>
@@ -324,9 +331,7 @@ export function CatalogManager({
         method: "POST",
       });
       onMessage?.(
-        action === "submit"
-          ? "Produk dikirim ke antrean review."
-          : "Produk berhasil diarsipkan.",
+        action === "submit" ? "Produk dikirim ke antrean review." : "Produk berhasil diarsipkan.",
       );
       await load();
     } catch (reason) {
@@ -363,12 +368,20 @@ export function CatalogManager({
 
   return (
     <div className={styles.shell}>
-      {refreshing ? <div aria-label="Memperbarui katalog" className={styles.refreshBar} role="status"><span /></div> : null}
+      {refreshing ? (
+        <div aria-label="Memperbarui katalog" className={styles.refreshBar} role="status">
+          <span />
+        </div>
+      ) : null}
       {error ? (
         <div className={styles.error} role="alert">
           <strong>Operasi katalog gagal</strong>
           <span>{error.message}</span>
-          {error.requestId ? <small>Kode permintaan: <code>{error.requestId}</code></small> : null}
+          {error.requestId ? (
+            <small>
+              Kode permintaan: <code>{error.requestId}</code>
+            </small>
+          ) : null}
         </div>
       ) : null}
 
@@ -380,13 +393,36 @@ export function CatalogManager({
               <h2>{products.length} produk partner</h2>
             </div>
             <div className={styles.actions}>
-              <button className={styles.buttonQuiet} disabled={refreshing} onClick={() => void load()} type="button">{refreshing ? "Memuat…" : "Muat ulang"}</button>
-              <button className={styles.button} disabled={categories.length === 0 || refreshing} onClick={openCreate} type="button">Tambah produk</button>
+              <button
+                className={styles.buttonQuiet}
+                disabled={refreshing}
+                onClick={() => void load()}
+                type="button"
+              >
+                {refreshing ? "Memuat…" : "Muat ulang"}
+              </button>
+              <button
+                className={styles.button}
+                disabled={categories.length === 0 || refreshing}
+                onClick={openCreate}
+                type="button"
+              >
+                Tambah produk
+              </button>
             </div>
           </header>
           <div className={styles.filters}>
-            <input className={styles.input} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama, SKU, atau slug…" value={search} />
-            <select className={styles.select} onChange={(event) => setStatus(event.target.value)} value={status}>
+            <input
+              className={styles.input}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Cari nama, SKU, atau slug…"
+              value={search}
+            />
+            <select
+              className={styles.select}
+              onChange={(event) => setStatus(event.target.value)}
+              value={status}
+            >
               <option value="all">Semua status</option>
               <option value="draft">Draft</option>
               <option value="pending_review">Menunggu review</option>
@@ -398,27 +434,86 @@ export function CatalogManager({
           </div>
           {isFiltering ? (
             <div className={styles.skeletonTable} aria-label="Menyaring produk" role="status">
-              {Array.from({ length: 5 }, (_, index) => <div className={styles.skeletonTableRow} key={index}><span className={styles.skeletonProduct} /><span className={styles.skeletonCell} /><span className={styles.skeletonCell} /><span className={styles.skeletonCell} /><span className={styles.skeletonBadge} /></div>)}
+              {Array.from({ length: 5 }, (_, index) => (
+                <div className={styles.skeletonTableRow} key={index}>
+                  <span className={styles.skeletonProduct} />
+                  <span className={styles.skeletonCell} />
+                  <span className={styles.skeletonCell} />
+                  <span className={styles.skeletonCell} />
+                  <span className={styles.skeletonBadge} />
+                </div>
+              ))}
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className={styles.state}>Belum ada produk yang cocok dengan filter.</div>
           ) : (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
-                <thead><tr><th>Produk</th><th>Harga</th><th>Stok</th><th>Media</th><th>Status</th><th>Aksi</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Produk</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Media</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {filteredProducts.map((product) => (
                     <tr key={product.id}>
-                      <td><div className={styles.product}><strong>{product.name}</strong><span className={styles.meta}>{product.sku ?? "Tanpa SKU"} · {product.slug}</span>{product.review_reason ? <span className={styles.meta}>Review: {product.review_reason}</span> : null}</div></td>
+                      <td>
+                        <div className={styles.product}>
+                          <strong>{product.name}</strong>
+                          <span className={styles.meta}>
+                            {product.sku ?? "Tanpa SKU"} · {product.slug}
+                          </span>
+                          {product.review_reason ? (
+                            <span className={styles.meta}>Review: {product.review_reason}</span>
+                          ) : null}
+                        </div>
+                      </td>
                       <td>{formatCurrency(product.unit_price, product.currency)}</td>
-                      <td>{product.stock_tracked ? product.inventory?.available ?? 0 : "Tidak dilacak"}</td>
+                      <td>
+                        {product.stock_tracked
+                          ? (product.inventory?.available ?? 0)
+                          : "Tidak dilacak"}
+                      </td>
                       <td>{product.media.length}</td>
-                      <td><span className={styles.badge} data-status={product.status}>{product.status.replaceAll("_", " ")}</span></td>
-                      <td><div className={styles.rowActions}>
-                        <button disabled={busyId === product.id} onClick={() => openEdit(product)} type="button">Edit</button>
-                        {["draft", "revision_required"].includes(product.status) ? <button disabled={busyId === product.id} onClick={() => void runAction(product, "submit")} type="button">{busyId === product.id ? "Memproses…" : "Kirim review"}</button> : null}
-                        {product.status !== "archived" ? <button disabled={busyId === product.id} onClick={() => void runAction(product, "archive")} type="button">Arsipkan</button> : null}
-                      </div></td>
+                      <td>
+                        <span className={styles.badge} data-status={product.status}>
+                          {product.status.replaceAll("_", " ")}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.rowActions}>
+                          <button
+                            disabled={busyId === product.id}
+                            onClick={() => openEdit(product)}
+                            type="button"
+                          >
+                            Edit
+                          </button>
+                          {["draft", "revision_required"].includes(product.status) ? (
+                            <button
+                              disabled={busyId === product.id}
+                              onClick={() => void runAction(product, "submit")}
+                              type="button"
+                            >
+                              {busyId === product.id ? "Memproses…" : "Kirim review"}
+                            </button>
+                          ) : null}
+                          {product.status !== "archived" ? (
+                            <button
+                              disabled={busyId === product.id}
+                              onClick={() => void runAction(product, "archive")}
+                              type="button"
+                            >
+                              Arsipkan
+                            </button>
+                          ) : null}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -428,22 +523,82 @@ export function CatalogManager({
         </section>
       ) : (
         <section className={styles.panel}>
-          <header className={styles.toolbar}><div><span className={styles.eyebrow}>OPTIMISTIC INVENTORY CONTROL</span><h2>Stok produk partner</h2></div><button className={styles.buttonQuiet} disabled={refreshing} onClick={() => void load()} type="button">{refreshing ? "Memuat…" : "Muat ulang"}</button></header>
+          <header className={styles.toolbar}>
+            <div>
+              <span className={styles.eyebrow}>OPTIMISTIC INVENTORY CONTROL</span>
+              <h2>Stok produk partner</h2>
+            </div>
+            <button
+              className={styles.buttonQuiet}
+              disabled={refreshing}
+              onClick={() => void load()}
+              type="button"
+            >
+              {refreshing ? "Memuat…" : "Muat ulang"}
+            </button>
+          </header>
           <div className={styles.inventoryGrid}>
-            {trackedProducts.length === 0 ? <div className={styles.state}>Belum ada produk dengan pelacakan stok aktif.</div> : null}
+            {trackedProducts.length === 0 ? (
+              <div className={styles.state}>Belum ada produk dengan pelacakan stok aktif.</div>
+            ) : null}
             {trackedProducts.map((product) => (
               <article className={styles.inventoryCard} key={product.id}>
-                <div className={styles.inventoryHead}><div className={styles.product}><strong>{product.name}</strong><span className={styles.meta}>{product.sku ?? product.slug}</span></div><span className={styles.badge} data-status={product.status}>{product.status.replaceAll("_", " ")}</span></div>
-                <div className={styles.inventoryStats}>
-                  <div><span>On hand</span><strong>{product.inventory?.on_hand ?? 0}</strong></div>
-                  <div><span>Reserved</span><strong>{product.inventory?.reserved ?? 0}</strong></div>
-                  <div><span>Available</span><strong>{product.inventory?.available ?? 0}</strong></div>
-                  <div><span>Version</span><strong>{product.inventory?.version ?? 1}</strong></div>
+                <div className={styles.inventoryHead}>
+                  <div className={styles.product}>
+                    <strong>{product.name}</strong>
+                    <span className={styles.meta}>{product.sku ?? product.slug}</span>
+                  </div>
+                  <span className={styles.badge} data-status={product.status}>
+                    {product.status.replaceAll("_", " ")}
+                  </span>
                 </div>
-                <form className={styles.inventoryForm} onSubmit={(event) => void updateInventory(product, event)}>
-                  <label>Jumlah fisik<input className={styles.input} defaultValue={product.inventory?.on_hand ?? 0} min="0" name="on_hand" required type="number" /></label>
-                  <label>Batas restock<input className={styles.input} defaultValue={product.inventory?.reorder_level ?? 0} min="0" name="reorder_level" required type="number" /></label>
-                  <button className={styles.button} disabled={busyId === product.id} type="submit">{busyId === product.id ? "Menyimpan…" : "Simpan stok"}</button>
+                <div className={styles.inventoryStats}>
+                  <div>
+                    <span>On hand</span>
+                    <strong>{product.inventory?.on_hand ?? 0}</strong>
+                  </div>
+                  <div>
+                    <span>Reserved</span>
+                    <strong>{product.inventory?.reserved ?? 0}</strong>
+                  </div>
+                  <div>
+                    <span>Available</span>
+                    <strong>{product.inventory?.available ?? 0}</strong>
+                  </div>
+                  <div>
+                    <span>Version</span>
+                    <strong>{product.inventory?.version ?? 1}</strong>
+                  </div>
+                </div>
+                <form
+                  className={styles.inventoryForm}
+                  onSubmit={(event) => void updateInventory(product, event)}
+                >
+                  <label>
+                    Jumlah fisik
+                    <input
+                      className={styles.input}
+                      defaultValue={product.inventory?.on_hand ?? 0}
+                      min="0"
+                      name="on_hand"
+                      required
+                      type="number"
+                    />
+                  </label>
+                  <label>
+                    Batas restock
+                    <input
+                      className={styles.input}
+                      defaultValue={product.inventory?.reorder_level ?? 0}
+                      min="0"
+                      name="reorder_level"
+                      required
+                      type="number"
+                    />
+                  </label>
+                  <button className={styles.button} disabled={busyId === product.id} type="submit">
+                    {busyId === product.id ? "Menyimpan…" : "Simpan stok"}
+                  </button>
                 </form>
               </article>
             ))}
@@ -453,27 +608,169 @@ export function CatalogManager({
 
       {modalOpen ? (
         <div className={styles.modalBackdrop} role="presentation">
-          <div aria-labelledby="catalog-form-title" aria-modal="true" className={styles.modal} role="dialog">
-            <div className={styles.modalHeader}><div><span className={styles.eyebrow}>CATALOG WORKFLOW</span><h3 id="catalog-form-title">{editing ? "Edit produk" : "Buat produk"}</h3></div><button className={styles.buttonQuiet} onClick={() => setModalOpen(false)} type="button">Tutup</button></div>
+          <div
+            aria-labelledby="catalog-form-title"
+            aria-modal="true"
+            className={styles.modal}
+            role="dialog"
+          >
+            <div className={styles.modalHeader}>
+              <div>
+                <span className={styles.eyebrow}>CATALOG WORKFLOW</span>
+                <h3 id="catalog-form-title">{editing ? "Edit produk" : "Buat produk"}</h3>
+              </div>
+              <button
+                className={styles.buttonQuiet}
+                onClick={() => setModalOpen(false)}
+                type="button"
+              >
+                Tutup
+              </button>
+            </div>
             <form className={styles.form} onSubmit={(event) => void saveProduct(event)}>
               <div className={styles.grid}>
-                <label>Kategori<select className={styles.select} onChange={(event) => setForm({ ...form, category_id: event.target.value })} required value={form.category_id}>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-                <label>SKU<input className={styles.input} maxLength={80} onChange={(event) => setForm({ ...form, sku: event.target.value })} placeholder="Opsional" value={form.sku} /></label>
+                <label>
+                  Kategori
+                  <select
+                    className={styles.select}
+                    onChange={(event) => setForm({ ...form, category_id: event.target.value })}
+                    required
+                    value={form.category_id}
+                  >
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  SKU
+                  <input
+                    className={styles.input}
+                    maxLength={80}
+                    onChange={(event) => setForm({ ...form, sku: event.target.value })}
+                    placeholder="Opsional"
+                    value={form.sku}
+                  />
+                </label>
               </div>
-              <label>Nama produk<input className={styles.input} maxLength={180} minLength={2} onChange={(event) => setForm({ ...form, name: event.target.value })} required value={form.name} /></label>
-              <label>Deskripsi<textarea className={styles.textarea} maxLength={10000} minLength={10} onChange={(event) => setForm({ ...form, description: event.target.value })} required value={form.description} /></label>
+              <label>
+                Nama produk
+                <input
+                  className={styles.input}
+                  maxLength={180}
+                  minLength={2}
+                  onChange={(event) => setForm({ ...form, name: event.target.value })}
+                  required
+                  value={form.name}
+                />
+              </label>
+              <label>
+                Deskripsi
+                <textarea
+                  className={styles.textarea}
+                  maxLength={10000}
+                  minLength={10}
+                  onChange={(event) => setForm({ ...form, description: event.target.value })}
+                  required
+                  value={form.description}
+                />
+              </label>
               <div className={styles.grid}>
-                <label>Harga IDR<input className={styles.input} min="0" onChange={(event) => setForm({ ...form, unit_price: event.target.value })} required step="0.01" type="number" value={form.unit_price} /></label>
-                <label className={styles.check}><input checked={form.stock_tracked} onChange={(event) => setForm({ ...form, stock_tracked: event.target.checked })} type="checkbox" /> Lacak stok</label>
+                <label>
+                  Harga IDR
+                  <input
+                    className={styles.input}
+                    min="0"
+                    onChange={(event) => setForm({ ...form, unit_price: event.target.value })}
+                    required
+                    step="0.01"
+                    type="number"
+                    value={form.unit_price}
+                  />
+                </label>
+                <label className={styles.check}>
+                  <input
+                    checked={form.stock_tracked}
+                    onChange={(event) => setForm({ ...form, stock_tracked: event.target.checked })}
+                    type="checkbox"
+                  />{" "}
+                  Lacak stok
+                </label>
               </div>
-              {!editing && form.stock_tracked ? <div className={styles.grid}><label>Stok awal<input className={styles.input} min="0" onChange={(event) => setForm({ ...form, initial_stock: event.target.value })} type="number" value={form.initial_stock} /></label><label>Batas restock<input className={styles.input} min="0" onChange={(event) => setForm({ ...form, reorder_level: event.target.value })} type="number" value={form.reorder_level} /></label></div> : null}
+              {!editing && form.stock_tracked ? (
+                <div className={styles.grid}>
+                  <label>
+                    Stok awal
+                    <input
+                      className={styles.input}
+                      min="0"
+                      onChange={(event) => setForm({ ...form, initial_stock: event.target.value })}
+                      type="number"
+                      value={form.initial_stock}
+                    />
+                  </label>
+                  <label>
+                    Batas restock
+                    <input
+                      className={styles.input}
+                      min="0"
+                      onChange={(event) => setForm({ ...form, reorder_level: event.target.value })}
+                      type="number"
+                      value={form.reorder_level}
+                    />
+                  </label>
+                </div>
+              ) : null}
               <div className={styles.grid}>
-                <label>Object key media<input className={styles.input} onChange={(event) => setForm({ ...form, media_object_key: event.target.value })} placeholder="catalog/partner/product.webp" value={form.media_object_key} /></label>
-                <label>Content type<input className={styles.input} onChange={(event) => setForm({ ...form, media_content_type: event.target.value })} value={form.media_content_type} /></label>
+                <label>
+                  Object key media
+                  <input
+                    className={styles.input}
+                    onChange={(event) => setForm({ ...form, media_object_key: event.target.value })}
+                    placeholder="catalog/partner/product.webp"
+                    value={form.media_object_key}
+                  />
+                </label>
+                <label>
+                  Content type
+                  <input
+                    className={styles.input}
+                    onChange={(event) =>
+                      setForm({ ...form, media_content_type: event.target.value })
+                    }
+                    value={form.media_content_type}
+                  />
+                </label>
               </div>
-              <label className={styles.check}><input checked={form.submit_after_save} onChange={(event) => setForm({ ...form, submit_after_save: event.target.checked })} type="checkbox" /> Kirim untuk review setelah disimpan</label>
-              <div className={styles.notice}>Media object key hanya mendaftarkan objek yang sudah diunggah ke storage. UI ini tidak memalsukan upload file. Bila policy publish mensyaratkan media, isi object key yang valid sebelum mengirim review.</div>
-              <div className={styles.footer}><button className={styles.buttonQuiet} onClick={() => setModalOpen(false)} type="button">Batal</button><button className={styles.button} disabled={Boolean(busyId)} type="submit">{busyId ? "Menyimpan…" : "Simpan"}</button></div>
+              <label className={styles.check}>
+                <input
+                  checked={form.submit_after_save}
+                  onChange={(event) =>
+                    setForm({ ...form, submit_after_save: event.target.checked })
+                  }
+                  type="checkbox"
+                />{" "}
+                Kirim untuk review setelah disimpan
+              </label>
+              <div className={styles.notice}>
+                Media object key hanya mendaftarkan objek yang sudah diunggah ke storage. UI ini
+                tidak memalsukan upload file. Bila policy publish mensyaratkan media, isi object key
+                yang valid sebelum mengirim review.
+              </div>
+              <div className={styles.footer}>
+                <button
+                  className={styles.buttonQuiet}
+                  onClick={() => setModalOpen(false)}
+                  type="button"
+                >
+                  Batal
+                </button>
+                <button className={styles.button} disabled={Boolean(busyId)} type="submit">
+                  {busyId ? "Menyimpan…" : "Simpan"}
+                </button>
+              </div>
             </form>
           </div>
         </div>

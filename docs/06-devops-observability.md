@@ -2,13 +2,13 @@
 
 ## 1. Environments
 
-| Environment | Tujuan | Data |
-| --- | --- | --- |
-| Local | Development cepat | Synthetic seed |
-| CI | Automated verification | Ephemeral |
-| Preview | Per-PR review | Synthetic/minimized |
-| Staging | Production-like validation | Synthetic/anonymized |
-| Production | Customer traffic | Real, restricted |
+| Environment | Tujuan                     | Data                 |
+| ----------- | -------------------------- | -------------------- |
+| Local       | Development cepat          | Synthetic seed       |
+| CI          | Automated verification     | Ephemeral            |
+| Preview     | Per-PR review              | Synthetic/minimized  |
+| Staging     | Production-like validation | Synthetic/anonymized |
+| Production  | Customer traffic           | Real, restricted     |
 
 Tidak ada shared secret atau database antara staging dan production.
 
@@ -36,11 +36,11 @@ Feature berisiko memakai feature flag dengan owner, expiry, dan cleanup task.
 
 ## 4. Health endpoints
 
-| Endpoint | Meaning |
-| --- | --- |
-| `/health/live` | Process hidup; tidak memanggil dependency |
-| `/health/ready` | Siap menerima traffic; dependency kritis tersedia |
-| `/health/startup` | Initialization/migration compatibility selesai |
+| Endpoint          | Meaning                                           |
+| ----------------- | ------------------------------------------------- |
+| `/health/live`    | Process hidup; tidak memanggil dependency         |
+| `/health/ready`   | Siap menerima traffic; dependency kritis tersedia |
+| `/health/startup` | Initialization/migration compatibility selesai    |
 
 Response tidak membocorkan credential, host internal, atau versi detail sensitif.
 
@@ -92,16 +92,16 @@ Jangan memasukkan prompt/foto/PII ke span attributes.
 
 Alert berdasarkan user impact dan burn rate, bukan setiap error tunggal.
 
-| Signal | Alert example |
-| --- | --- |
-| Availability | Multi-window error budget burn |
-| Checkout | Success rate turun signifikan |
-| Payment | Verified webhook lag melewati threshold |
-| Booking | Assignment queue age tinggi |
-| Ledger | Imbalance > 0 langsung page |
-| Auth | Spike login failure/token reuse |
-| Security | Cross-tenant denial anomaly/export spike |
-| AI | Safety gate failure/provider cost anomaly |
+| Signal       | Alert example                             |
+| ------------ | ----------------------------------------- |
+| Availability | Multi-window error budget burn            |
+| Checkout     | Success rate turun signifikan             |
+| Payment      | Verified webhook lag melewati threshold   |
+| Booking      | Assignment queue age tinggi               |
+| Ledger       | Imbalance > 0 langsung page               |
+| Auth         | Spike login failure/token reuse           |
+| Security     | Cross-tenant denial anomaly/export spike  |
+| AI           | Safety gate failure/provider cost anomaly |
 
 Setiap alert memiliki runbook, owner, severity, dan expected action.
 
@@ -116,12 +116,12 @@ Setiap alert memiliki runbook, owner, severity, dan expected action.
 
 Initial recovery targets yang perlu disetujui:
 
-| System | RPO | RTO |
-| --- | --- | --- |
-| Transaction database | ≤ 5 menit | ≤ 60 menit |
-| Object storage restricted | ≤ 15 menit | ≤ 4 jam |
-| Qdrant | Rebuild/snapshot ≤ 24 jam | ≤ 8 jam |
-| Analytics/read models | Rebuildable | ≤ 24 jam |
+| System                    | RPO                       | RTO        |
+| ------------------------- | ------------------------- | ---------- |
+| Transaction database      | ≤ 5 menit                 | ≤ 60 menit |
+| Object storage restricted | ≤ 15 menit                | ≤ 4 jam    |
+| Qdrant                    | Rebuild/snapshot ≤ 24 jam | ≤ 8 jam    |
+| Analytics/read models     | Rebuildable               | ≤ 24 jam   |
 
 ## 8. Capacity planning
 

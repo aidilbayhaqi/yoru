@@ -168,14 +168,14 @@ SQL/read model menghitung angka. LLM hanya:
 
 ### Tools
 
-| Tool | Scope | Output |
-| --- | --- | --- |
-| `get_sales_summary` | Active partner + period | Deterministic metrics |
-| `get_product_performance` | Partner products | Top/slow products |
-| `get_inventory_risks` | Partner inventory | Stockout/slow stock |
-| `get_booking_performance` | Partner services | Utilization/cancel/no-show |
-| `get_customer_segments` | Aggregated only | Repeat/new/customer cohorts |
-| `get_settlement_summary` | Finance role only | Pending/available/payout |
+| Tool                      | Scope                   | Output                      |
+| ------------------------- | ----------------------- | --------------------------- |
+| `get_sales_summary`       | Active partner + period | Deterministic metrics       |
+| `get_product_performance` | Partner products        | Top/slow products           |
+| `get_inventory_risks`     | Partner inventory       | Stockout/slow stock         |
+| `get_booking_performance` | Partner services        | Utilization/cancel/no-show  |
+| `get_customer_segments`   | Aggregated only         | Repeat/new/customer cohorts |
+| `get_settlement_summary`  | Finance role only       | Pending/available/payout    |
 
 Setiap tool:
 
@@ -291,15 +291,15 @@ Dataset terversi berisi:
 
 ### Metrics
 
-| Area | Metric |
-| --- | --- |
-| Retrieval | Recall@K, nDCG@K, filter correctness |
-| Recommendation | Relevance, budget fit, catalog validity |
-| Safety | Unsafe recommendation rate, escalation recall |
-| Grounding | Unsupported claim rate |
-| Partner copilot | Numeric faithfulness, evidence coverage |
-| Operations | p50/p95 latency, error, token, cost/request |
-| User value | Engagement, conversion assist, feedback—not diagnosis outcome |
+| Area            | Metric                                                        |
+| --------------- | ------------------------------------------------------------- |
+| Retrieval       | Recall@K, nDCG@K, filter correctness                          |
+| Recommendation  | Relevance, budget fit, catalog validity                       |
+| Safety          | Unsafe recommendation rate, escalation recall                 |
+| Grounding       | Unsupported claim rate                                        |
+| Partner copilot | Numeric faithfulness, evidence coverage                       |
+| Operations      | p50/p95 latency, error, token, cost/request                   |
+| User value      | Engagement, conversion assist, feedback—not diagnosis outcome |
 
 Launch gate ditentukan sebelum model/provider dipilih. Evaluator LLM tidak boleh menjadi
 satu-satunya quality judge; gunakan deterministic checks dan human review.

@@ -1,7 +1,12 @@
 import type { Product, Service } from "@/lib/storefront-types";
 
 export type ProductSort = "recommended" | "price_asc" | "price_desc" | "rating_desc";
-export type ServiceSort = "recommended" | "price_asc" | "price_desc" | "rating_desc" | "duration_asc";
+export type ServiceSort =
+  | "recommended"
+  | "price_asc"
+  | "price_desc"
+  | "rating_desc"
+  | "duration_asc";
 
 export type ProductFilters = {
   query: string;
@@ -34,10 +39,8 @@ export function filterProducts(items: Product[], filters: ProductFilters): Produ
       [product.name, product.category, product.partner, product.description, ...product.tags],
       filters.query,
     );
-    const matchesCategory =
-      filters.category === "Semua" || product.category === filters.category;
-    const matchesPartner =
-      filters.partner === "Semua" || product.partner === filters.partner;
+    const matchesCategory = filters.category === "Semua" || product.category === filters.category;
+    const matchesPartner = filters.partner === "Semua" || product.partner === filters.partner;
     const matchesPrice =
       filters.maxPriceMinor === null || product.priceMinor <= filters.maxPriceMinor;
     const matchesRating = product.rating >= filters.minRating;
@@ -85,21 +88,14 @@ export function filterServices(items: Service[], filters: ServiceFilters): Servi
       ],
       filters.query,
     );
-    const matchesCategory =
-      filters.category === "Semua" || service.category === filters.category;
+    const matchesCategory = filters.category === "Semua" || service.category === filters.category;
     const matchesPrice =
       filters.maxPriceMinor === null || service.priceMinor <= filters.maxPriceMinor;
     const matchesDuration =
       filters.maxDurationMin === null || service.durationMin <= filters.maxDurationMin;
     const matchesRating = service.rating >= filters.minRating;
 
-    return (
-      matchesQuery &&
-      matchesCategory &&
-      matchesPrice &&
-      matchesDuration &&
-      matchesRating
-    );
+    return matchesQuery && matchesCategory && matchesPrice && matchesDuration && matchesRating;
   });
 
   return [...result].sort((left, right) => {

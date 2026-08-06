@@ -26,14 +26,14 @@ Root task runner dapat memanggil Python commands, tetapi tidak boleh menyembunyi
 
 ### State
 
-| State | Tempat |
-| --- | --- |
-| URL filters/sort/page | Search params |
-| Server data | Query/cache layer |
-| Form | Form library/local reducer |
-| Short UI state | Component state |
-| Auth capability | Server session + minimal client context |
-| Cart optimistic view | Dedicated cart store + server reconciliation |
+| State                 | Tempat                                       |
+| --------------------- | -------------------------------------------- |
+| URL filters/sort/page | Search params                                |
+| Server data           | Query/cache layer                            |
+| Form                  | Form library/local reducer                   |
+| Short UI state        | Component state                              |
+| Auth capability       | Server session + minimal client context      |
+| Cart optimistic view  | Dedicated cart store + server reconciliation |
 
 ### Performance rules
 
@@ -64,12 +64,12 @@ Setiap feature memiliki:
 
 ### Layer responsibility
 
-| Layer | Tanggung jawab |
-| --- | --- |
-| API | Parse, auth dependency, map error/response |
-| Application | Use case, transaction, authorization call, port orchestration |
-| Domain | Invariant, state transition, policy pure |
-| Infrastructure | ORM, external provider, cache, queue |
+| Layer          | Tanggung jawab                                                |
+| -------------- | ------------------------------------------------------------- |
+| API            | Parse, auth dependency, map error/response                    |
+| Application    | Use case, transaction, authorization call, port orchestration |
+| Domain         | Invariant, state transition, policy pure                      |
+| Infrastructure | ORM, external provider, cache, queue                          |
 
 ### Query rules
 
@@ -93,16 +93,16 @@ Setiap feature memiliki:
 
 ## 4. Test pyramid
 
-| Level | Fokus | Target |
-| --- | --- | --- |
-| Unit | Policy, calculation, state transition, parser | Cepat dan dominan |
-| Integration | PostgreSQL, Redis, Qdrant, repository, RLS | Real dependency container |
-| Contract | OpenAPI, provider adapter/webhook fixtures | Consumer/provider compatibility |
-| Component | React UI behavior/accessibility | Feature states |
-| E2E | Critical customer/partner/admin journeys | Sedikit tetapi high-value |
-| Performance | Search, checkout, webhook burst, dashboard | Budget/SLO |
-| Security | BOLA, auth abuse, upload, SSRF, replay | Release gate |
-| AI eval | Retrieval, safety, grounding, numeric faithfulness | Model/prompt gate |
+| Level       | Fokus                                              | Target                          |
+| ----------- | -------------------------------------------------- | ------------------------------- |
+| Unit        | Policy, calculation, state transition, parser      | Cepat dan dominan               |
+| Integration | PostgreSQL, Redis, Qdrant, repository, RLS         | Real dependency container       |
+| Contract    | OpenAPI, provider adapter/webhook fixtures         | Consumer/provider compatibility |
+| Component   | React UI behavior/accessibility                    | Feature states                  |
+| E2E         | Critical customer/partner/admin journeys           | Sedikit tetapi high-value       |
+| Performance | Search, checkout, webhook burst, dashboard         | Budget/SLO                      |
+| Security    | BOLA, auth abuse, upload, SSRF, replay             | Release gate                    |
+| AI eval     | Retrieval, safety, grounding, numeric faithfulness | Model/prompt gate               |
 
 ## 5. Critical test scenarios
 
@@ -201,18 +201,18 @@ Required gates:
 
 Initial target, harus dikalibrasi dengan load model:
 
-| Metric | Target awal |
-| --- | --- |
-| Public API availability | 99.9% bulanan |
-| Read API p95 | < 500 ms tanpa provider |
-| Write API p95 | < 800 ms tanpa provider |
-| Checkout create p95 | < 1.5 s sebelum provider redirect |
-| Auth failure error leakage | 0 |
-| Cross-tenant test failure | 0 |
-| Ledger imbalance | 0 |
-| Critical/high known vulnerability | 0 saat release |
-| Storefront LCP p75 | < 2.5 s pada target network/device |
-| CLS p75 | < 0.1 |
+| Metric                            | Target awal                        |
+| --------------------------------- | ---------------------------------- |
+| Public API availability           | 99.9% bulanan                      |
+| Read API p95                      | < 500 ms tanpa provider            |
+| Write API p95                     | < 800 ms tanpa provider            |
+| Checkout create p95               | < 1.5 s sebelum provider redirect  |
+| Auth failure error leakage        | 0                                  |
+| Cross-tenant test failure         | 0                                  |
+| Ledger imbalance                  | 0                                  |
+| Critical/high known vulnerability | 0 saat release                     |
+| Storefront LCP p75                | < 2.5 s pada target network/device |
+| CLS p75                           | < 0.1                              |
 
 AI latency dan quality memiliki SLO terpisah agar tidak menurunkan core transaction.
 

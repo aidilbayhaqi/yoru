@@ -11,10 +11,7 @@ function normalizeAbsoluteUrl(value: string, variableName: string): string {
 
 export function getPublicApiBaseUrl(): string {
   const value = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-  return normalizeAbsoluteUrl(
-    value || DEFAULT_PUBLIC_API_BASE_URL,
-    "NEXT_PUBLIC_API_BASE_URL",
-  );
+  return normalizeAbsoluteUrl(value || DEFAULT_PUBLIC_API_BASE_URL, "NEXT_PUBLIC_API_BASE_URL");
 }
 
 export function getServerApiBaseUrl(): string {
@@ -22,7 +19,5 @@ export function getServerApiBaseUrl(): string {
   if (value) {
     return normalizeAbsoluteUrl(value, "API_INTERNAL_BASE_URL");
   }
-  return typeof window === "undefined"
-    ? DEFAULT_INTERNAL_API_BASE_URL
-    : getPublicApiBaseUrl();
+  return typeof window === "undefined" ? DEFAULT_INTERNAL_API_BASE_URL : getPublicApiBaseUrl();
 }

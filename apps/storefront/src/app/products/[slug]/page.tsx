@@ -16,5 +16,11 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = productBySlug(slug);
   if (!product) notFound();
-  return <><SiteHeader /><ProductDetail product={product} /><SiteFooter /></>;
+  return (
+    <>
+      <SiteHeader />
+      <ProductDetail product={product} />
+      <SiteFooter />
+    </>
+  );
 }

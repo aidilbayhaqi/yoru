@@ -11,5 +11,10 @@ export default async function BookingPage({ params }: Props) {
   const { slug } = await params;
   const service = serviceBySlug(slug);
   if (!service) notFound();
-  return <><SiteHeader /><ServiceBookingFlow service={service} /></>;
+  return (
+    <>
+      <SiteHeader />
+      <ServiceBookingFlow service={service} />
+    </>
+  );
 }

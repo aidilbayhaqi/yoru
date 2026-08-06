@@ -7,5 +7,11 @@ import { WishlistScreen } from "@/components/wishlist-screen";
 export const metadata: Metadata = { title: "Wishlist" };
 
 export default function WishlistPage() {
-  return <><SiteHeader /><WishlistScreen /><SiteFooter /></>;
+  return (
+    <>
+      <SiteHeader />
+      <WishlistScreen />
+      <SiteFooter />
+    </>
+  );
 }

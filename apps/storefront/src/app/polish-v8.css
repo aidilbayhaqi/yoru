@@ -12,7 +12,7 @@
   --v8-text: #171717;
   --v8-text-soft: #3d3d3a;
   --v8-muted: #74746e;
-  --v8-border: rgba(23, 23, 23, 0.10);
+  --v8-border: rgba(23, 23, 23, 0.1);
   --v8-border-strong: rgba(23, 23, 23, 0.18);
   --v8-accent: #65466f;
   --v8-accent-hover: #51375a;
@@ -81,7 +81,9 @@ body {
   min-height: 100vh;
   background: var(--v8-bg);
   color: var(--v8-text);
-  transition: background-color 180ms ease, color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 body,
@@ -120,7 +122,12 @@ textarea:focus-visible {
 .mobile-filter-button,
 .load-more-button,
 .filter-reset {
-  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .primary-button {
@@ -390,7 +397,9 @@ button:disabled {
   background: var(--v8-text);
   box-shadow: var(--v8-shadow-sm);
   transform: translateX(0);
-  transition: transform 180ms ease, background-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
 }
 
 .theme-toggle[aria-pressed="true"] .theme-toggle__track > span {
@@ -729,7 +738,9 @@ button:disabled {
   border: 1px solid var(--v8-border);
   border-radius: 12px;
   background: var(--v8-panel);
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .filter-search > div:focus-within {
@@ -1349,7 +1360,9 @@ button:disabled {
   border: 1px solid var(--v8-border-strong);
   border-radius: 15px;
   background: var(--v8-bg);
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .discovery-input:focus-within {
@@ -1662,7 +1675,11 @@ button:disabled {
   flex-direction: column;
   gap: 12px;
   background:
-    radial-gradient(circle at 20% -5%, color-mix(in srgb, var(--v8-accent) 8%, transparent), transparent 34%),
+    radial-gradient(
+      circle at 20% -5%,
+      color-mix(in srgb, var(--v8-accent) 8%, transparent),
+      transparent 34%
+    ),
     var(--v8-bg);
   scrollbar-width: thin;
   scrollbar-color: var(--v8-panel-strong) transparent;
@@ -1738,8 +1755,12 @@ button:disabled {
   animation: v8-typing 0.9s ease-in-out infinite;
 }
 
-.assistant-typing span:nth-child(2) { animation-delay: 120ms; }
-.assistant-typing span:nth-child(3) { animation-delay: 240ms; }
+.assistant-typing span:nth-child(2) {
+  animation-delay: 120ms;
+}
+.assistant-typing span:nth-child(3) {
+  animation-delay: 240ms;
+}
 
 .assistant-quick-prompts {
   padding: 9px 14px;
@@ -1836,7 +1857,12 @@ button:disabled {
 
 /* Skeleton and legacy customer pages */
 .skeleton-shimmer {
-  background: linear-gradient(90deg, var(--v8-panel-soft) 22%, var(--v8-panel-strong) 44%, var(--v8-panel-soft) 66%);
+  background: linear-gradient(
+    90deg,
+    var(--v8-panel-soft) 22%,
+    var(--v8-panel-strong) 44%,
+    var(--v8-panel-soft) 66%
+  );
   background-size: 240% 100%;
   animation: v8-shimmer 1.25s linear infinite;
 }
@@ -1894,16 +1920,38 @@ button:disabled {
 }
 
 /* Motion */
-@keyframes v8-spin { to { transform: rotate(360deg); } }
+@keyframes v8-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 @keyframes v8-chat-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes v8-typing {
-  0%, 70%, 100% { opacity: 0.35; transform: translateY(0); }
-  35% { opacity: 1; transform: translateY(-2px); }
+  0%,
+  70%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
 }
-@keyframes v8-shimmer { to { background-position: -240% 0; } }
+@keyframes v8-shimmer {
+  to {
+    background-position: -240% 0;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

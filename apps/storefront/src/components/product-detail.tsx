@@ -31,14 +31,20 @@ export function ProductDetail({ product }: { product: Product }) {
   );
   const favorite = state.favorites.includes(product.id);
   const related = useMemo(
-    () => products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 4),
+    () =>
+      products
+        .filter((item) => item.id !== product.id && item.category === product.category)
+        .slice(0, 4),
     [product.category, product.id],
   );
 
-  useEffect(() => () => {
-    if (addedTimerRef.current !== null) window.clearTimeout(addedTimerRef.current);
-    if (sharedTimerRef.current !== null) window.clearTimeout(sharedTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (addedTimerRef.current !== null) window.clearTimeout(addedTimerRef.current);
+      if (sharedTimerRef.current !== null) window.clearTimeout(sharedTimerRef.current);
+    },
+    [],
+  );
 
   function addToCart() {
     addProduct(product.id, variant.id, quantity);
@@ -86,13 +92,23 @@ export function ProductDetail({ product }: { product: Product }) {
   return (
     <main className="v5-product-page">
       <div className="breadcrumb">
-        <Link href="/">Home</Link><span>/</span><Link href="/products">Products</Link><span>/</span><span>{product.name}</span>
+        <Link href="/">Home</Link>
+        <span>/</span>
+        <Link href="/products">Products</Link>
+        <span>/</span>
+        <span>{product.name}</span>
       </div>
 
       <section className="detail-layout v5-detail-layout">
         <div className="v5-product-gallery">
           <div className={`detail-media v5-detail-media v5-detail-media--${mediaView}`}>
-            <Image alt={product.name} fill priority sizes="(max-width: 900px) 92vw, 52vw" src={product.image} />
+            <Image
+              alt={product.name}
+              fill
+              priority
+              sizes="(max-width: 900px) 92vw, 52vw"
+              src={product.image}
+            />
             {product.badge ? <span className="detail-badge">{product.badge}</span> : null}
             <button className="gallery-share-button" onClick={shareProduct} type="button">
               {shared ? "Link copied" : "Share"}
@@ -104,7 +120,12 @@ export function ProductDetail({ product }: { product: Product }) {
               ["detail", "Close-up"],
               ["texture", "Texture"],
             ].map(([value, label]) => (
-              <button className={mediaView === value ? "is-active" : ""} key={value} onClick={() => setMediaView(value as typeof mediaView)} type="button">
+              <button
+                className={mediaView === value ? "is-active" : ""}
+                key={value}
+                onClick={() => setMediaView(value as typeof mediaView)}
+                type="button"
+              >
                 <span className={`gallery-thumb gallery-thumb--${value}`}>
                   <Image alt="" fill sizes="90px" src={product.image} />
                 </span>
@@ -117,11 +138,14 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="detail-panel v5-detail-panel">
           <div className="product-kicker-row">
             <p className="detail-partner">{product.partner}</p>
-            <span className="verified-label"><Icon name="shield" width="15" /> Verified partner</span>
+            <span className="verified-label">
+              <Icon name="shield" width="15" /> Verified partner
+            </span>
           </div>
           <h1>{product.name}</h1>
           <div className="rating-row detail-rating">
-            <Icon name="star" width="16" /><strong>{product.rating}</strong>
+            <Icon name="star" width="16" />
+            <strong>{product.rating}</strong>
             <a href="#reviews">{product.reviewCount} verified reviews</a>
           </div>
 
@@ -162,9 +186,23 @@ export function ProductDetail({ product }: { product: Product }) {
             <div>
               <span className="option-label">Quantity</span>
               <div className="quantity-control">
-                <button aria-label="Kurangi jumlah" onClick={() => setQuantity((value) => Math.max(1, value - 1))} type="button"><Icon name="minus" width="17" /></button>
+                <button
+                  aria-label="Kurangi jumlah"
+                  onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                  type="button"
+                >
+                  <Icon name="minus" width="17" />
+                </button>
                 <span>{quantity}</span>
-                <button aria-label="Tambah jumlah" onClick={() => setQuantity((value) => Math.min(Math.max(1, variant.stock), value + 1))} type="button"><Icon name="plus" width="17" /></button>
+                <button
+                  aria-label="Tambah jumlah"
+                  onClick={() =>
+                    setQuantity((value) => Math.min(Math.max(1, variant.stock), value + 1))
+                  }
+                  type="button"
+                >
+                  <Icon name="plus" width="17" />
+                </button>
               </div>
             </div>
             <button
@@ -179,39 +217,85 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
 
           <div className="detail-primary-actions">
-            <button className="secondary-button detail-cart-button" disabled={variant.stock <= 0} onClick={addToCart} type="button">
+            <button
+              className="secondary-button detail-cart-button"
+              disabled={variant.stock <= 0}
+              onClick={addToCart}
+              type="button"
+            >
               {added ? "Added to cart" : "Add to cart"}
               <Icon name={added ? "check" : "bag"} width="18" />
             </button>
-            <button className="primary-button buy-now-button" disabled={variant.stock <= 0} onClick={buyNow} type="button">
+            <button
+              className="primary-button buy-now-button"
+              disabled={variant.stock <= 0}
+              onClick={buyNow}
+              type="button"
+            >
               Buy now
               <Icon name="arrow" width="18" />
             </button>
           </div>
 
-          <p className="buy-now-note">Buy now membawa varian ini langsung ke checkout. Cart yang sudah ada tidak dihapus.</p>
+          <p className="buy-now-note">
+            Buy now membawa varian ini langsung ke checkout. Cart yang sudah ada tidak dihapus.
+          </p>
 
           <div className="delivery-estimator">
-            <div><Icon name="truck" width="20" /><span><strong>Delivery estimate</strong><small>From {product.partnerLocation}</small></span></div>
+            <div>
+              <Icon name="truck" width="20" />
+              <span>
+                <strong>Delivery estimate</strong>
+                <small>From {product.partnerLocation}</small>
+              </span>
+            </div>
             <div className="delivery-estimator__form">
-              <input aria-label="Kode pos" inputMode="numeric" maxLength={5} onChange={(event) => setPostalCode(event.target.value)} placeholder="Postal code" value={postalCode} />
-              <button onClick={estimateDelivery} type="button">Check</button>
+              <input
+                aria-label="Kode pos"
+                inputMode="numeric"
+                maxLength={5}
+                onChange={(event) => setPostalCode(event.target.value)}
+                placeholder="Postal code"
+                value={postalCode}
+              />
+              <button onClick={estimateDelivery} type="button">
+                Check
+              </button>
             </div>
             {deliveryMessage ? <p>{deliveryMessage}</p> : null}
           </div>
 
           <div className="detail-accordions">
             <details open>
-              <summary>Product highlights <span>+</span></summary>
-              <ul>{product.highlights.map((highlight) => <li key={highlight}><Icon name="check" width="16" />{highlight}</li>)}</ul>
+              <summary>
+                Product highlights <span>+</span>
+              </summary>
+              <ul>
+                {product.highlights.map((highlight) => (
+                  <li key={highlight}>
+                    <Icon name="check" width="16" />
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
             </details>
             <details>
-              <summary>Shipping & returns <span>+</span></summary>
-              <p>{product.shippingEta}. Return eligibility should be verified against category, item condition, and partner policy.</p>
+              <summary>
+                Shipping & returns <span>+</span>
+              </summary>
+              <p>
+                {product.shippingEta}. Return eligibility should be verified against category, item
+                condition, and partner policy.
+              </p>
             </details>
             <details>
-              <summary>Authenticity & partner <span>+</span></summary>
-              <p>Published through {product.partner}. Partner identity and product state are checked before the item is shown as active.</p>
+              <summary>
+                Authenticity & partner <span>+</span>
+              </summary>
+              <p>
+                Published through {product.partner}. Partner identity and product state are checked
+                before the item is shown as active.
+              </p>
             </details>
           </div>
         </div>
@@ -221,29 +305,65 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="v5-review-summary">
           <p className="section-eyebrow">Verified feedback</p>
           <strong>{product.rating}</strong>
-          <div><Icon name="star" width="18" /><span>Based on {product.reviewCount} reviews</span></div>
-          <p>Review distribution shown here is an interface preview until review aggregates are served by the API.</p>
+          <div>
+            <Icon name="star" width="18" />
+            <span>Based on {product.reviewCount} reviews</span>
+          </div>
+          <p>
+            Review distribution shown here is an interface preview until review aggregates are
+            served by the API.
+          </p>
         </div>
         <div className="v5-review-cards">
-          <article><div><strong>Packaging felt considered.</strong><span>5.0</span></div><p>Produk datang aman dan varian sesuai. Tekstur terasa nyaman dipakai harian.</p><small>Verified purchase · 12 days ago</small></article>
-          <article><div><strong>Easy addition to my routine.</strong><span>4.8</span></div><p>Detail produknya jelas dan proses checkout cepat. Estimasi pengiriman sesuai.</p><small>Verified purchase · 3 weeks ago</small></article>
+          <article>
+            <div>
+              <strong>Packaging felt considered.</strong>
+              <span>5.0</span>
+            </div>
+            <p>Produk datang aman dan varian sesuai. Tekstur terasa nyaman dipakai harian.</p>
+            <small>Verified purchase · 12 days ago</small>
+          </article>
+          <article>
+            <div>
+              <strong>Easy addition to my routine.</strong>
+              <span>4.8</span>
+            </div>
+            <p>Detail produknya jelas dan proses checkout cepat. Estimasi pengiriman sesuai.</p>
+            <small>Verified purchase · 3 weeks ago</small>
+          </article>
         </div>
       </section>
 
       {related.length > 0 ? (
         <section className="home-section v5-related-section">
           <div className="section-heading-row">
-            <div><p className="section-eyebrow">Complete the edit</p><h2>You may also like.</h2></div>
-            <Link className="text-link" href={`/search?q=${encodeURIComponent(product.category)}`}>View category <Icon name="arrow" width="18" /></Link>
+            <div>
+              <p className="section-eyebrow">Complete the edit</p>
+              <h2>You may also like.</h2>
+            </div>
+            <Link className="text-link" href={`/search?q=${encodeURIComponent(product.category)}`}>
+              View category <Icon name="arrow" width="18" />
+            </Link>
           </div>
-          <div className="catalog-grid">{related.map((item) => <ProductCard key={item.id} product={item} />)}</div>
+          <div className="catalog-grid">
+            {related.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
         </section>
       ) : null}
 
       <div className="mobile-buy-bar">
-        <div><small>{variant.name}</small><strong>{formatMoney(variant.priceMinor)}</strong></div>
-        <button className="secondary-button" onClick={addToCart} type="button"><Icon name="bag" width="18" /></button>
-        <button className="primary-button" onClick={buyNow} type="button">Buy now</button>
+        <div>
+          <small>{variant.name}</small>
+          <strong>{formatMoney(variant.priceMinor)}</strong>
+        </div>
+        <button className="secondary-button" onClick={addToCart} type="button">
+          <Icon name="bag" width="18" />
+        </button>
+        <button className="primary-button" onClick={buyNow} type="button">
+          Buy now
+        </button>
       </div>
     </main>
   );

@@ -17,16 +17,38 @@ export default function DealsPage() {
       <SiteHeader />
       <main className="v5-content-page">
         <section className="v5-page-hero v5-page-hero--deals">
-          <p className="section-eyebrow">Curated value</p><h1>Good timing, better edit.</h1>
-          <p>Promotional display based on catalog prices. Discount eligibility and final totals must still be calculated by the commerce API.</p>
+          <p className="section-eyebrow">Curated value</p>
+          <h1>Good timing, better edit.</h1>
+          <p>
+            Promotional display based on catalog prices. Discount eligibility and final totals must
+            still be calculated by the commerce API.
+          </p>
         </section>
         <section className="home-section">
-          <div className="section-heading-row"><div><p className="section-eyebrow">Limited price edit</p><h2>Products with visible markdowns.</h2></div></div>
-          <div className="catalog-grid">{productDeals.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+          <div className="section-heading-row">
+            <div>
+              <p className="section-eyebrow">Limited price edit</p>
+              <h2>Products with visible markdowns.</h2>
+            </div>
+          </div>
+          <div className="catalog-grid">
+            {productDeals.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </section>
         <section className="home-section">
-          <div className="section-heading-row"><div><p className="section-eyebrow">Highly rated</p><h2>Services worth booking ahead.</h2></div></div>
-          <div className="catalog-grid">{servicePicks.map((service) => <ServiceCard key={service.id} service={service} />)}</div>
+          <div className="section-heading-row">
+            <div>
+              <p className="section-eyebrow">Highly rated</p>
+              <h2>Services worth booking ahead.</h2>
+            </div>
+          </div>
+          <div className="catalog-grid">
+            {servicePicks.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))}
+          </div>
         </section>
       </main>
       <SiteFooter />

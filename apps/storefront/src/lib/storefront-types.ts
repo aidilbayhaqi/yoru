@@ -80,12 +80,7 @@ export type TimelineItem = {
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 export type RefundStatus = "none" | "requested" | "approved" | "rejected" | "refunded";
 export type DisputeStatus = "none" | "opened" | "under_review" | "resolved" | "rejected";
-export type OrderStatus =
-  | "awaiting_payment"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
+export type OrderStatus = "awaiting_payment" | "processing" | "shipped" | "delivered" | "cancelled";
 export type FulfillmentStatus =
   | "unfulfilled"
   | "packing"

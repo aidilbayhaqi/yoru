@@ -46,18 +46,18 @@ function ModerationSkeleton({ count = 4 }: { count?: number }) {
           <span className={styles.skeletonLineTitle} />
           <span className={styles.skeletonParagraph} />
           <span className={styles.skeletonTextarea} />
-          <div className={styles.skeletonActions}><span /><span /><span /></div>
+          <div className={styles.skeletonActions}>
+            <span />
+            <span />
+            <span />
+          </div>
         </article>
       ))}
     </div>
   );
 }
 
-export function CatalogModeration({
-  onMessage,
-}: {
-  onMessage?: (message: string) => void;
-}) {
+export function CatalogModeration({ onMessage }: { onMessage?: (message: string) => void }) {
   const [products, setProducts] = useState<ReviewProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -150,13 +150,22 @@ export function CatalogModeration({
 
   return (
     <section className={styles.panel}>
-      {refreshing ? <div aria-label="Memperbarui antrean" className={styles.refreshBar} role="status"><span /></div> : null}
+      {refreshing ? (
+        <div aria-label="Memperbarui antrean" className={styles.refreshBar} role="status">
+          <span />
+        </div>
+      ) : null}
       <header className={styles.toolbar}>
         <div>
           <span className={styles.eyebrow}>LIVE CATALOG MODERATION</span>
           <h2>{products.length} produk menunggu review</h2>
         </div>
-        <button className={styles.buttonQuiet} disabled={loading || refreshing} onClick={() => void load()} type="button">
+        <button
+          className={styles.buttonQuiet}
+          disabled={loading || refreshing}
+          onClick={() => void load()}
+          type="button"
+        >
           {refreshing ? "Memuat…" : "Muat ulang"}
         </button>
       </header>
@@ -169,14 +178,20 @@ export function CatalogModeration({
           type="search"
           value={search}
         />
-        <span>{filteredProducts.length} dari {products.length} antrean</span>
+        <span>
+          {filteredProducts.length} dari {products.length} antrean
+        </span>
       </div>
 
       {error ? (
         <div className={styles.error} role="alert">
           <strong>Moderasi katalog gagal</strong>
           <span>{error.message}</span>
-          {error.requestId ? <small>Kode permintaan: <code>{error.requestId}</code></small> : null}
+          {error.requestId ? (
+            <small>
+              Kode permintaan: <code>{error.requestId}</code>
+            </small>
+          ) : null}
         </div>
       ) : null}
 
@@ -194,14 +209,17 @@ export function CatalogModeration({
             <article className={styles.moderationCard} key={product.id}>
               <div className={styles.product}>
                 <strong>{product.name}</strong>
-                <span className={styles.meta}>Partner {product.partner_id.slice(0, 8)} · {product.sku ?? product.slug}</span>
+                <span className={styles.meta}>
+                  Partner {product.partner_id.slice(0, 8)} · {product.sku ?? product.slug}
+                </span>
                 <span className={styles.meta}>
                   {new Intl.NumberFormat("id-ID", {
                     style: "currency",
                     currency: product.currency,
                     maximumFractionDigits: 0,
                   }).format(Number(product.unit_price))}
-                  {" · "}{product.media.length} media
+                  {" · "}
+                  {product.media.length} media
                 </span>
               </div>
               <p className={styles.description}>{product.description}</p>
@@ -211,17 +229,38 @@ export function CatalogModeration({
                   className={styles.textarea}
                   disabled={busyId === product.id}
                   maxLength={2000}
-                  onChange={(event) => setReasons((current) => ({ ...current, [product.id]: event.target.value }))}
+                  onChange={(event) =>
+                    setReasons((current) => ({ ...current, [product.id]: event.target.value }))
+                  }
                   placeholder="Wajib untuk revisi atau penolakan"
                   value={reasons[product.id] ?? ""}
                 />
               </label>
               <div className={styles.actions}>
-                <button className={styles.button} disabled={busyId === product.id} onClick={() => void moderate(product, "publish")} type="button">
+                <button
+                  className={styles.button}
+                  disabled={busyId === product.id}
+                  onClick={() => void moderate(product, "publish")}
+                  type="button"
+                >
                   {busyId === product.id ? "Memproses…" : "Publish"}
                 </button>
-                <button className={styles.buttonQuiet} disabled={busyId === product.id} onClick={() => void moderate(product, "revision_required")} type="button">Minta revisi</button>
-                <button className={styles.buttonDanger} disabled={busyId === product.id} onClick={() => void moderate(product, "reject")} type="button">Tolak</button>
+                <button
+                  className={styles.buttonQuiet}
+                  disabled={busyId === product.id}
+                  onClick={() => void moderate(product, "revision_required")}
+                  type="button"
+                >
+                  Minta revisi
+                </button>
+                <button
+                  className={styles.buttonDanger}
+                  disabled={busyId === product.id}
+                  onClick={() => void moderate(product, "reject")}
+                  type="button"
+                >
+                  Tolak
+                </button>
               </div>
             </article>
           ))}

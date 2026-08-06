@@ -125,12 +125,8 @@ async function readList<T>(path: string): Promise<T[]> {
 
 export async function getCatalogProducts(): Promise<Product[]> {
   try {
-    const items = await readList<CatalogProductResponse>(
-      "/catalog/products?limit=100",
-    );
-    const mapped = items
-      .map(mapProduct)
-      .filter((item): item is Product => item !== null);
+    const items = await readList<CatalogProductResponse>("/catalog/products?limit=100");
+    const mapped = items.map(mapProduct).filter((item): item is Product => item !== null);
     return mapped.length > 0 ? mapped : fallbackProducts;
   } catch {
     return fallbackProducts;
@@ -139,26 +135,18 @@ export async function getCatalogProducts(): Promise<Product[]> {
 
 export async function getCatalogServices(): Promise<Service[]> {
   try {
-    const items = await readList<CatalogServiceResponse>(
-      "/catalog/services?limit=100",
-    );
-    const mapped = items
-      .map(mapService)
-      .filter((item): item is Service => item !== null);
+    const items = await readList<CatalogServiceResponse>("/catalog/services?limit=100");
+    const mapped = items.map(mapService).filter((item): item is Service => item !== null);
     return mapped.length > 0 ? mapped : fallbackServices;
   } catch {
     return fallbackServices;
   }
 }
 
-export async function getCatalogProductBySlug(
-  slug: string,
-): Promise<Product | undefined> {
+export async function getCatalogProductBySlug(slug: string): Promise<Product | undefined> {
   return (await getCatalogProducts()).find((product) => product.slug === slug);
 }
 
-export async function getCatalogServiceBySlug(
-  slug: string,
-): Promise<Service | undefined> {
+export async function getCatalogServiceBySlug(slug: string): Promise<Service | undefined> {
   return (await getCatalogServices()).find((service) => service.slug === slug);
 }

@@ -61,8 +61,7 @@ function validationField(issue: ValidationIssue): string {
     .reverse()
     .find(
       (item): item is string =>
-        typeof item === "string" &&
-        !["body", "query", "path", "header", "cookie"].includes(item),
+        typeof item === "string" && !["body", "query", "path", "header", "cookie"].includes(item),
     );
   return candidate ?? "_form";
 }
@@ -94,8 +93,7 @@ export function parseApiErrorPayload(
     };
   }
 
-  const requestId =
-    typeof payload.request_id === "string" ? payload.request_id : responseRequestId;
+  const requestId = typeof payload.request_id === "string" ? payload.request_id : responseRequestId;
   const detail = payload.detail;
   const rawIssues = Array.isArray(payload.errors)
     ? payload.errors
@@ -113,9 +111,7 @@ export function parseApiErrorPayload(
     }
     return {
       message:
-        typeof detail === "string" && detail.trim()
-          ? detail
-          : "Periksa kembali data yang disorot.",
+        typeof detail === "string" && detail.trim() ? detail : "Periksa kembali data yang disorot.",
       code:
         typeof payload.code === "string" && payload.code
           ? payload.code
@@ -191,11 +187,7 @@ async function refreshSession(): Promise<boolean> {
   return refreshPromise;
 }
 
-async function performRequest(
-  path: string,
-  init: RequestInit,
-  method: string,
-): Promise<Response> {
+async function performRequest(path: string, init: RequestInit, method: string): Promise<Response> {
   return fetch(`${getPublicApiBaseUrl()}${path}`, {
     ...init,
     method,
@@ -205,10 +197,7 @@ async function performRequest(
   });
 }
 
-export async function apiRequest<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
+export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? "GET").toUpperCase();
   let response = await performRequest(path, init, method);
 

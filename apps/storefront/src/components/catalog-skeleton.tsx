@@ -37,7 +37,10 @@ export function CatalogGridSkeleton({
 
 export function CatalogRouteSkeleton({ kind }: { kind: "product" | "service" }) {
   return (
-    <main aria-busy="true" aria-label={`Memuat katalog ${kind === "product" ? "produk" : "layanan"}`}>
+    <main
+      aria-busy="true"
+      aria-label={`Memuat katalog ${kind === "product" ? "produk" : "layanan"}`}
+    >
       <section className="catalog-hero v6-route-skeleton-hero">
         <div>
           <span className="v6-route-skeleton-eyebrow skeleton-shimmer" />

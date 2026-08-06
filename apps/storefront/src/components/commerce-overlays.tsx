@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  type ChangeEvent,
-  type FormEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { Icon } from "@/components/icons";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -174,7 +167,9 @@ export function CommerceOverlays() {
     if (!debouncedQuery.trim()) return source.slice(0, 5);
     const normalized = debouncedQuery.toLowerCase();
     return source
-      .filter((item) => `${item.label} ${item.meta} ${item.kind}`.toLowerCase().includes(normalized))
+      .filter((item) =>
+        `${item.label} ${item.meta} ${item.kind}`.toLowerCase().includes(normalized),
+      )
       .slice(0, 6);
   }, [debouncedQuery]);
 
@@ -227,10 +222,7 @@ export function CommerceOverlays() {
     const assistantMessageId = userMessageId + 1;
     nextMessageIdRef.current += 2;
 
-    setMessages((current) => [
-      ...current,
-      { id: userMessageId, role: "user", text: normalized },
-    ]);
+    setMessages((current) => [...current, { id: userMessageId, role: "user", text: normalized }]);
     setAssistantInput("");
     setAssistantLoading(true);
 
@@ -254,8 +246,13 @@ export function CommerceOverlays() {
           onClick={() => setAssistantOpen(true)}
           type="button"
         >
-          <span className="ai-fab__orb"><Icon name="sparkle" width="17" /></span>
-          <span className="ai-fab__label"><strong>Yoru AI</strong><small>Tanya apa saja</small></span>
+          <span className="ai-fab__orb">
+            <Icon name="sparkle" width="17" />
+          </span>
+          <span className="ai-fab__label">
+            <strong>Yoru AI</strong>
+            <small>Tanya apa saja</small>
+          </span>
         </button>
       ) : null}
 
@@ -274,7 +271,12 @@ export function CommerceOverlays() {
                 <h2 id="search-dialog-title">Apa yang sedang kamu cari?</h2>
                 <p>Pilih cara pencarian yang paling nyaman.</p>
               </div>
-              <button aria-label="Tutup pencarian" className="icon-button" onClick={closeSearch} type="button">
+              <button
+                aria-label="Tutup pencarian"
+                className="icon-button"
+                onClick={closeSearch}
+                type="button"
+              >
                 <Icon name="close" width="20" />
               </button>
             </div>
@@ -290,7 +292,10 @@ export function CommerceOverlays() {
                   type="button"
                 >
                   <Icon name={item.icon} width="18" />
-                  <span><strong>{item.title}</strong><small>{item.detail}</small></span>
+                  <span>
+                    <strong>{item.title}</strong>
+                    <small>{item.detail}</small>
+                  </span>
                 </button>
               ))}
             </div>
@@ -319,7 +324,8 @@ export function CommerceOverlays() {
 
                 {mode === "ai" ? (
                   <p className="ai-disclaimer">
-                    AI membantu menyusun intent. Harga, stok, area, dan slot final tetap diverifikasi sistem.
+                    AI membantu menyusun intent. Harga, stok, area, dan slot final tetap
+                    diverifikasi sistem.
                   </p>
                 ) : null}
 
@@ -329,17 +335,34 @@ export function CommerceOverlays() {
                     <small>{suggestions.length} rekomendasi</small>
                   </div>
                   {suggestionsLoading ? (
-                    <div aria-label="Mencari saran" className="search-suggestion-skeleton" role="status">
-                      {Array.from({ length: 4 }, (_, index) => <span className="skeleton-shimmer" key={index} />)}
+                    <div
+                      aria-label="Mencari saran"
+                      className="search-suggestion-skeleton"
+                      role="status"
+                    >
+                      {Array.from({ length: 4 }, (_, index) => (
+                        <span className="skeleton-shimmer" key={index} />
+                      ))}
                     </div>
-                  ) : suggestions.length > 0 ? suggestions.map((item) => (
-                    <Link href={item.href} key={item.href} onClick={closeSearch}>
-                      <span className="search-suggestion-icon"><Icon name="search" width="16" /></span>
-                      <div><strong>{item.label}</strong><small>{item.kind} · {item.meta}</small></div>
-                      <Icon name="arrow" width="16" />
-                    </Link>
-                  )) : (
-                    <p className="search-no-suggestion">Tekan Cari untuk melihat hasil yang lebih luas.</p>
+                  ) : suggestions.length > 0 ? (
+                    suggestions.map((item) => (
+                      <Link href={item.href} key={item.href} onClick={closeSearch}>
+                        <span className="search-suggestion-icon">
+                          <Icon name="search" width="16" />
+                        </span>
+                        <div>
+                          <strong>{item.label}</strong>
+                          <small>
+                            {item.kind} · {item.meta}
+                          </small>
+                        </div>
+                        <Icon name="arrow" width="16" />
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="search-no-suggestion">
+                      Tekan Cari untuk melihat hasil yang lebih luas.
+                    </p>
                   )}
                 </div>
               </form>
@@ -353,7 +376,9 @@ export function CommerceOverlays() {
                 >
                   {!previewUrl ? (
                     <>
-                      <span><Icon name="sparkle" width="25" /></span>
+                      <span>
+                        <Icon name="sparkle" width="25" />
+                      </span>
                       <strong>Upload foto referensi</strong>
                       <small>JPG, PNG, atau WEBP · maksimal 10 MB</small>
                     </>
@@ -375,26 +400,37 @@ export function CommerceOverlays() {
                 <div className="visual-category-picker">
                   <span>Fokus pencarian</span>
                   <div>
-                    {["fashion", "skincare", "makeup", "hair care", "home service"].map((category) => (
-                      <button
-                        className={visualCategory === category ? "is-active" : ""}
-                        key={category}
-                        onClick={() => setVisualCategory(category)}
-                        type="button"
-                      >
-                        {category}
-                      </button>
-                    ))}
+                    {["fashion", "skincare", "makeup", "hair care", "home service"].map(
+                      (category) => (
+                        <button
+                          className={visualCategory === category ? "is-active" : ""}
+                          key={category}
+                          onClick={() => setVisualCategory(category)}
+                          type="button"
+                        >
+                          {category}
+                        </button>
+                      ),
+                    )}
                   </div>
                 </div>
 
-                {visualError ? <p className="visual-error" role="alert">{visualError}</p> : null}
-                <button className="primary-button visual-search-action" onClick={runVisualSearch} type="button">
+                {visualError ? (
+                  <p className="visual-error" role="alert">
+                    {visualError}
+                  </p>
+                ) : null}
+                <button
+                  className="primary-button visual-search-action"
+                  onClick={runVisualSearch}
+                  type="button"
+                >
                   {fileName ? "Cari barang serupa" : "Pilih media"}
                   <Icon name="arrow" width="18" />
                 </button>
                 <p className="ai-disclaimer">
-                  Preview membuat intent dari nama file dan kategori. Similarity production tetap membutuhkan image embedding API.
+                  Preview membuat intent dari nama file dan kategori. Similarity production tetap
+                  membutuhkan image embedding API.
                 </p>
               </div>
             )}
@@ -411,39 +447,71 @@ export function CommerceOverlays() {
             role="dialog"
           >
             <div className="assistant-heading">
-              <div className="assistant-avatar"><Icon name="sparkle" width="20" /></div>
+              <div className="assistant-avatar">
+                <Icon name="sparkle" width="20" />
+              </div>
               <div className="assistant-heading__copy">
-                <div><strong id="assistant-title">Yoru Assistant</strong><span className="assistant-presence">Online</span></div>
+                <div>
+                  <strong id="assistant-title">Yoru Assistant</strong>
+                  <span className="assistant-presence">Online</span>
+                </div>
                 <span>Belanja dan home service</span>
               </div>
-              <button aria-label="Tutup assistant" className="icon-button" onClick={() => setAssistantOpen(false)} type="button">
+              <button
+                aria-label="Tutup assistant"
+                className="icon-button"
+                onClick={() => setAssistantOpen(false)}
+                type="button"
+              >
                 <Icon name="close" width="18" />
               </button>
             </div>
 
             <div className="assistant-context-bar">
-              <span><Icon name="shield" width="15" /> Rekomendasi terarah</span>
-              <button onClick={() => {
-                setAssistantOpen(false);
-                setMode("image");
-                setSearchOpen(true);
-              }} type="button">
+              <span>
+                <Icon name="shield" width="15" /> Rekomendasi terarah
+              </span>
+              <button
+                onClick={() => {
+                  setAssistantOpen(false);
+                  setMode("image");
+                  setSearchOpen(true);
+                }}
+                type="button"
+              >
                 <Icon name="sparkle" width="15" /> Cari dengan gambar
               </button>
             </div>
 
             <div className="assistant-messages" aria-live="polite">
               {messages.map((message) => (
-                <div className={`assistant-message-row assistant-message-row--${message.role}`} key={message.id}>
-                  {message.role === "assistant" ? <span className="assistant-message-avatar"><Icon name="sparkle" width="14" /></span> : null}
-                  <div className={`assistant-message assistant-message--${message.role}`}>{message.text}</div>
+                <div
+                  className={`assistant-message-row assistant-message-row--${message.role}`}
+                  key={message.id}
+                >
+                  {message.role === "assistant" ? (
+                    <span className="assistant-message-avatar">
+                      <Icon name="sparkle" width="14" />
+                    </span>
+                  ) : null}
+                  <div className={`assistant-message assistant-message--${message.role}`}>
+                    {message.text}
+                  </div>
                 </div>
               ))}
               {assistantLoading ? (
                 <div className="assistant-message-row assistant-message-row--assistant">
-                  <span className="assistant-message-avatar"><Icon name="sparkle" width="14" /></span>
-                  <div aria-label="Yoru Assistant sedang mengetik" className="assistant-typing" role="status">
-                    <span /><span /><span />
+                  <span className="assistant-message-avatar">
+                    <Icon name="sparkle" width="14" />
+                  </span>
+                  <div
+                    aria-label="Yoru Assistant sedang mengetik"
+                    className="assistant-typing"
+                    role="status"
+                  >
+                    <span />
+                    <span />
+                    <span />
                   </div>
                 </div>
               ) : null}
@@ -452,7 +520,14 @@ export function CommerceOverlays() {
 
             <div className="assistant-quick-prompts" aria-label="Pertanyaan cepat">
               {quickPrompts.map((prompt) => (
-                <button disabled={assistantLoading} key={prompt} onClick={() => sendAssistant(prompt)} type="button">{prompt}</button>
+                <button
+                  disabled={assistantLoading}
+                  key={prompt}
+                  onClick={() => sendAssistant(prompt)}
+                  type="button"
+                >
+                  {prompt}
+                </button>
               ))}
             </div>
 
@@ -471,13 +546,20 @@ export function CommerceOverlays() {
                   rows={2}
                   value={assistantInput}
                 />
-                <button aria-label="Kirim pesan" className="primary-button" disabled={!assistantInput.trim() || assistantLoading} type="submit">
+                <button
+                  aria-label="Kirim pesan"
+                  className="primary-button"
+                  disabled={!assistantInput.trim() || assistantLoading}
+                  type="submit"
+                >
                   <Icon name="arrow" width="18" />
                 </button>
               </form>
               <div className="assistant-footer-row">
                 <span>AI dapat keliru. Verifikasi detail transaksi.</span>
-                <Link href="/assistant" onClick={() => setAssistantOpen(false)}>Buka penuh <Icon name="arrow" width="14" /></Link>
+                <Link href="/assistant" onClick={() => setAssistantOpen(false)}>
+                  Buka penuh <Icon name="arrow" width="14" />
+                </Link>
               </div>
             </div>
           </aside>

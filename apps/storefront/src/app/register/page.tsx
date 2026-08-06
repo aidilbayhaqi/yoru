@@ -21,21 +21,33 @@ export default async function RegisterPage({ searchParams }: Props) {
           <div className="auth-visual-copy">
             <p className="section-eyebrow">Customer registration</p>
             <h1>One account for commerce and home service.</h1>
-            <p>Buat akun customer untuk menyimpan pilihan, mengikuti order, dan mengelola booking dalam satu tempat.</p>
+            <p>
+              Buat akun customer untuk menyimpan pilihan, mengikuti order, dan mengelola booking
+              dalam satu tempat.
+            </p>
           </div>
 
           <div className="auth-benefits" aria-label="Yoru account benefits">
             <span>
               <Icon name="heart" width="19" />
-              <span><strong>Simpan favorit</strong><small>Bangun wishlist produk dan layananmu.</small></span>
+              <span>
+                <strong>Simpan favorit</strong>
+                <small>Bangun wishlist produk dan layananmu.</small>
+              </span>
             </span>
             <span>
               <Icon name="truck" width="19" />
-              <span><strong>Pantau transaksi</strong><small>Order dan pengiriman punya status jelas.</small></span>
+              <span>
+                <strong>Pantau transaksi</strong>
+                <small>Order dan pengiriman punya status jelas.</small>
+              </span>
             </span>
             <span>
               <Icon name="user" width="19" />
-              <span><strong>Kelola booking</strong><small>Lihat profesional, slot, OTP, dan lifecycle.</small></span>
+              <span>
+                <strong>Kelola booking</strong>
+                <small>Lihat profesional, slot, OTP, dan lifecycle.</small>
+              </span>
             </span>
           </div>
         </section>
@@ -52,14 +64,19 @@ export default async function RegisterPage({ searchParams }: Props) {
           <div className="storefront-auth-card__heading">
             <p className="section-eyebrow">Create account</p>
             <h2>Mulai perjalananmu.</h2>
-            <p>Gunakan email aktif dan password kuat. Registrasi publik hanya membuat akun customer.</p>
+            <p>
+              Gunakan email aktif dan password kuat. Registrasi publik hanya membuat akun customer.
+            </p>
           </div>
 
           <AuthForm mode="register" nextPath={nextPath} />
 
           <div className="auth-security-note">
             <Icon name="shield" width="17" />
-            <span>Partner dan admin tetap melalui onboarding terkontrol. Role tidak dapat dipilih dari formulir registrasi publik.</span>
+            <span>
+              Partner dan admin tetap melalui onboarding terkontrol. Role tidak dapat dipilih dari
+              formulir registrasi publik.
+            </span>
           </div>
         </section>
       </div>

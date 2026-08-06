@@ -1,4 +1,8 @@
-import { resolveConsoleAccess, type ConsoleRole, type ConsoleSessionShape } from "@/lib/console-auth";
+import {
+  resolveConsoleAccess,
+  type ConsoleRole,
+  type ConsoleSessionShape,
+} from "@/lib/console-auth";
 
 export type { ConsoleRole } from "@/lib/console-auth";
 
@@ -57,10 +61,7 @@ export function resolveConsoleRole(session: ConsoleSessionShape): ConsoleRole {
   return role;
 }
 
-export function sectionBelongsToRole(
-  role: ConsoleRole,
-  section: DashboardSection,
-): boolean {
+export function sectionBelongsToRole(role: ConsoleRole, section: DashboardSection): boolean {
   return navigationForRole(role)
     .flatMap((group) => group.items)
     .some((item) => item.id === section);
@@ -212,38 +213,162 @@ export const initialProducts = [
 ];
 
 export const partnerOrders = [
-  { id: "YR-240812", customer: "Nadia Prameswari", amount: 1_275_000, status: "Diproses", time: "8 menit lalu" },
-  { id: "YR-240811", customer: "Ari Wibowo", amount: 650_000, status: "Selesai", time: "24 menit lalu" },
-  { id: "YR-240810", customer: "Maya Kurnia", amount: 475_000, status: "Menunggu", time: "41 menit lalu" },
-  { id: "YR-240809", customer: "Dimas Saputra", amount: 940_000, status: "Selesai", time: "1 jam lalu" },
+  {
+    id: "YR-240812",
+    customer: "Nadia Prameswari",
+    amount: 1_275_000,
+    status: "Diproses",
+    time: "8 menit lalu",
+  },
+  {
+    id: "YR-240811",
+    customer: "Ari Wibowo",
+    amount: 650_000,
+    status: "Selesai",
+    time: "24 menit lalu",
+  },
+  {
+    id: "YR-240810",
+    customer: "Maya Kurnia",
+    amount: 475_000,
+    status: "Menunggu",
+    time: "41 menit lalu",
+  },
+  {
+    id: "YR-240809",
+    customer: "Dimas Saputra",
+    amount: 940_000,
+    status: "Selesai",
+    time: "1 jam lalu",
+  },
 ];
 
 export const bookingSchedule = [
-  { time: "08:00", customer: "Rani", service: "Deep Cleaning", professional: "Raka", status: "On the way" },
-  { time: "10:30", customer: "Kevin", service: "AC Service", professional: "Dimas", status: "Confirmed" },
-  { time: "13:00", customer: "Sinta", service: "Sofa Detailing", professional: "Raka", status: "Assigned" },
-  { time: "15:30", customer: "Andre", service: "Deep Cleaning", professional: "Alya", status: "Requested" },
+  {
+    time: "08:00",
+    customer: "Rani",
+    service: "Deep Cleaning",
+    professional: "Raka",
+    status: "On the way",
+  },
+  {
+    time: "10:30",
+    customer: "Kevin",
+    service: "AC Service",
+    professional: "Dimas",
+    status: "Confirmed",
+  },
+  {
+    time: "13:00",
+    customer: "Sinta",
+    service: "Sofa Detailing",
+    professional: "Raka",
+    status: "Assigned",
+  },
+  {
+    time: "15:30",
+    customer: "Andre",
+    service: "Deep Cleaning",
+    professional: "Alya",
+    status: "Requested",
+  },
 ];
 
 export const verificationQueue = [
-  { partner: "PT Bersih Selalu", type: "Home service", submitted: "12 menit lalu", risk: "Low", completeness: 100 },
-  { partner: "Klinik Senyum Cerah", type: "Healthcare", submitted: "27 menit lalu", risk: "Medium", completeness: 92 },
-  { partner: "CV Teknik Prima", type: "Maintenance", submitted: "44 menit lalu", risk: "Low", completeness: 100 },
-  { partner: "Glow House Indonesia", type: "Beauty", submitted: "1 jam lalu", risk: "High", completeness: 84 },
+  {
+    partner: "PT Bersih Selalu",
+    type: "Home service",
+    submitted: "12 menit lalu",
+    risk: "Low",
+    completeness: 100,
+  },
+  {
+    partner: "Klinik Senyum Cerah",
+    type: "Healthcare",
+    submitted: "27 menit lalu",
+    risk: "Medium",
+    completeness: 92,
+  },
+  {
+    partner: "CV Teknik Prima",
+    type: "Maintenance",
+    submitted: "44 menit lalu",
+    risk: "Low",
+    completeness: 100,
+  },
+  {
+    partner: "Glow House Indonesia",
+    type: "Beauty",
+    submitted: "1 jam lalu",
+    risk: "High",
+    completeness: 84,
+  },
 ];
 
 export const partnerDirectory = [
-  { name: "HomeCare Jakarta", category: "Home service", gmv: 428_000_000, orders: 982, health: 96, status: "Healthy" },
-  { name: "Klinik Senyum Cerah", category: "Healthcare", gmv: 286_000_000, orders: 481, health: 88, status: "Review" },
-  { name: "Teknik Prima", category: "Maintenance", gmv: 194_000_000, orders: 722, health: 92, status: "Healthy" },
-  { name: "Glow House", category: "Beauty", gmv: 167_000_000, orders: 538, health: 71, status: "At risk" },
+  {
+    name: "HomeCare Jakarta",
+    category: "Home service",
+    gmv: 428_000_000,
+    orders: 982,
+    health: 96,
+    status: "Healthy",
+  },
+  {
+    name: "Klinik Senyum Cerah",
+    category: "Healthcare",
+    gmv: 286_000_000,
+    orders: 481,
+    health: 88,
+    status: "Review",
+  },
+  {
+    name: "Teknik Prima",
+    category: "Maintenance",
+    gmv: 194_000_000,
+    orders: 722,
+    health: 92,
+    status: "Healthy",
+  },
+  {
+    name: "Glow House",
+    category: "Beauty",
+    gmv: 167_000_000,
+    orders: 538,
+    health: 71,
+    status: "At risk",
+  },
 ];
 
 export const platformTransactions = [
-  { id: "PAY-839102", partner: "HomeCare Jakarta", amount: 2_450_000, provider: "MockPay", status: "Settled" },
-  { id: "PAY-839101", partner: "Teknik Prima", amount: 875_000, provider: "MockPay", status: "Pending" },
-  { id: "PAY-839100", partner: "Glow House", amount: 1_280_000, provider: "MockPay", status: "Review" },
-  { id: "PAY-839099", partner: "Klinik Senyum Cerah", amount: 3_150_000, provider: "MockPay", status: "Settled" },
+  {
+    id: "PAY-839102",
+    partner: "HomeCare Jakarta",
+    amount: 2_450_000,
+    provider: "MockPay",
+    status: "Settled",
+  },
+  {
+    id: "PAY-839101",
+    partner: "Teknik Prima",
+    amount: 875_000,
+    provider: "MockPay",
+    status: "Pending",
+  },
+  {
+    id: "PAY-839100",
+    partner: "Glow House",
+    amount: 1_280_000,
+    provider: "MockPay",
+    status: "Review",
+  },
+  {
+    id: "PAY-839099",
+    partner: "Klinik Senyum Cerah",
+    amount: 3_150_000,
+    provider: "MockPay",
+    status: "Settled",
+  },
 ];
 
 export const financeBalances = [
@@ -254,8 +379,18 @@ export const financeBalances = [
 ];
 
 export const auditEvents = [
-  { actor: "admin@yoru.id", action: "PARTNER_VERIFIED", target: "PT Bersih Selalu", time: "3 menit lalu" },
-  { actor: "finance@yoru.id", action: "PAYOUT_APPROVED", target: "PO-48211", time: "11 menit lalu" },
+  {
+    actor: "admin@yoru.id",
+    action: "PARTNER_VERIFIED",
+    target: "PT Bersih Selalu",
+    time: "3 menit lalu",
+  },
+  {
+    actor: "finance@yoru.id",
+    action: "PAYOUT_APPROVED",
+    target: "PO-48211",
+    time: "11 menit lalu",
+  },
   { actor: "system", action: "SECURITY_EVENT_RESOLVED", target: "SEC-2104", time: "18 menit lalu" },
   { actor: "ops@yoru.id", action: "BOOKING_REASSIGNED", target: "BK-72112", time: "26 menit lalu" },
 ];

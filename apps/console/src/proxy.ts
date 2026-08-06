@@ -5,7 +5,10 @@ import { ACCESS_COOKIE, CSRF_COOKIE, safeDashboardReturnPath } from "@/lib/conso
 
 function loginRedirect(request: NextRequest, reason?: string): NextResponse {
   const loginUrl = new URL("/login", request.url);
-  loginUrl.searchParams.set("next", safeDashboardReturnPath(`${request.nextUrl.pathname}${request.nextUrl.search}`));
+  loginUrl.searchParams.set(
+    "next",
+    safeDashboardReturnPath(`${request.nextUrl.pathname}${request.nextUrl.search}`),
+  );
   if (reason) loginUrl.searchParams.set("reason", reason);
   return NextResponse.redirect(loginUrl);
 }
@@ -24,7 +27,9 @@ export function proxy(request: NextRequest) {
   }
 
   if (isPublicAuthPage && hasAccessCookie) {
-    return NextResponse.redirect(new URL(safeDashboardReturnPath(request.nextUrl.searchParams.get("next")), request.url));
+    return NextResponse.redirect(
+      new URL(safeDashboardReturnPath(request.nextUrl.searchParams.get("next")), request.url),
+    );
   }
 
   return NextResponse.next();

@@ -1,28 +1,58 @@
 import { describe, expect, it } from "vitest";
 
-import { hasConsoleAccess, isSuperAdmin, resolveConsoleAccess, safeDashboardReturnPath } from "@/lib/console-auth";
+import {
+  hasConsoleAccess,
+  isSuperAdmin,
+  resolveConsoleAccess,
+  safeDashboardReturnPath,
+} from "@/lib/console-auth";
 import { sectionBelongsToRole } from "@/lib/console-dashboard";
 
 const partner = {
   active_partner_id: "p-1",
   platform_roles: [],
-  memberships: [{ partner_id: "p-1", role: "partner_owner", membership_status: "active", partner_status: "verified" }],
+  memberships: [
+    {
+      partner_id: "p-1",
+      role: "partner_owner",
+      membership_status: "active",
+      partner_status: "verified",
+    },
+  ],
 };
 
 const admin = { active_partner_id: null, platform_roles: ["super_admin"], memberships: [] };
 
-const verifier = { active_partner_id: null, platform_roles: ["platform_verifier"], memberships: [] };
+const verifier = {
+  active_partner_id: null,
+  platform_roles: ["platform_verifier"],
+  memberships: [],
+};
 
 const blockedPartner = {
   active_partner_id: "p-2",
   platform_roles: [],
-  memberships: [{ partner_id: "p-2", role: "partner_owner", membership_status: "active", partner_status: "suspended" }],
+  memberships: [
+    {
+      partner_id: "p-2",
+      role: "partner_owner",
+      membership_status: "active",
+      partner_status: "suspended",
+    },
+  ],
 };
 
 const unknownPartnerRole = {
   active_partner_id: "p-3",
   platform_roles: [],
-  memberships: [{ partner_id: "p-3", role: "customer", membership_status: "active", partner_status: "verified" }],
+  memberships: [
+    {
+      partner_id: "p-3",
+      role: "customer",
+      membership_status: "active",
+      partner_status: "verified",
+    },
+  ],
 };
 
 describe("console RBAC", () => {
@@ -47,6 +77,8 @@ describe("console RBAC", () => {
 
   it("rejects unsafe return paths", () => {
     expect(safeDashboardReturnPath("https://evil.test")).toBe("/dashboard");
-    expect(safeDashboardReturnPath("/dashboard?section=finance")).toBe("/dashboard?section=finance");
+    expect(safeDashboardReturnPath("/dashboard?section=finance")).toBe(
+      "/dashboard?section=finance",
+    );
   });
 });

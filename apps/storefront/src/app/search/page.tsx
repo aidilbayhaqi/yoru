@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Search" };
 
 export default async function SearchPage({ searchParams }: Props) {
   const values = await searchParams;
-  const query = Array.isArray(values.q) ? values.q[0] ?? "" : values.q ?? "";
+  const query = Array.isArray(values.q) ? (values.q[0] ?? "") : (values.q ?? "");
   const rawMode = Array.isArray(values.mode) ? values.mode[0] : values.mode;
   const mode: SearchMode = rawMode === "ai" || rawMode === "image" ? rawMode : "query";
 

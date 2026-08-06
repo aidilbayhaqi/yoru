@@ -6,9 +6,12 @@ export function SiteFooter() {
       <div className="commerce-footer__grid">
         <div className="footer-brand">
           <Link className="commerce-brand" href="/">
-            <span className="commerce-brand__mark">Y</span><span>Yoru</span>
+            <span className="commerce-brand__mark">Y</span>
+            <span>Yoru</span>
           </Link>
-          <p>Curated commerce and trusted home service, designed as one connected customer journey.</p>
+          <p>
+            Curated commerce and trusted home service, designed as one connected customer journey.
+          </p>
           <span className="footer-edition">Yoru Storefront · Phase 9 experience</span>
         </div>
         <div>
@@ -35,7 +38,9 @@ export function SiteFooter() {
       </div>
       <div className="commerce-footer__bottom">
         <span>© 2026 Yoru Platform</span>
-        <span>Prices, stock, serviceability, and payment states are verified at transaction time.</span>
+        <span>
+          Prices, stock, serviceability, and payment states are verified at transaction time.
+        </span>
       </div>
     </footer>
   );

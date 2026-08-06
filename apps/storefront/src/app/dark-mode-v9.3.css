@@ -20,7 +20,7 @@ html[data-theme="dark"] {
   --dm-muted: #aaaab2;
   --dm-faint: #84848d;
   --dm-border: rgba(255, 255, 255, 0.11);
-  --dm-border-strong: rgba(255, 255, 255, 0.20);
+  --dm-border-strong: rgba(255, 255, 255, 0.2);
   --dm-accent: #d2b0da;
   --dm-accent-hover: #e0c2e7;
   --dm-accent-soft: #38293e;
@@ -28,7 +28,7 @@ html[data-theme="dark"] {
   --dm-positive: #83d3aa;
   --dm-warning: #f0c879;
   --dm-danger: #f29a91;
-  --dm-overlay: rgba(4, 4, 6, 0.70);
+  --dm-overlay: rgba(4, 4, 6, 0.7);
   --dm-shadow: 0 28px 90px rgba(0, 0, 0, 0.52);
 
   /* Normalize every previous design generation. */
@@ -47,7 +47,7 @@ html[data-theme="dark"] {
   --v8-accent-soft: var(--dm-accent-soft);
   --v8-success: var(--dm-positive);
   --v8-danger: var(--dm-danger);
-  --v8-shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.30);
+  --v8-shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.3);
   --v8-shadow-md: 0 24px 72px rgba(0, 0, 0, 0.46);
   --v8-shadow-lg: var(--dm-shadow);
 
@@ -96,29 +96,11 @@ html[data-theme="dark"] textarea {
   color: var(--dm-text);
 }
 
-html[data-theme="dark"] :where(
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  strong,
-  b,
-  label,
-  legend,
-  summary,
-  dt
-) {
+html[data-theme="dark"] :where(h1, h2, h3, h4, h5, h6, strong, b, label, legend, summary, dt) {
   color: var(--dm-text);
 }
 
-html[data-theme="dark"] :where(
-  p,
-  small,
-  dd,
-  figcaption
-) {
+html[data-theme="dark"] :where(p, small, dd, figcaption) {
   color: inherit;
 }
 
@@ -152,55 +134,51 @@ html[data-theme="dark"] select option {
   color: var(--dm-text);
 }
 
-html[data-theme="dark"] :where(
-  input,
-  select,
-  textarea,
-  button,
-  a
-):focus-visible {
+html[data-theme="dark"] :where(input, select, textarea, button, a):focus-visible {
   outline-color: color-mix(in srgb, var(--dm-accent) 56%, transparent) !important;
 }
 
 /* Shared semantic text */
-html[data-theme="dark"] :where(
-  .muted,
-  .section-support,
-  .buy-now-note,
-  .ai-disclaimer,
-  .catalog-card__partner,
-  .service-meta,
-  .service-price-row > span,
-  .detail-description,
-  .v5-payment-note,
-  .filter-information,
-  .catalog-results__summary span,
-  .assistant-heading__copy > span,
-  .assistant-footer-row,
-  .commerce-footer p,
-  .commerce-footer a,
-  .breadcrumb,
-  .breadcrumb a,
-  .delivery-estimator p,
-  .professional-section p,
-  .service-area-card p,
-  .v5-service-journey p,
-  .v5-service-faq p,
-  .v5-review-cards p,
-  .search-no-suggestion,
-  .search-suggestion-heading
-) {
+html[data-theme="dark"]
+  :where(
+    .muted,
+    .section-support,
+    .buy-now-note,
+    .ai-disclaimer,
+    .catalog-card__partner,
+    .service-meta,
+    .service-price-row > span,
+    .detail-description,
+    .v5-payment-note,
+    .filter-information,
+    .catalog-results__summary span,
+    .assistant-heading__copy > span,
+    .assistant-footer-row,
+    .commerce-footer p,
+    .commerce-footer a,
+    .breadcrumb,
+    .breadcrumb a,
+    .delivery-estimator p,
+    .professional-section p,
+    .service-area-card p,
+    .v5-service-journey p,
+    .v5-service-faq p,
+    .v5-review-cards p,
+    .search-no-suggestion,
+    .search-suggestion-heading
+  ) {
   color: var(--dm-muted) !important;
 }
 
-html[data-theme="dark"] :where(
-  .section-eyebrow,
-  .detail-partner,
-  .verified-label,
-  .text-link,
-  .assistant-context-bar > button,
-  .active-filter-reset
-) {
+html[data-theme="dark"]
+  :where(
+    .section-eyebrow,
+    .detail-partner,
+    .verified-label,
+    .text-link,
+    .assistant-context-bar > button,
+    .active-filter-reset
+  ) {
   color: var(--dm-accent) !important;
 }
 
@@ -217,14 +195,15 @@ html[data-theme="dark"] .commerce-header {
   backdrop-filter: blur(20px) saturate(1.15);
 }
 
-html[data-theme="dark"] :where(
-  .commerce-brand,
-  .commerce-nav a:hover,
-  .commerce-nav a.is-active,
-  .icon-button,
-  .mobile-menu > a,
-  .mobile-search-trigger
-) {
+html[data-theme="dark"]
+  :where(
+    .commerce-brand,
+    .commerce-nav a:hover,
+    .commerce-nav a.is-active,
+    .icon-button,
+    .mobile-menu > a,
+    .mobile-search-trigger
+  ) {
   color: var(--dm-text) !important;
 }
 
@@ -285,98 +264,105 @@ html[data-theme="dark"] .cart-count {
 }
 
 /* Buttons */
-html[data-theme="dark"] :where(
-  .primary-button,
-  .filter-apply-button,
-  .buy-now-button,
-  .service-book-cta,
-  .delivery-estimator__form button
-) {
+html[data-theme="dark"]
+  :where(
+    .primary-button,
+    .filter-apply-button,
+    .buy-now-button,
+    .service-book-cta,
+    .delivery-estimator__form button
+  ) {
   border-color: var(--dm-text) !important;
   background: var(--dm-text) !important;
   color: #151519 !important;
 }
 
-html[data-theme="dark"] :where(
-  .primary-button,
-  .filter-apply-button,
-  .buy-now-button,
-  .service-book-cta,
-  .delivery-estimator__form button
-):hover:not(:disabled) {
+html[data-theme="dark"]
+  :where(
+    .primary-button,
+    .filter-apply-button,
+    .buy-now-button,
+    .service-book-cta,
+    .delivery-estimator__form button
+  ):hover:not(:disabled) {
   border-color: var(--dm-accent-hover) !important;
   background: var(--dm-accent-hover) !important;
   color: var(--dm-accent-contrast) !important;
 }
 
-html[data-theme="dark"] :where(
-  .secondary-button,
-  .filter-reset,
-  .mobile-filter-button,
-  .load-more-button,
-  .detail-cart-button
-) {
+html[data-theme="dark"]
+  :where(
+    .secondary-button,
+    .filter-reset,
+    .mobile-filter-button,
+    .load-more-button,
+    .detail-cart-button
+  ) {
   border-color: var(--dm-border-strong) !important;
   background: var(--dm-panel) !important;
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .secondary-button,
-  .filter-reset,
-  .mobile-filter-button,
-  .load-more-button,
-  .detail-cart-button
-):hover:not(:disabled) {
+html[data-theme="dark"]
+  :where(
+    .secondary-button,
+    .filter-reset,
+    .mobile-filter-button,
+    .load-more-button,
+    .detail-cart-button
+  ):hover:not(:disabled) {
   border-color: var(--dm-accent) !important;
   background: var(--dm-panel-soft) !important;
   color: var(--dm-text) !important;
 }
 
 /* Home surfaces */
-html[data-theme="dark"] :where(
-  .v5-home-hero,
-  .home-section,
-  .v5-home-section,
-  .v5-category-rail,
-  .v5-editorial-split,
-  .v5-member-banner,
-  .v5-trust-grid,
-  .v5-content-page,
-  .v5-page-hero,
-  .v5-search-page,
-  .v5-product-page,
-  .v5-service-page
-) {
+html[data-theme="dark"]
+  :where(
+    .v5-home-hero,
+    .home-section,
+    .v5-home-section,
+    .v5-category-rail,
+    .v5-editorial-split,
+    .v5-member-banner,
+    .v5-trust-grid,
+    .v5-content-page,
+    .v5-page-hero,
+    .v5-search-page,
+    .v5-product-page,
+    .v5-service-page
+  ) {
   color: var(--dm-text);
 }
 
-html[data-theme="dark"] :where(
-  .hero-discovery-trigger,
-  .v5-category-tile,
-  .v5-editorial-card,
-  .v5-member-banner,
-  .trust-grid article,
-  .v5-trust-grid article,
-  .collection-story,
-  .service-area-card,
-  .help-topic-grid article,
-  .search-intent-card,
-  .v5-visual-search-card
-) {
+html[data-theme="dark"]
+  :where(
+    .hero-discovery-trigger,
+    .v5-category-tile,
+    .v5-editorial-card,
+    .v5-member-banner,
+    .trust-grid article,
+    .v5-trust-grid article,
+    .collection-story,
+    .service-area-card,
+    .help-topic-grid article,
+    .search-intent-card,
+    .v5-visual-search-card
+  ) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel) !important;
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .v5-home-hero__lead,
-  .v5-category-tile p,
-  .v5-editorial-card p,
-  .v5-member-banner p,
-  .trust-grid article p,
-  .v5-trust-grid article p
-) {
+html[data-theme="dark"]
+  :where(
+    .v5-home-hero__lead,
+    .v5-category-tile p,
+    .v5-editorial-card p,
+    .v5-member-banner p,
+    .trust-grid article p,
+    .v5-trust-grid article p
+  ) {
   color: var(--dm-muted) !important;
 }
 
@@ -398,14 +384,15 @@ html[data-theme="dark"] .service-status-card :where(strong, span) {
 }
 
 /* Catalog and filtering */
-html[data-theme="dark"] :where(
-  .catalog-hero,
-  .v5-catalog-hero,
-  .filter-panel,
-  .filter-drawer,
-  .catalog-results__toolbar,
-  .filter-empty-state
-) {
+html[data-theme="dark"]
+  :where(
+    .catalog-hero,
+    .v5-catalog-hero,
+    .filter-panel,
+    .filter-drawer,
+    .catalog-results__toolbar,
+    .filter-empty-state
+  ) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel) !important;
   color: var(--dm-text) !important;
@@ -425,61 +412,57 @@ html[data-theme="dark"] .filter-drawer-backdrop {
   background: var(--dm-overlay) !important;
 }
 
-html[data-theme="dark"] :where(
-  .filter-panel__heading,
-  .filter-drawer__heading,
-  .filter-drawer__footer,
-  .filter-section,
-  .filter-toggle-row
-) {
+html[data-theme="dark"]
+  :where(
+    .filter-panel__heading,
+    .filter-drawer__heading,
+    .filter-drawer__footer,
+    .filter-section,
+    .filter-toggle-row
+  ) {
   border-color: var(--dm-border) !important;
 }
 
-html[data-theme="dark"] :where(
-  .filter-label,
-  .filter-section__heading,
-  .filter-field > span
-) {
+html[data-theme="dark"] :where(.filter-label, .filter-section__heading, .filter-field > span) {
   color: var(--dm-text-soft) !important;
 }
 
-html[data-theme="dark"] :where(
-  .filter-search > div,
-  .filter-field select,
-  .catalog-sort select
-) {
+html[data-theme="dark"] :where(.filter-search > div, .filter-field select, .catalog-sort select) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel-soft) !important;
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .filter-choice-grid button,
-  .filter-segmented button,
-  .active-filter-row button,
-  .view-switcher button
-) {
+html[data-theme="dark"]
+  :where(
+    .filter-choice-grid button,
+    .filter-segmented button,
+    .active-filter-row button,
+    .view-switcher button
+  ) {
   border-color: var(--dm-border) !important;
   background: transparent !important;
   color: var(--dm-text-soft) !important;
 }
 
-html[data-theme="dark"] :where(
-  .filter-choice-grid button,
-  .filter-segmented button,
-  .active-filter-row button,
-  .view-switcher button
-):hover {
+html[data-theme="dark"]
+  :where(
+    .filter-choice-grid button,
+    .filter-segmented button,
+    .active-filter-row button,
+    .view-switcher button
+  ):hover {
   border-color: var(--dm-border-strong) !important;
   background: var(--dm-panel-soft) !important;
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .filter-choice-grid button.is-active,
-  .filter-segmented button.is-active,
-  .view-switcher button.is-active
-) {
+html[data-theme="dark"]
+  :where(
+    .filter-choice-grid button.is-active,
+    .filter-segmented button.is-active,
+    .view-switcher button.is-active
+  ) {
   border-color: var(--dm-accent) !important;
   background: var(--dm-accent-soft) !important;
   color: var(--dm-text) !important;
@@ -528,78 +511,69 @@ html[data-theme="dark"] .catalog-card__media {
   box-shadow: inset 0 0 0 1px var(--dm-border) !important;
 }
 
-html[data-theme="dark"] :where(
-  .catalog-card h3,
-  .catalog-card__heading,
-  .price-row strong,
-  .service-price-row strong,
-  .rating-row strong
-) {
+html[data-theme="dark"]
+  :where(
+    .catalog-card h3,
+    .catalog-card__heading,
+    .price-row strong,
+    .service-price-row strong,
+    .rating-row strong
+  ) {
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .card-quick-action,
-  .favorite-button,
-  .gallery-share-button
-) {
+html[data-theme="dark"] :where(.card-quick-action, .favorite-button, .gallery-share-button) {
   border-color: var(--dm-border) !important;
-  background: rgba(23, 23, 27, 0.90) !important;
+  background: rgba(23, 23, 27, 0.9) !important;
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .catalog-badge,
-  .service-badge,
-  .detail-badge
-) {
+html[data-theme="dark"] :where(.catalog-badge, .service-badge, .detail-badge) {
   border-color: rgba(255, 255, 255, 0.12) !important;
   background: rgba(9, 9, 11, 0.82) !important;
   color: #ffffff !important;
 }
 
 /* Detail pages */
-html[data-theme="dark"] :where(
-  .v5-detail-panel,
-  .detail-panel,
-  .delivery-estimator,
-  .detail-accordions details,
-  .v5-review-section,
-  .v5-review-cards article,
-  .v5-review-summary,
-  .professional-section,
-  .professional-grid article,
-  .v5-service-assurance,
-  .v5-service-journey,
-  .v5-service-faq,
-  .service-area-card
-) {
+html[data-theme="dark"]
+  :where(
+    .v5-detail-panel,
+    .detail-panel,
+    .delivery-estimator,
+    .detail-accordions details,
+    .v5-review-section,
+    .v5-review-cards article,
+    .v5-review-summary,
+    .professional-section,
+    .professional-grid article,
+    .v5-service-assurance,
+    .v5-service-journey,
+    .v5-service-faq,
+    .service-area-card
+  ) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel) !important;
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .v5-detail-media,
-  .detail-media,
-  .service-detail-media,
-  .gallery-thumb
-) {
+html[data-theme="dark"]
+  :where(.v5-detail-media, .detail-media, .service-detail-media, .gallery-thumb) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel-soft) !important;
 }
 
-html[data-theme="dark"] :where(
-  .v5-detail-panel h1,
-  .detail-price,
-  .service-detail-price,
-  .option-label,
-  .detail-accordions summary,
-  .professional-section h2,
-  .v5-review-section h2,
-  .v5-service-journey h2,
-  .v5-service-faq h2
-) {
+html[data-theme="dark"]
+  :where(
+    .v5-detail-panel h1,
+    .detail-price,
+    .service-detail-price,
+    .option-label,
+    .detail-accordions summary,
+    .professional-section h2,
+    .v5-review-section h2,
+    .v5-service-journey h2,
+    .v5-service-faq h2
+  ) {
   color: var(--dm-text) !important;
 }
 
@@ -673,14 +647,15 @@ html[data-theme="dark"] .overlay-backdrop {
   background: var(--dm-overlay) !important;
 }
 
-html[data-theme="dark"] :where(
-  .search-dialog,
-  .visual-search-panel,
-  .search-suggestion-list,
-  .search-suggestion-list > a,
-  .search-suggestion-list > button,
-  .search-no-suggestion
-) {
+html[data-theme="dark"]
+  :where(
+    .search-dialog,
+    .visual-search-panel,
+    .search-suggestion-list,
+    .search-suggestion-list > a,
+    .search-suggestion-list > button,
+    .search-no-suggestion
+  ) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel) !important;
   color: var(--dm-text) !important;
@@ -760,13 +735,14 @@ html[data-theme="dark"] .assistant-backdrop {
   background: rgba(4, 4, 6, 0.48) !important;
 }
 
-html[data-theme="dark"] :where(
-  .assistant-drawer,
-  .assistant-heading,
-  .assistant-context-bar,
-  .assistant-quick-prompts,
-  .assistant-composer-shell
-) {
+html[data-theme="dark"]
+  :where(
+    .assistant-drawer,
+    .assistant-heading,
+    .assistant-context-bar,
+    .assistant-quick-prompts,
+    .assistant-composer-shell
+  ) {
   border-color: var(--dm-border) !important;
   background: var(--dm-panel) !important;
   color: var(--dm-text) !important;
@@ -840,31 +816,31 @@ html[data-theme="dark"] .footer-edition {
 }
 
 /* Skeletons and disabled state */
-html[data-theme="dark"] :where(
-  .skeleton-shimmer,
-  .catalog-card-skeleton__media,
-  .catalog-card-skeleton__line,
-  .catalog-skeleton-media,
-  .catalog-skeleton-line,
-  .catalog-skeleton-title,
-  .catalog-skeleton-price,
-  .catalog-skeleton-action,
-  .v6-detail-media-skeleton,
-  .v6-detail-title-skeleton,
-  .v6-route-skeleton-copy,
-  .v6-route-skeleton-eyebrow,
-  .v6-route-skeleton-heading,
-  .v6-route-skeleton-stat,
-  .v6-toolbar-skeleton,
-  .v6-filter-skeleton-line
-) {
-  background:
-    linear-gradient(
-      90deg,
-      var(--dm-panel-soft) 25%,
-      var(--dm-panel-strong) 44%,
-      var(--dm-panel-soft) 64%
-    ) !important;
+html[data-theme="dark"]
+  :where(
+    .skeleton-shimmer,
+    .catalog-card-skeleton__media,
+    .catalog-card-skeleton__line,
+    .catalog-skeleton-media,
+    .catalog-skeleton-line,
+    .catalog-skeleton-title,
+    .catalog-skeleton-price,
+    .catalog-skeleton-action,
+    .v6-detail-media-skeleton,
+    .v6-detail-title-skeleton,
+    .v6-route-skeleton-copy,
+    .v6-route-skeleton-eyebrow,
+    .v6-route-skeleton-heading,
+    .v6-route-skeleton-stat,
+    .v6-toolbar-skeleton,
+    .v6-filter-skeleton-line
+  ) {
+  background: linear-gradient(
+    90deg,
+    var(--dm-panel-soft) 25%,
+    var(--dm-panel-strong) 44%,
+    var(--dm-panel-soft) 64%
+  ) !important;
   background-size: 220% 100% !important;
 }
 
@@ -885,46 +861,38 @@ html[data-theme="dark"] select:-webkit-autofill {
 }
 
 /* High-contrast safety net for old components. */
-html[data-theme="dark"] :where(
-  .catalog-page,
-  .v5-product-page,
-  .v5-service-page,
-  .v5-content-page,
-  .v5-search-page,
-  .home-section
-) :where(
-  h1,
-  h2,
-  h3,
-  h4,
-  strong,
-  label,
-  summary
-) {
+html[data-theme="dark"]
+  :where(
+    .catalog-page,
+    .v5-product-page,
+    .v5-service-page,
+    .v5-content-page,
+    .v5-search-page,
+    .home-section
+  )
+  :where(h1, h2, h3, h4, strong, label, summary) {
   color: var(--dm-text) !important;
 }
 
-html[data-theme="dark"] :where(
-  .catalog-page,
-  .v5-product-page,
-  .v5-service-page,
-  .v5-content-page,
-  .v5-search-page,
-  .home-section
-) :where(
-  p,
-  small,
-  span
-):not(
-  .catalog-badge,
-  .service-badge,
-  .detail-badge,
-  .cart-count,
-  .status-dot,
-  .theme-toggle__track,
-  .price-row *,
-  .service-price-row *
-) {
+html[data-theme="dark"]
+  :where(
+    .catalog-page,
+    .v5-product-page,
+    .v5-service-page,
+    .v5-content-page,
+    .v5-search-page,
+    .home-section
+  )
+  :where(p, small, span):not(
+    .catalog-badge,
+    .service-badge,
+    .detail-badge,
+    .cart-count,
+    .status-dot,
+    .theme-toggle__track,
+    .price-row *,
+    .service-price-row *
+  ) {
   color: inherit;
 }
 
@@ -933,6 +901,6 @@ html[data-theme="dark"] :where(
   html[data-theme="dark"] {
     --dm-muted: #c3c3c9;
     --dm-border: rgba(255, 255, 255, 0.19);
-    --dm-border-strong: rgba(255, 255, 255, 0.30);
+    --dm-border-strong: rgba(255, 255, 255, 0.3);
   }
 }

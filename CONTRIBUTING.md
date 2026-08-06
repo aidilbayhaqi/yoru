@@ -37,14 +37,14 @@ docs(adr): record commission calculation decision
 
 ## Review ownership
 
-| Perubahan | Reviewer wajib |
-| --- | --- |
-| Auth, permission, tenant scope | Backend + security owner |
-| Payment, ledger, payout | Backend + finance/product owner |
-| Migration atau index | Backend + database owner |
-| AI prompt/tool/retrieval | AI owner + domain/product owner |
-| UI shared component | Frontend owner |
-| CI/deployment/secret | Platform owner |
+| Perubahan                      | Reviewer wajib                  |
+| ------------------------------ | ------------------------------- |
+| Auth, permission, tenant scope | Backend + security owner        |
+| Payment, ledger, payout        | Backend + finance/product owner |
+| Migration atau index           | Backend + database owner        |
+| AI prompt/tool/retrieval       | AI owner + domain/product owner |
+| UI shared component            | Frontend owner                  |
+| CI/deployment/secret           | Platform owner                  |
 
 ## Coding standards
 

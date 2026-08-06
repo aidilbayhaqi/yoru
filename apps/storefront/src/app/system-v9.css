@@ -6,7 +6,7 @@
     --v9-elevated: rgba(255, 255, 255, 0.94);
     --v9-text: #18181b;
     --v9-muted: #6f6f76;
-    --v9-border: rgba(24, 24, 27, 0.10);
+    --v9-border: rgba(24, 24, 27, 0.1);
     --v9-border-strong: rgba(24, 24, 27, 0.18);
     --v9-accent: #27272a;
     --v9-accent-text: #fafafa;
@@ -58,7 +58,11 @@
     border: 1px solid var(--v9-border);
     border-radius: var(--v9-radius-lg);
     background:
-      radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--v9-focus) 15%, transparent), transparent 34%),
+      radial-gradient(
+        circle at 90% 10%,
+        color-mix(in srgb, var(--v9-focus) 15%, transparent),
+        transparent 34%
+      ),
       var(--v9-surface);
     box-shadow: none;
   }
@@ -67,8 +71,8 @@
     max-width: 18ch;
     margin: 8px 0 12px;
     font-size: clamp(2rem, 4.2vw, 4rem);
-    line-height: .98;
-    letter-spacing: -.055em;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
   }
 
   .catalog-hero p:not(.section-eyebrow) {
@@ -107,7 +111,7 @@
   .filter-panel__heading h2 {
     margin: 3px 0 0;
     font-size: 1.05rem;
-    letter-spacing: -.02em;
+    letter-spacing: -0.02em;
   }
 
   .filter-panel__heading > span {
@@ -118,7 +122,7 @@
     border-radius: 99px;
     background: var(--v9-accent);
     color: var(--v9-accent-text);
-    font-size: .76rem;
+    font-size: 0.76rem;
   }
 
   .filter-search > div,
@@ -145,9 +149,9 @@
   .filter-section__heading,
   .filter-field > span {
     color: var(--v9-muted);
-    font-size: .74rem;
+    font-size: 0.74rem;
     font-weight: 750;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
@@ -215,12 +219,12 @@
   }
 
   .catalog-results__summary strong {
-    font-size: .95rem;
+    font-size: 0.95rem;
   }
 
   .catalog-results__summary span {
     color: var(--v9-muted);
-    font-size: .78rem;
+    font-size: 0.78rem;
   }
 
   .catalog-grid {
@@ -233,7 +237,10 @@
     border-radius: var(--v9-radius-md);
     background: transparent;
     box-shadow: none;
-    transition: transform .22s ease, border-color .22s ease, background .22s ease;
+    transition:
+      transform 0.22s ease,
+      border-color 0.22s ease,
+      background 0.22s ease;
   }
 
   .catalog-card:hover {
@@ -253,7 +260,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform .45s cubic-bezier(.2,.7,.2,1);
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   .catalog-card:hover .catalog-card__media img {
@@ -267,7 +274,7 @@
   .catalog-card__body h3 {
     margin: 4px 0;
     font-size: 1rem;
-    letter-spacing: -.02em;
+    letter-spacing: -0.02em;
   }
 
   .catalog-card__partner,
@@ -304,11 +311,12 @@
   .skeleton-shimmer,
   .catalog-card-skeleton__media,
   .catalog-card-skeleton__line {
-    background:
-      linear-gradient(90deg,
-        var(--v9-surface-soft) 25%,
-        color-mix(in srgb, var(--v9-surface-soft) 58%, var(--v9-surface)) 42%,
-        var(--v9-surface-soft) 62%);
+    background: linear-gradient(
+      90deg,
+      var(--v9-surface-soft) 25%,
+      color-mix(in srgb, var(--v9-surface-soft) 58%, var(--v9-surface)) 42%,
+      var(--v9-surface-soft) 62%
+    );
     background-size: 220% 100%;
   }
 
@@ -335,17 +343,17 @@
   }
 
   .ai-fab__label strong {
-    font-size: .82rem;
+    font-size: 0.82rem;
   }
 
   .ai-fab__label small {
     color: var(--v9-muted);
-    font-size: .68rem;
+    font-size: 0.68rem;
   }
 
   .assistant-backdrop,
   .overlay-backdrop {
-    background: rgba(0, 0, 0, .34);
+    background: rgba(0, 0, 0, 0.34);
     backdrop-filter: blur(4px);
   }
 
@@ -386,7 +394,11 @@
   .assistant-messages {
     padding: 18px;
     background:
-      radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--v9-focus) 8%, transparent), transparent 32%),
+      radial-gradient(
+        circle at 20% 0%,
+        color-mix(in srgb, var(--v9-focus) 8%, transparent),
+        transparent 32%
+      ),
       var(--v9-bg);
   }
 
@@ -445,7 +457,7 @@
   .search-mode-tabs button.is-active {
     background: var(--v9-surface);
     color: var(--v9-text);
-    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   }
 
   @media (max-width: 920px) {

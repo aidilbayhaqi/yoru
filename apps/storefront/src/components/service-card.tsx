@@ -18,7 +18,9 @@ export function ServiceCard({ service }: { service: Service }) {
         <Link aria-label={`Lihat ${service.name}`} href={`/services/${service.slug}`}>
           <Image alt={service.name} height={720} src={service.image} width={640} />
         </Link>
-        {service.badge ? <span className="catalog-badge service-badge">{service.badge}</span> : null}
+        {service.badge ? (
+          <span className="catalog-badge service-badge">{service.badge}</span>
+        ) : null}
         <button
           aria-label={favorite ? "Hapus dari favorit" : "Tambah ke favorit"}
           className={`favorite-button ${favorite ? "is-active" : ""}`}
@@ -44,8 +46,14 @@ export function ServiceCard({ service }: { service: Service }) {
         </div>
 
         <div className="service-meta">
-          <span><Icon name="clock" width="14" />{service.durationMin} menit</span>
-          <span><Icon name="pin" width="14" />{service.serviceArea}</span>
+          <span>
+            <Icon name="clock" width="14" />
+            {service.durationMin} menit
+          </span>
+          <span>
+            <Icon name="pin" width="14" />
+            {service.serviceArea}
+          </span>
         </div>
 
         <div className="catalog-card__footer">
@@ -53,7 +61,11 @@ export function ServiceCard({ service }: { service: Service }) {
             <span>Mulai</span>
             <strong>{formatMoney(service.priceMinor)}</strong>
           </div>
-          <Link aria-label={`Pilih jadwal ${service.name}`} className="card-quick-action" href={`/services/${service.slug}/book`}>
+          <Link
+            aria-label={`Pilih jadwal ${service.name}`}
+            className="card-quick-action"
+            href={`/services/${service.slug}/book`}
+          >
             <Icon name="arrow" width="17" />
           </Link>
         </div>

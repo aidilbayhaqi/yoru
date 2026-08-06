@@ -22,23 +22,31 @@ export default async function LoginPage({ searchParams }: Props) {
             <p className="section-eyebrow">One secure customer session</p>
             <h1>Welcome back to your curated routine.</h1>
             <p>
-              Masuk untuk melanjutkan cart, wishlist, order, dan booking dari
-              satu akun yang sama.
+              Masuk untuk melanjutkan cart, wishlist, order, dan booking dari satu akun yang sama.
             </p>
           </div>
 
           <div className="auth-benefits" aria-label="Yoru account benefits">
             <span>
               <Icon name="bag" width="19" />
-              <span><strong>Cart tetap tersimpan</strong><small>Lanjutkan pilihanmu tanpa mulai ulang.</small></span>
+              <span>
+                <strong>Cart tetap tersimpan</strong>
+                <small>Lanjutkan pilihanmu tanpa mulai ulang.</small>
+              </span>
             </span>
             <span>
               <Icon name="heart" width="19" />
-              <span><strong>Wishlist personal</strong><small>Simpan produk dan layanan yang relevan.</small></span>
+              <span>
+                <strong>Wishlist personal</strong>
+                <small>Simpan produk dan layanan yang relevan.</small>
+              </span>
             </span>
             <span>
               <Icon name="shield" width="19" />
-              <span><strong>Session terlindungi</strong><small>Cookie HttpOnly dan proteksi CSRF.</small></span>
+              <span>
+                <strong>Session terlindungi</strong>
+                <small>Cookie HttpOnly dan proteksi CSRF.</small>
+              </span>
             </span>
           </div>
         </section>
@@ -62,7 +70,10 @@ export default async function LoginPage({ searchParams }: Props) {
 
           <div className="auth-security-note">
             <Icon name="shield" width="17" />
-            <span>Token akses tidak disimpan di local storage. Yoru memakai session cookie HttpOnly dan proteksi CSRF.</span>
+            <span>
+              Token akses tidak disimpan di local storage. Yoru memakai session cookie HttpOnly dan
+              proteksi CSRF.
+            </span>
           </div>
         </section>
       </div>

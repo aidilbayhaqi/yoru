@@ -15,20 +15,20 @@
 
 ## 2. Aggregate
 
-| Aggregate | Root | Invariant |
-| --- | --- | --- |
-| Identity | `users` | Email/phone terverifikasi sesuai policy |
-| Partner | `partners` | Hanya partner terverifikasi dapat publish |
-| Catalog | `products` / `services` | Variant/service price valid dan tenant-scoped |
-| Inventory | `inventory_items` | Available = on_hand - reserved, tidak negatif |
-| Professional | `professionals` | Credential dan availability sesuai service |
-| Cart | `carts` | Item aktif dan quote belum kedaluwarsa |
-| Order | `orders` | Totals dari server-side price snapshot |
-| Booking | `bookings` | Slot, area, dan professional assignment valid |
-| Payment | `payment_intents` | Provider transition idempotent |
-| Ledger | `ledger_transactions` | Debit = credit per transaction |
-| Dispute | `disputes` | Resolution memiliki actor dan evidence |
-| AI Session | `ai_sessions` | Consent, policy version, dan retention tercatat |
+| Aggregate    | Root                    | Invariant                                       |
+| ------------ | ----------------------- | ----------------------------------------------- |
+| Identity     | `users`                 | Email/phone terverifikasi sesuai policy         |
+| Partner      | `partners`              | Hanya partner terverifikasi dapat publish       |
+| Catalog      | `products` / `services` | Variant/service price valid dan tenant-scoped   |
+| Inventory    | `inventory_items`       | Available = on_hand - reserved, tidak negatif   |
+| Professional | `professionals`         | Credential dan availability sesuai service      |
+| Cart         | `carts`                 | Item aktif dan quote belum kedaluwarsa          |
+| Order        | `orders`                | Totals dari server-side price snapshot          |
+| Booking      | `bookings`              | Slot, area, dan professional assignment valid   |
+| Payment      | `payment_intents`       | Provider transition idempotent                  |
+| Ledger       | `ledger_transactions`   | Debit = credit per transaction                  |
+| Dispute      | `disputes`              | Resolution memiliki actor dan evidence          |
+| AI Session   | `ai_sessions`           | Consent, policy version, dan retention tercatat |
 
 ## 3. ERD inti
 
@@ -70,89 +70,89 @@ metadata sesuai kebutuhan.
 
 ### Identity & access
 
-| Table | Kolom penting | Constraint/index awal |
-| --- | --- | --- |
-| `users` | id, email, phone, status, locale | unique normalized email/phone |
-| `user_credentials` | user_id, password_hash, changed_at | one active password |
-| `sessions` | id, user_id, token_hash, expires_at, revoked_at | user + active expiry |
-| `mfa_methods` | user_id, type, secret_ciphertext, verified_at | encrypted secret |
-| `roles` | id, code, scope | unique code |
-| `permissions` | id, code | unique code |
-| `role_permissions` | role_id, permission_id | composite unique |
-| `partner_memberships` | partner_id, user_id, role_id, status | unique partner/user |
+| Table                 | Kolom penting                                   | Constraint/index awal         |
+| --------------------- | ----------------------------------------------- | ----------------------------- |
+| `users`               | id, email, phone, status, locale                | unique normalized email/phone |
+| `user_credentials`    | user_id, password_hash, changed_at              | one active password           |
+| `sessions`            | id, user_id, token_hash, expires_at, revoked_at | user + active expiry          |
+| `mfa_methods`         | user_id, type, secret_ciphertext, verified_at   | encrypted secret              |
+| `roles`               | id, code, scope                                 | unique code                   |
+| `permissions`         | id, code                                        | unique code                   |
+| `role_permissions`    | role_id, permission_id                          | composite unique              |
+| `partner_memberships` | partner_id, user_id, role_id, status            | unique partner/user           |
 
 ### Partner & professional
 
-| Table | Kolom penting | Constraint/index awal |
-| --- | --- | --- |
-| `partners` | id, legal_name, display_name, type, status | status + updated |
-| `partner_verifications` | partner_id, type, status, reviewer_id | partner + status |
-| `partner_documents` | partner_id, kind, object_key, expires_at | private object |
-| `service_areas` | partner_id, type, geometry/postal_codes | spatial/index policy |
-| `professionals` | partner_id, user_id, status, rating | unique membership |
-| `professional_credentials` | professional_id, kind, status, expires_at | expiry index |
-| `availability_rules` | professional_id, weekday, start/end | valid time range |
-| `availability_exceptions` | professional_id, start/end, reason | range query |
+| Table                      | Kolom penting                              | Constraint/index awal |
+| -------------------------- | ------------------------------------------ | --------------------- |
+| `partners`                 | id, legal_name, display_name, type, status | status + updated      |
+| `partner_verifications`    | partner_id, type, status, reviewer_id      | partner + status      |
+| `partner_documents`        | partner_id, kind, object_key, expires_at   | private object        |
+| `service_areas`            | partner_id, type, geometry/postal_codes    | spatial/index policy  |
+| `professionals`            | partner_id, user_id, status, rating        | unique membership     |
+| `professional_credentials` | professional_id, kind, status, expires_at  | expiry index          |
+| `availability_rules`       | professional_id, weekday, start/end        | valid time range      |
+| `availability_exceptions`  | professional_id, start/end, reason         | range query           |
 
 ### Catalog, inventory, and service
 
-| Table | Kolom penting | Constraint/index awal |
-| --- | --- | --- |
-| `categories` | parent_id, type, slug, status | unique type/slug |
-| `products` | partner_id, category_id, name, slug, status | tenant + status |
-| `product_variants` | partner_id, product_id, sku, price_minor | unique partner/SKU |
-| `product_media` | product_id, object_key, position | unique position |
-| `inventory_items` | partner_id, variant_id, on_hand, reserved | unique variant |
-| `inventory_movements` | inventory_item_id, type, quantity, ref | append-only |
-| `inventory_reservations` | variant_id, cart/order ref, qty, expires_at | active expiry |
-| `services` | partner_id, category_id, name, duration_min, status | tenant + status |
-| `service_prices` | service_id, zone/type, price_minor, active | valid date range |
+| Table                    | Kolom penting                                       | Constraint/index awal |
+| ------------------------ | --------------------------------------------------- | --------------------- |
+| `categories`             | parent_id, type, slug, status                       | unique type/slug      |
+| `products`               | partner_id, category_id, name, slug, status         | tenant + status       |
+| `product_variants`       | partner_id, product_id, sku, price_minor            | unique partner/SKU    |
+| `product_media`          | product_id, object_key, position                    | unique position       |
+| `inventory_items`        | partner_id, variant_id, on_hand, reserved           | unique variant        |
+| `inventory_movements`    | inventory_item_id, type, quantity, ref              | append-only           |
+| `inventory_reservations` | variant_id, cart/order ref, qty, expires_at         | active expiry         |
+| `services`               | partner_id, category_id, name, duration_min, status | tenant + status       |
+| `service_prices`         | service_id, zone/type, price_minor, active          | valid date range      |
 
 ### Commerce and booking
 
-| Table | Kolom penting | Constraint/index awal |
-| --- | --- | --- |
-| `carts` | customer_id, status, currency, expires_at | one active/cart policy |
-| `cart_items` | cart_id, item_type, item_id, qty | valid item ref |
-| `quotes` | cart_id, totals JSON/snapshot, expires_at | immutable snapshot |
-| `orders` | partner_id, customer_id, number, state, totals | partner + state + time |
-| `order_items` | order_id, variant_id, snapshot, qty, totals | immutable snapshot |
-| `shipments` | order_id, provider, tracking_no, state | tracking unique/provider |
-| `shipment_events` | shipment_id, state, occurred_at, payload | append-only |
-| `bookings` | partner_id, customer_id, service_id, professional_id, state, schedule | exclusion rule |
-| `booking_addresses` | booking_id, encrypted/minimized address | one per booking |
-| `booking_events` | booking_id, type, actor_id, occurred_at | append-only |
-| `professional_locations` | booking_id, professional_id, geo, recorded_at | short retention |
-| `service_otps` | booking_id, purpose, hash, expires_at, used_at | one-time use |
+| Table                    | Kolom penting                                                         | Constraint/index awal    |
+| ------------------------ | --------------------------------------------------------------------- | ------------------------ |
+| `carts`                  | customer_id, status, currency, expires_at                             | one active/cart policy   |
+| `cart_items`             | cart_id, item_type, item_id, qty                                      | valid item ref           |
+| `quotes`                 | cart_id, totals JSON/snapshot, expires_at                             | immutable snapshot       |
+| `orders`                 | partner_id, customer_id, number, state, totals                        | partner + state + time   |
+| `order_items`            | order_id, variant_id, snapshot, qty, totals                           | immutable snapshot       |
+| `shipments`              | order_id, provider, tracking_no, state                                | tracking unique/provider |
+| `shipment_events`        | shipment_id, state, occurred_at, payload                              | append-only              |
+| `bookings`               | partner_id, customer_id, service_id, professional_id, state, schedule | exclusion rule           |
+| `booking_addresses`      | booking_id, encrypted/minimized address                               | one per booking          |
+| `booking_events`         | booking_id, type, actor_id, occurred_at                               | append-only              |
+| `professional_locations` | booking_id, professional_id, geo, recorded_at                         | short retention          |
+| `service_otps`           | booking_id, purpose, hash, expires_at, used_at                        | one-time use             |
 
 ### Payment, ledger, and payout
 
-| Table | Kolom penting | Constraint/index awal |
-| --- | --- | --- |
-| `payment_intents` | order/booking ref, provider, amount, status | idempotency/provider ref |
-| `payment_events` | intent_id, provider_event_id, type, verified | unique provider event |
-| `refunds` | payment_intent_id, amount, status, reason | amount constraint |
-| `ledger_accounts` | owner_type/id, code, currency | owner/code/currency unique |
-| `ledger_transactions` | id, reference_type/id, occurred_at | immutable |
-| `ledger_entries` | transaction_id, account_id, side, amount | balanced transaction |
-| `partner_balances` | partner_id, currency, available, pending | derived/read model |
-| `payouts` | partner_id, amount, state, provider_ref | tenant + state |
+| Table                 | Kolom penting                                | Constraint/index awal      |
+| --------------------- | -------------------------------------------- | -------------------------- |
+| `payment_intents`     | order/booking ref, provider, amount, status  | idempotency/provider ref   |
+| `payment_events`      | intent_id, provider_event_id, type, verified | unique provider event      |
+| `refunds`             | payment_intent_id, amount, status, reason    | amount constraint          |
+| `ledger_accounts`     | owner_type/id, code, currency                | owner/code/currency unique |
+| `ledger_transactions` | id, reference_type/id, occurred_at           | immutable                  |
+| `ledger_entries`      | transaction_id, account_id, side, amount     | balanced transaction       |
+| `partner_balances`    | partner_id, currency, available, pending     | derived/read model         |
+| `payouts`             | partner_id, amount, state, provider_ref      | tenant + state             |
 
 ### Operations, AI, and audit
 
-| Table | Kolom penting | Constraint/index awal |
-| --- | --- | --- |
-| `reviews` | customer_id, order/booking ref, rating, status | verified transaction only |
-| `disputes` | partner_id, customer_id, ref, status, category | state + SLA |
-| `dispute_messages` | dispute_id, actor_id, message/object | access scoped |
-| `notification_requests` | user_id, channel, template, state | retry schedule |
-| `outbox_events` | aggregate, type, payload, published_at | unpublished partial index |
-| `webhook_deliveries` | provider, event_id, state, attempts | unique provider/event |
-| `ai_sessions` | user/partner, purpose, consent, policy_version | retention index |
-| `ai_messages` | session_id, role, redacted_content, token metadata | no raw sensitive image |
-| `ai_recommendations` | session_id, item refs, reasons, score, model version | traceable output |
-| `analytics_snapshots` | partner_id, period, metric_version, metrics | unique period/version |
-| `audit_events` | actor, action, resource, tenant, before/after hash | append-only/partition |
+| Table                   | Kolom penting                                        | Constraint/index awal     |
+| ----------------------- | ---------------------------------------------------- | ------------------------- |
+| `reviews`               | customer_id, order/booking ref, rating, status       | verified transaction only |
+| `disputes`              | partner_id, customer_id, ref, status, category       | state + SLA               |
+| `dispute_messages`      | dispute_id, actor_id, message/object                 | access scoped             |
+| `notification_requests` | user_id, channel, template, state                    | retry schedule            |
+| `outbox_events`         | aggregate, type, payload, published_at               | unpublished partial index |
+| `webhook_deliveries`    | provider, event_id, state, attempts                  | unique provider/event     |
+| `ai_sessions`           | user/partner, purpose, consent, policy_version       | retention index           |
+| `ai_messages`           | session_id, role, redacted_content, token metadata   | no raw sensitive image    |
+| `ai_recommendations`    | session_id, item refs, reasons, score, model version | traceable output          |
+| `analytics_snapshots`   | partner_id, period, metric_version, metrics          | unique period/version     |
+| `audit_events`          | actor, action, resource, tenant, before/after hash   | append-only/partition     |
 
 ## 5. Tenant and RLS model
 

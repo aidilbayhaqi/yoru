@@ -110,19 +110,19 @@ Policy CSP final harus diuji terhadap Next.js runtime dan provider yang benar-be
 
 ## 5. API threat controls
 
-| Threat | Control |
-| --- | --- |
-| BOLA/IDOR | Object-level policy + tenant filter + RLS + negative tests |
-| Broken function auth | Permission per command, deny-by-default |
-| SQL injection | Parameterized ORM/query; no raw concatenation |
-| SSRF | Provider allowlist, URL parser, block private/link-local, egress policy |
-| Mass assignment | Explicit request schema and command mapping |
-| Resource exhaustion | Body limit, upload limit, timeout, pagination cap, rate limit |
-| Replay | Timestamp/nonce/signature, idempotency, event deduplication |
-| Credential stuffing | Progressive rate limit, breached-password policy, alert |
-| Enumeration | Generic auth/recovery response |
-| Unsafe redirect | Allowlist internal path/provider callback |
-| Dependency compromise | Lockfile, SBOM, signature/provenance where available |
+| Threat                | Control                                                                 |
+| --------------------- | ----------------------------------------------------------------------- |
+| BOLA/IDOR             | Object-level policy + tenant filter + RLS + negative tests              |
+| Broken function auth  | Permission per command, deny-by-default                                 |
+| SQL injection         | Parameterized ORM/query; no raw concatenation                           |
+| SSRF                  | Provider allowlist, URL parser, block private/link-local, egress policy |
+| Mass assignment       | Explicit request schema and command mapping                             |
+| Resource exhaustion   | Body limit, upload limit, timeout, pagination cap, rate limit           |
+| Replay                | Timestamp/nonce/signature, idempotency, event deduplication             |
+| Credential stuffing   | Progressive rate limit, breached-password policy, alert                 |
+| Enumeration           | Generic auth/recovery response                                          |
+| Unsafe redirect       | Allowlist internal path/provider callback                               |
+| Dependency compromise | Lockfile, SBOM, signature/provenance where available                    |
 
 ## 6. File and photo security
 
@@ -158,13 +158,13 @@ Aturan:
 
 ## 8. Data classification
 
-| Class | Contoh | Baseline |
-| --- | --- | --- |
-| Public | Published product/service | Cache/CDN allowed |
-| Internal | Operational metrics, config non-secret | Auth + least privilege |
-| Confidential | Email, phone, order, address | Encryption, scoped access |
-| Restricted | Face/skin photo, health-adjacent answers, ID docs, payout data | Explicit purpose, step-up, short retention/audit |
-| Secret | Token, API key, encryption key | Secret manager, never log |
+| Class        | Contoh                                                         | Baseline                                         |
+| ------------ | -------------------------------------------------------------- | ------------------------------------------------ |
+| Public       | Published product/service                                      | Cache/CDN allowed                                |
+| Internal     | Operational metrics, config non-secret                         | Auth + least privilege                           |
+| Confidential | Email, phone, order, address                                   | Encryption, scoped access                        |
+| Restricted   | Face/skin photo, health-adjacent answers, ID docs, payout data | Explicit purpose, step-up, short retention/audit |
+| Secret       | Token, API key, encryption key                                 | Secret manager, never log                        |
 
 ## 9. Encryption and key management
 

@@ -146,48 +146,48 @@ ditentukan.
 
 ## 12. Epic backlog
 
-| ID | Epic | Priority | Dependency |
-| --- | --- | --- | --- |
-| E-001 | Engineering Foundation | P0 | None |
-| E-002 | Identity & Session | P0 | E-001 |
-| E-003 | Authorization & Tenant Isolation | P0 | E-002 |
-| E-004 | Partner Verification | P0 | E-003 |
-| E-005 | Catalog & Inventory | P0 | E-004 |
-| E-006 | Services & Professionals | P0 | E-004 |
-| E-007 | Cart & Quote | P0 | E-005 |
-| E-008 | Checkout & Payment | P0 | E-007 |
-| E-009 | Product Fulfillment | P0 | E-008 |
-| E-010 | Booking & Dispatch | P0 | E-006, E-008 |
-| E-011 | Ledger & Payout | P0 | E-008, E-010 |
-| E-012 | Dispute & Support | P1 | E-009, E-010 |
-| E-013 | Reviews | P1 | E-009, E-010 |
-| E-014 | Customer AI Advisor | P1 | E-005, E-006, E-003 |
-| E-015 | Partner Copilot | P1 | E-011, analytics |
-| E-016 | Advanced Promotion | P2 | Stable commerce |
-| E-017 | Automation Actions | P2 | Copilot safety/approval |
+| ID    | Epic                             | Priority | Dependency              |
+| ----- | -------------------------------- | -------- | ----------------------- |
+| E-001 | Engineering Foundation           | P0       | None                    |
+| E-002 | Identity & Session               | P0       | E-001                   |
+| E-003 | Authorization & Tenant Isolation | P0       | E-002                   |
+| E-004 | Partner Verification             | P0       | E-003                   |
+| E-005 | Catalog & Inventory              | P0       | E-004                   |
+| E-006 | Services & Professionals         | P0       | E-004                   |
+| E-007 | Cart & Quote                     | P0       | E-005                   |
+| E-008 | Checkout & Payment               | P0       | E-007                   |
+| E-009 | Product Fulfillment              | P0       | E-008                   |
+| E-010 | Booking & Dispatch               | P0       | E-006, E-008            |
+| E-011 | Ledger & Payout                  | P0       | E-008, E-010            |
+| E-012 | Dispute & Support                | P1       | E-009, E-010            |
+| E-013 | Reviews                          | P1       | E-009, E-010            |
+| E-014 | Customer AI Advisor              | P1       | E-005, E-006, E-003     |
+| E-015 | Partner Copilot                  | P1       | E-011, analytics        |
+| E-016 | Advanced Promotion               | P2       | Stable commerce         |
+| E-017 | Automation Actions               | P2       | Copilot safety/approval |
 
 ## 13. Decision register
 
 Setiap decision memiliki owner, due-before, rationale, dan approval evidence.
 
-| ID | Decision | Recommended baseline | Blocking |
-| --- | --- | --- | --- |
-| OD-01 | Cross-partner cart | Satu checkout menghasilkan child order per partner; MVP dapat membatasi satu partner per cart untuk menyederhanakan | Checkout |
-| OD-02 | Komisi | 10% eligible subtotal setelah partner discount; exclude shipping/tax/tip/gateway fee | Ledger |
-| OD-03 | Payment fee | Tampilkan dan alokasikan eksplisit; jangan tersembunyi | Checkout/ledger |
-| OD-04 | Payout hold | Hold sampai fulfillment/booking completion + dispute window | Payout |
-| OD-05 | Refund allocation | Pro-rata berdasarkan komponen dan funding source | Ledger |
-| OD-06 | Booking acceptance | Auto-confirm hanya bila availability dan SLA kuat; selain itu timed partner acceptance | Booking |
-| OD-07 | Service area | Radius/zone terverifikasi; hindari free-text | Booking |
-| OD-08 | Cancellation/no-show | Tier berdasarkan waktu, actor, perjalanan, dan evidence | Booking/ledger |
-| OD-09 | Dental/treatment scope | Non-invasive only pada MVP setelah legal review | Catalog/booking |
-| OD-10 | Photo retention | Default ≤24 jam setelah analysis, kecuali user memilih simpan dengan purpose jelas | AI/privacy |
-| OD-11 | AI provider | Abstraction + evaluation bake-off berdasarkan safety, quality, privacy, region, cost | AI |
-| OD-12 | Data residency/retention | Pilih region/provider setelah legal/privacy review | Infra |
-| OD-13 | Logistics | Integrasi provider vs partner-managed delivery | Fulfillment |
-| OD-14 | Live tracking | Interval, retention, consent, dan fallback | Booking |
-| OD-15 | Review eligibility | Hanya verified transaction; moderation/appeal | Reviews |
-| OD-16 | Partner KYC/KYB | Document set, expiry, re-verification, sanctions policy | Onboarding |
+| ID    | Decision                 | Recommended baseline                                                                                                | Blocking        |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------- |
+| OD-01 | Cross-partner cart       | Satu checkout menghasilkan child order per partner; MVP dapat membatasi satu partner per cart untuk menyederhanakan | Checkout        |
+| OD-02 | Komisi                   | 10% eligible subtotal setelah partner discount; exclude shipping/tax/tip/gateway fee                                | Ledger          |
+| OD-03 | Payment fee              | Tampilkan dan alokasikan eksplisit; jangan tersembunyi                                                              | Checkout/ledger |
+| OD-04 | Payout hold              | Hold sampai fulfillment/booking completion + dispute window                                                         | Payout          |
+| OD-05 | Refund allocation        | Pro-rata berdasarkan komponen dan funding source                                                                    | Ledger          |
+| OD-06 | Booking acceptance       | Auto-confirm hanya bila availability dan SLA kuat; selain itu timed partner acceptance                              | Booking         |
+| OD-07 | Service area             | Radius/zone terverifikasi; hindari free-text                                                                        | Booking         |
+| OD-08 | Cancellation/no-show     | Tier berdasarkan waktu, actor, perjalanan, dan evidence                                                             | Booking/ledger  |
+| OD-09 | Dental/treatment scope   | Non-invasive only pada MVP setelah legal review                                                                     | Catalog/booking |
+| OD-10 | Photo retention          | Default ≤24 jam setelah analysis, kecuali user memilih simpan dengan purpose jelas                                  | AI/privacy      |
+| OD-11 | AI provider              | Abstraction + evaluation bake-off berdasarkan safety, quality, privacy, region, cost                                | AI              |
+| OD-12 | Data residency/retention | Pilih region/provider setelah legal/privacy review                                                                  | Infra           |
+| OD-13 | Logistics                | Integrasi provider vs partner-managed delivery                                                                      | Fulfillment     |
+| OD-14 | Live tracking            | Interval, retention, consent, dan fallback                                                                          | Booking         |
+| OD-15 | Review eligibility       | Hanya verified transaction; moderation/appeal                                                                       | Reviews         |
+| OD-16 | Partner KYC/KYB          | Document set, expiry, re-verification, sanctions policy                                                             | Onboarding      |
 
 ## 14. Definition of Ready
 

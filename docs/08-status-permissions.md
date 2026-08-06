@@ -116,26 +116,26 @@ Legend:
 - `S`: assigned resource
 - `—`: denied
 
-| Capability | Customer | Professional | Partner Admin | Partner Finance | Partner Owner | Verifier | Support | Platform Finance | Super Admin |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| View published catalog | A | A | A | A | A | A | A | A | A |
-| Manage product/service | — | — | T | — | T | — | read | read | A |
-| Manage professionals | — | self profile | T | — | T | read | read | read | A |
-| View customer order | O | — | T | T finance | T | read | scoped support | scoped finance | A |
-| Change order fulfillment | cancel O | — | T | — | T | — | assisted only | — | emergency |
-| View booking | O | S | T | T finance | T | read | scoped support | scoped finance | A |
-| Update job status | — | S | T override | — | T override | — | assisted only | — | emergency |
-| View live tracking | O active | S active | T active | — | T active | — | incident only | — | emergency |
-| Request refund | O | — | T policy | T policy | T policy | — | case create | scoped | emergency |
-| View ledger/balance | — | own earnings | read T | T | T | — | limited | scoped A | A |
-| Request payout | — | policy-specific | — | T + MFA | T + MFA | — | — | — | emergency |
-| Approve payout | — | — | — | — | — | — | — | A + MFA | A + MFA |
-| Verify partner | — | — | — | — | — | A scoped | read | read | A |
-| Block partner/product | — | — | — | — | — | recommend/scoped | escalate | — | A + reason |
-| View AI customer session | O | — | — | — | — | — | consented case only | — | break-glass |
-| View partner AI insight | — | limited S | T | T finance | T | — | read case only | scoped | A |
-| Manage roles | — | — | limited T | — | T | — | — | — | A |
-| View audit log | own security | own actions | T subset | T finance | T | scoped | scoped | finance scoped | A |
+| Capability               | Customer     | Professional    | Partner Admin | Partner Finance | Partner Owner | Verifier         | Support             | Platform Finance | Super Admin |
+| ------------------------ | ------------ | --------------- | ------------- | --------------- | ------------- | ---------------- | ------------------- | ---------------- | ----------- |
+| View published catalog   | A            | A               | A             | A               | A             | A                | A                   | A                | A           |
+| Manage product/service   | —            | —               | T             | —               | T             | —                | read                | read             | A           |
+| Manage professionals     | —            | self profile    | T             | —               | T             | read             | read                | read             | A           |
+| View customer order      | O            | —               | T             | T finance       | T             | read             | scoped support      | scoped finance   | A           |
+| Change order fulfillment | cancel O     | —               | T             | —               | T             | —                | assisted only       | —                | emergency   |
+| View booking             | O            | S               | T             | T finance       | T             | read             | scoped support      | scoped finance   | A           |
+| Update job status        | —            | S               | T override    | —               | T override    | —                | assisted only       | —                | emergency   |
+| View live tracking       | O active     | S active        | T active      | —               | T active      | —                | incident only       | —                | emergency   |
+| Request refund           | O            | —               | T policy      | T policy        | T policy      | —                | case create         | scoped           | emergency   |
+| View ledger/balance      | —            | own earnings    | read T        | T               | T             | —                | limited             | scoped A         | A           |
+| Request payout           | —            | policy-specific | —             | T + MFA         | T + MFA       | —                | —                   | —                | emergency   |
+| Approve payout           | —            | —               | —             | —               | —             | —                | —                   | A + MFA          | A + MFA     |
+| Verify partner           | —            | —               | —             | —               | —             | A scoped         | read                | read             | A           |
+| Block partner/product    | —            | —               | —             | —               | —             | recommend/scoped | escalate            | —                | A + reason  |
+| View AI customer session | O            | —               | —             | —               | —             | —                | consented case only | —                | break-glass |
+| View partner AI insight  | —            | limited S       | T             | T finance       | T             | —                | read case only      | scoped           | A           |
+| Manage roles             | —            | —               | limited T     | —               | T             | —                | —                   | —                | A           |
+| View audit log           | own security | own actions     | T subset      | T finance       | T             | scoped           | scoped              | finance scoped   | A           |
 
 Matrix adalah baseline. Permission code granular tetap menjadi authority, misalnya:
 
